@@ -32,57 +32,6 @@ Spectracom.launch()
 
 time.sleep(80)
 
-## set trajectory
-
-#def scenario_reading():
-
-    ## Time version FONCTIONNE
-
-#    for section in range(len(scenario)-1):
-#        section = section + 1
-#        time.sleep(30)
-#        if ((scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != '' )):
-#            print(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
-#            Spectracom.set_position(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
-#        if scenario[section][6] != '':
-#            Spectracom.set_acceleration(float(scenario[section][6]))
-#        if scenario[section][4] != '':
-#            Spectracom.set_heading(float(scenario[section][4]))
-#        if scenario[section][5] != '':
-#            Spectracom.set_speed(float(scenario[section][5]))
-#        if scenario[section][7] != '':
-#            Spectracom.set_rateHeadind(float(scenario[section][7]))
-#        if scenario[section][8] != '':
-#            Spectracom.set_turnRate(float(scenario[section][8]))
-#        if scenario[section][9] != '':
-#            Spectracom.set_turnradius(float(scenario[section][9]))
-
-
-    ## position version FONCTIONNE
-
-def scenario_reading():
-    savefile = open('spectracom_data.nmea', 'w')
-
-    for section in range(len(scenario)-2):
-        section = section+1
-        while (((Spectracom.get_current_pos()[0][2] <= float(scenario[section][1]))) or
-                   ((Spectracom.get_current_pos()[0][1] <= float(scenario[section][0])))):
-            Spectracom.set_heading(Spectracom.heading_compute(float(scenario[section-1][0]),
-                                                              float(scenario[section][0]),
-                                                              float(scenario[section-1][1]),
-                                                              float(scenario[section][1])))
-            print(inst.query('SOURce:SCENario:HEADing?'))
-            Spectracom.set_speed(float(scenario[section][5]))
-            data = inst.query('SOURce:SCENario:LOG?')
-            savefile.write(data)
-        while ((Spectracom.get_current_pos()[0][1] >= float(scenario[section][0]))):
-            Spectracom.set_heading(float(scenario[section][4]))
-            Spectracom.set_speed(float(scenario[section][5]))
-            data = inst.query('SOURce:SCENario:LOG?')
-            savefile.write(data)
-    savefile.close()
-
-
 ## read data comming from both the Spectracom and the Ublox at the same time while the scenario is running
 
 class Acquire_data(Thread):
@@ -90,12 +39,12 @@ class Acquire_data(Thread):
         Thread.__init__(self)
         self.nb = nb
     def run(self):
-#        if self.nb == 1:                                --> comment when using position version
+#        if self.nb == 1:                    --> comment when using position version
 #            Spectracom.get_data(Duration_tot)
         if self.nb == 2:
-            ublox.read_data(Duration_tot)
+            ublox.read_data(Duration)
         if self.nb ==3:
-            scenario_reading()
+            Spectracom.scenario_reading()
 
 #thread_1 = Acquire_data(1)
 thread_2 = Acquire_data(2)
@@ -104,6 +53,7 @@ thread_3 = Acquire_data(3)
 thread_2.start()
 thread_3.start()
 #thread_1.join()
-thread_2.join()
+#thread_2.join()
 thread_3.join()
+
 Spectracom.stop()

@@ -5,6 +5,9 @@ import connection, tools, config_parser
 
 if connection.connect_spectracom() == 'connected':
     inst = pyvisa.ResourceManager().open_resource ('USB0::0x14EB::0x0060::200448::INSTR')
+
+scenario = config_parser.read_scen()
+
 ## INITIALISATION
 
 def clear():
@@ -131,6 +134,76 @@ def heading_compute(lat1, lat2, long1, long2):
             heading = 180 + angle
     return heading
 
+#def scenario_reading():
+
+    ## Time version FONCTIONNE
+
+#    for section in range(len(scenario)-1):
+#        section = section + 1
+#        time.sleep(30)
+#        if ((scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != '' )):
+#            print(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
+#            set_position(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
+#        if scenario[section][6] != '':
+#            set_acceleration(float(scenario[section][6]))
+#        if scenario[section][4] != '':
+#            set_heading(float(scenario[section][4]))
+#        if scenario[section][5] != '':
+#            set_speed(float(scenario[section][5]))
+#        if scenario[section][7] != '':
+#            set_rateHeadind(float(scenario[section][7]))
+#        if scenario[section][8] != '':
+#            set_turnRate(float(scenario[section][8]))
+#        if scenario[section][9] != '':
+#            set_turnradius(float(scenario[section][9]))
+
+
+    ## position version FONCTIONNE
+
+def scenario_reading():
+    savefile = open('spectracom_data.nmea', 'w')
+    for section in range(len(scenario)-2):
+        section = section+1
+        if (abs(float(scenario[section-1][0]))<=abs(float(scenario[section][0]))) and (abs(float(scenario[section-1][1]))<=abs(float(scenario[section][1]))):
+            while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and
+                   ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
+                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
+                                            float(scenario[section-1][1]),float(scenario[section][1])))
+                    #get_current_pos()[0][1],float(scenario[section][0]),
+                     #                       get_current_pos()[0][2],float(scenario[section][1])))
+                set_speed(float(scenario[section][5]))
+                data = inst.query('SOURce:SCENario:LOG?')
+                savefile.write(data)
+        if (abs(float(scenario[section-1][0]))<=abs(float(scenario[section][0]))) and (abs(float(scenario[section-1][1]))>=abs(float(scenario[section][1]))):
+            while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and
+                   ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
+                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
+                                            float(scenario[section-1][1]),float(scenario[section][1])))
+                    #get_current_pos()[0][1],float(scenario[section][0]),
+                     #                       get_current_pos()[0][2],float(scenario[section][1])))
+                set_speed(float(scenario[section][5]))
+                data = inst.query('SOURce:SCENario:LOG?')
+                savefile.write(data)
+        if (abs(float(scenario[section-1][0]))>= abs(float(scenario[section][0]))) and (abs((float(scenario[section-1][1])))>=abs(float(scenario[section][1]))):
+            while (((get_current_pos()[0][1] >= (float(scenario[section][0])))) and
+                   ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
+                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
+                                            float(scenario[section-1][1]),float(scenario[section][1])))
+                    #get_current_pos()[0][1],float(scenario[section][0]),
+                     #                       get_current_pos()[0][2],float(scenario[section][1])))
+                set_speed(float(scenario[section][5]))
+                data = inst.query('SOURce:SCENario:LOG?')
+                savefile.write(data)
+        if (abs(float(scenario[section-1][0]))>=abs(float(scenario[section][0]))) and (abs(float(scenario[section-1][1]))<=abs(float(scenario[section][1]))):
+            while (((get_current_pos()[0][1] >= (float(scenario[section][0])))) and
+                   ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
+                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
+                                            float(scenario[section-1][1]),float(scenario[section][1])))
+                set_speed(float(scenario[section][5]))
+                data = inst.query('SOURce:SCENario:LOG?')
+                savefile.write(data)
+    savefile.close()
+
 # CONTROL
 
 def launch():
@@ -170,5 +243,4 @@ def get_current_pos():
 #print(get_current_pos())
 #print(inst.query('SOURce:SCENario:LOG?'))
 
-#done = tools.data('spectracom_data.txt')
-#print(done)
+#done = tools.data('spectracom_data.nmeaprint(done)
