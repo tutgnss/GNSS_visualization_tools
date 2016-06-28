@@ -134,74 +134,71 @@ def heading_compute(lat1, lat2, long1, long2):
             heading = 180 + angle
     return heading
 
-#def scenario_reading():
-
-    ## Time version FONCTIONNE
-
-#    for section in range(len(scenario)-1):
-#        section = section + 1
-#        time.sleep(30)
-#        if ((scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != '' )):
-#            print(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
-#            set_position(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
-#        if scenario[section][6] != '':
-#            set_acceleration(float(scenario[section][6]))
-#        if scenario[section][4] != '':
-#            set_heading(float(scenario[section][4]))
-#        if scenario[section][5] != '':
-#            set_speed(float(scenario[section][5]))
-#        if scenario[section][7] != '':
-#            set_rateHeadind(float(scenario[section][7]))
-#        if scenario[section][8] != '':
-#            set_turnRate(float(scenario[section][8]))
-#        if scenario[section][9] != '':
-#            set_turnradius(float(scenario[section][9]))
-
-
-    ## position version FONCTIONNE
+def info_available(section):
+    if scenario[section][4] != '':
+        set_heading(float(scenario[section][4]))
+    if scenario[section][5] != '':
+        set_speed(float(scenario[section][5]))
+    if scenario[section][6] != '':
+        set_acceleration(float(scenario[section][6]))
+    if scenario[section][7] != '':
+        set_rateHeadind(float(scenario[section][7]))
+    if scenario[section][8] != '':
+        set_turnRate(float(scenario[section][8]))
+    if scenario[section][9] != '':
+        set_turnradius(float(scenario[section][9]))
 
 def scenario_reading():
     savefile = open('spectracom_data.nmea', 'w')
     for section in range(len(scenario)-2):
         section = section+1
-        if (abs(float(scenario[section-1][0]))<=abs(float(scenario[section][0]))) and (abs(float(scenario[section-1][1]))<=abs(float(scenario[section][1]))):
-            while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and
-                   ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
-                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
-                                            float(scenario[section-1][1]),float(scenario[section][1])))
-                    #get_current_pos()[0][1],float(scenario[section][0]),
-                     #                       get_current_pos()[0][2],float(scenario[section][1])))
-                set_speed(float(scenario[section][5]))
-                data = inst.query('SOURce:SCENario:LOG?')
-                savefile.write(data)
-        if (abs(float(scenario[section-1][0]))<=abs(float(scenario[section][0]))) and (abs(float(scenario[section-1][1]))>=abs(float(scenario[section][1]))):
-            while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and
-                   ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
-                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
-                                            float(scenario[section-1][1]),float(scenario[section][1])))
-                    #get_current_pos()[0][1],float(scenario[section][0]),
-                     #                       get_current_pos()[0][2],float(scenario[section][1])))
-                set_speed(float(scenario[section][5]))
-                data = inst.query('SOURce:SCENario:LOG?')
-                savefile.write(data)
-        if (abs(float(scenario[section-1][0]))>= abs(float(scenario[section][0]))) and (abs((float(scenario[section-1][1])))>=abs(float(scenario[section][1]))):
-            while (((get_current_pos()[0][1] >= (float(scenario[section][0])))) and
-                   ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
-                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
-                                            float(scenario[section-1][1]),float(scenario[section][1])))
-                    #get_current_pos()[0][1],float(scenario[section][0]),
-                     #                       get_current_pos()[0][2],float(scenario[section][1])))
-                set_speed(float(scenario[section][5]))
-                data = inst.query('SOURce:SCENario:LOG?')
-                savefile.write(data)
-        if (abs(float(scenario[section-1][0]))>=abs(float(scenario[section][0]))) and (abs(float(scenario[section-1][1]))<=abs(float(scenario[section][1]))):
-            while (((get_current_pos()[0][1] >= (float(scenario[section][0])))) and
-                   ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
-                set_heading(heading_compute(float(scenario[section-1][0]),float(scenario[section][0]),
-                                            float(scenario[section-1][1]),float(scenario[section][1])))
-                set_speed(float(scenario[section][5]))
-                data = inst.query('SOURce:SCENario:LOG?')
-                savefile.write(data)
+        lat = 1
+        long = 1
+        print(section)
+        if scenario[section][3] == '':
+            # if there is no duration given in the scenario for the section
+            if get_current_pos()[0][4] == 'S':
+                lat = -1
+            if get_current_pos()[0][5] == 'W':
+                long = -1
+            if ((lat*get_current_pos()[0][1])<=(float(scenario[section][0]))) and ((long*get_current_pos()[0][2])<=(float(scenario[section][1]))):
+                # case where the next position is in the north east part
+                print('boucle 1')
+                while (((lat*get_current_pos()[0][1] <= (float(scenario[section][0])))) and ((long*get_current_pos()[0][2] <= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])),long*get_current_pos()[0][2],(float(scenario[section][1]))))
+                    info_available(section)
+                    data(savefile)
+            if ((lat*get_current_pos()[0][1])<=(float(scenario[section][0]))) and ((long*get_current_pos()[0][2])>=(float(scenario[section][1]))):
+                # case where the next position is in the north west part
+                print('boucle 2')
+                while (((lat*get_current_pos()[0][1] <= (float(scenario[section][0])))) and ((long*get_current_pos()[0][2] >= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])), long*get_current_pos()[0][2],(float(scenario[section][1]))))
+                    info_available(section)
+                    data(savefile)
+            if ((lat*get_current_pos()[0][1])>= (float(scenario[section][0]))) and (((long*get_current_pos()[0][2]))>=(float(scenario[section][1]))):
+                # case where the next position is in the south west part
+                print('boucle 3')
+                while (((lat*get_current_pos()[0][1] >= (float(scenario[section][0])))) and ((long*get_current_pos()[0][2] >= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])),long*get_current_pos()[0][1],(float(scenario[section][1]))))
+                    info_available(section)
+                    data(savefile)
+            if (lat*get_current_pos()[0][1]>=(float(scenario[section][0]))) and (long*get_current_pos()[0][2])<=(float(scenario[section][1])):
+                # case where the next position is in the south east part
+                print('boucle 4')
+                while ((lat*get_current_pos()[0][1] >= (float(scenario[section][0]))) and ((long*get_current_pos()[0][2] <= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])),long*get_current_pos()[0][2],(float(scenario[section][1]))))
+                    info_available(section)
+                    data(savefile)
+        else:
+            print('boucle 5')
+            if ((scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != '' )):
+                 set_position(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
+            info_available(section)
+            data(savefile)
+            duration = tools.Tools.get_sec(scenario[section][3])
+            tps = time.time()
+            while (time.time()-tps<duration):
+                data(savefile)
     savefile.close()
 
 # CONTROL
@@ -216,6 +213,10 @@ def stop():
     return inst.write('SOURce:SCENario:CONTrol stop')
 
 # GET DATA
+def data(savefile):
+    # take the data and print the result into the savefile chosen
+    data = inst.query('SOURce:SCENario:LOG?')
+    savefile.write(data)
 
 def get_data(Duration):
     # take the nmea data for the duration of the scenario
@@ -233,6 +234,7 @@ def get_data(Duration):
     return savefile
 
 def get_current_pos():
+    # save the current position in this shape [time in HHMMSS.DD, LAT in DMS, LONG in DMS, ALT in m]
     savefile = open('current_pos.txt', 'w')
     data = inst.query('SOURce:SCENario:LOG?')
     savefile.write(data)
