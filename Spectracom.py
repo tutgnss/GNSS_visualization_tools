@@ -3,10 +3,12 @@ __author__ = 'tobie'
 import pyvisa, time, math
 import connection, tools, config_parser
 
+
 if connection.connect_spectracom() == 'connected':
     inst = pyvisa.ResourceManager().open_resource ('USB0::0x14EB::0x0060::200448::INSTR')
 
 scenario = config_parser.read_scen()
+
 
 ## INITIALISATION
 
@@ -15,15 +17,18 @@ def clear():
     # also possible executing of scenario or signal dgenerator is stopped
     return inst.write('*CLS')
 
+
 def reset():
     # Reset the device, any ongoing activity is stopped and the device is prepared to start new
     # operations
     return inst.write('*RST')
 
+
 def set_power (Power):
     #sets the transmit power of the device. The power for ublox integrity must be less (or
     # equal) than -130 dBm!!
     return inst.write('SOURce:POWer %f' % Power)
+
 
 def set_extAttenuation(Extatt):
     # Set the external attenuation of the device. Note : Setting not stored during
@@ -36,14 +41,17 @@ def set_DateTime(Date, Hour):
     #Set the scenario start time as GPS time
     return inst.write('SOURce:SCENario:DATEtime %s %s' % (Date , Hour))
 
+
 def set_position (LAT, LONG, ALT):
     # set the position to the generator
     return inst.write('SOURce:SCENario:POSition IMM, %f, %f, %f' % (LAT, LONG, ALT))
+
 
 def set_ECEFpos(X, Y, Z):
     # Sets the ECEF position in X, Y, Z coordinates as the start position for the loaded scenario
     # or the current position if the scenario is Running. The X, Y, Z position is given in decimal meters
     return inst.write('SOURce:SCENario:ECEFPOSition IMM, %f, %f, %f' % X, Y, Z)
+
 
 def set_duration (Start, Duration, Interval):
     # Turn on scenario observations. Start is the number of seconds from scenario start.
@@ -51,48 +59,58 @@ def set_duration (Start, Duration, Interval):
     # observations in the resulting Rinex OBS file
     return inst.write('SOURce:SCENario:OBS %f, %f, %f' %(Start, tools.Tools.get_sec(Duration),Interval))
 
+
 def set_noise(Noise):
     # set the noise simulation ON OFF
     return inst.write('SOURce:NOISE:CONTrol %s' % Noise)
 
+
 def set_cno(CN0):
     # set the maximun carrier to noise density of the simulated signals
     return inst.write('SOURce:NOISE:CN0 %f' % CN0)
+
 
 def set_propa(env, sky, obstruction, nlos):
     # Sets built-in propagation environment model. The scenario must be running
     # <URBAN SUBURBAN RURAL OPEN> [,<sky_limit>, <obstruction_limit>, <nlos_probability>]
     return inst.write('SOURce:SCENario:PROPenv %s %f %f %f' % env, sky, obstruction, nlos)
 
+
 def set_speed(Speed):
     # sets the vehicle's speed over ground (WGS84 ellipsoid)
     # decimal 1D speed [0.00 to +20000.00] m/s
     return inst.write('SOURce:SCENario:SPEed imm, %f' %Speed)
+
 
 def set_acceleration(acceleration):
     # Sets the 1D acceleration expressed in m/s2 when scenario is running. Parameter: decimal 1d
     # acceleratin [-981 to +981] m/s2, ie [-100G to +100g]
     return inst.write('SOURce:SCENario:ACCeleration IMM, %f' % acceleration)
 
+
 def set_heading(Heading):
     # sets the vehicule true heading. the heading is expressed in clockwise direction
     # from the true north representing 0 degrees, increasing to 359.999 degrees
     return inst.write('SOURce:SCENario:HEADing imm, %f' % Heading)
+
 
 def set_antenna(antenna):
     #set the antenna model for the current scenario
     # model can be : Zero model, Helix, Patch, Cardioid
     return inst.write('SOURce:SCENario:ANTennamodel %s' % antenna)
 
+
 def set_tropo(tropo):
     # set the tropospheric model for the current scenario
     # model can be : Saastamoinen, black, Goad&Goodman, Stanag
     return inst.write('SOURce:SCENario:TROPOmodel %s' %tropo)
 
+
 def set_iono(iono):
     # Select the ionosperic model to be used in the current scenario. Permitted values are ON
     # and OFF
     return inst.write('SOURce:SCENario:IONOmodel %s' % iono)
+
 
 def set_keepAlt(keepalt):
     # sets the altitude model setting for the current scenario. Default setting is ON.
@@ -100,13 +118,16 @@ def set_keepAlt(keepalt):
     # from the difference between the ENU plane and the ellipsoid model of the earth.
     return inst.write('SOURce:SCENario:KEEPALTitude %s' % keepalt)
 
+
 def set_rateHeadind(rateheading):
     #set th heading change rate. Rate is expressed as degrees per second.
     return inst.write('SOURce:SCENario:RATEHEading IMM, %f' % rateheading)
 
+
 def set_turnRate(turnrate):
     # set the rate of turning. Rate is expressed as degrees per second.
     return inst.write('SOURce:SCENario:TURNRATE IMM, %f' % turnrate)
+
 
 def set_turnradius(turnradius):
     # Sets the radius of turning. Radius is expressed in meters
@@ -119,6 +140,7 @@ def set_init(Date, Hour, LAT, LONG, ALT, Start, Duration, Interval):
     set_DateTime(Date, Hour)
     set_position(LAT, LONG, ALT)
     set_duration(Start, Duration, Interval)
+
 
 def heading_compute(lat1, lat2, long1, long2):
     angle = abs(math.atan((long1-long2)/(lat1-lat2))*180/math.pi)
@@ -134,6 +156,7 @@ def heading_compute(lat1, lat2, long1, long2):
             heading = 180 + angle
     return heading
 
+
 def info_available(section):
     if scenario[section][4] != '':
         set_heading(float(scenario[section][4]))
@@ -148,45 +171,51 @@ def info_available(section):
     if scenario[section][9] != '':
         set_turnradius(float(scenario[section][9]))
 
+
+def LLcoef():
+    # set the coefficien to 1 or -1 depending on the position of the point
+    lat = 1
+    long = 1
+    if get_current_pos()[0][4] == 'S':
+        lat = -1
+    if get_current_pos()[0][5] == 'W':
+        long = -1
+    return (lat, long)
+
+
 def scenario_reading():
     savefile = open('spectracom_data.nmea', 'w')
     for section in range(len(scenario)-2):
         section = section+1
-        lat = 1
-        long = 1
         print(section)
         if scenario[section][3] == '':
             # if there is no duration given in the scenario for the section
-            if get_current_pos()[0][4] == 'S':
-                lat = -1
-            if get_current_pos()[0][5] == 'W':
-                long = -1
-            if ((lat*get_current_pos()[0][1])<=(float(scenario[section][0]))) and ((long*get_current_pos()[0][2])<=(float(scenario[section][1]))):
+            if ((get_current_pos()[0][1])<=(float(scenario[section][0]))) and ((get_current_pos()[0][2])<=(float(scenario[section][1]))):
                 # case where the next position is in the north east part
                 print('boucle 1')
-                while (((lat*get_current_pos()[0][1] <= (float(scenario[section][0])))) and ((long*get_current_pos()[0][2] <= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])),long*get_current_pos()[0][2],(float(scenario[section][1]))))
+                while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),get_current_pos()[0][2],(float(scenario[section][1]))))
                     info_available(section)
                     data(savefile)
-            if ((lat*get_current_pos()[0][1])<=(float(scenario[section][0]))) and ((long*get_current_pos()[0][2])>=(float(scenario[section][1]))):
+            if ((get_current_pos()[0][1])<=(float(scenario[section][0]))) and ((get_current_pos()[0][2])>=(float(scenario[section][1]))):
                 # case where the next position is in the north west part
                 print('boucle 2')
-                while (((lat*get_current_pos()[0][1] <= (float(scenario[section][0])))) and ((long*get_current_pos()[0][2] >= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])), long*get_current_pos()[0][2],(float(scenario[section][1]))))
+                while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])), get_current_pos()[0][2],(float(scenario[section][1]))))
                     info_available(section)
                     data(savefile)
-            if ((lat*get_current_pos()[0][1])>= (float(scenario[section][0]))) and (((long*get_current_pos()[0][2]))>=(float(scenario[section][1]))):
+            if ((get_current_pos()[0][1])>= (float(scenario[section][0]))) and (((get_current_pos()[0][2]))>=(float(scenario[section][1]))):
                 # case where the next position is in the south west part
                 print('boucle 3')
-                while (((lat*get_current_pos()[0][1] >= (float(scenario[section][0])))) and ((long*get_current_pos()[0][2] >= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])),long*get_current_pos()[0][1],(float(scenario[section][1]))))
+                while ((get_current_pos()[0][1] >= (float(scenario[section][0]))) and ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(get_current_pos()[0][1],float(scenario[section][0]),get_current_pos()[0][1],(float(scenario[section][1]))))
                     info_available(section)
                     data(savefile)
-            if (lat*get_current_pos()[0][1]>=(float(scenario[section][0]))) and (long*get_current_pos()[0][2])<=(float(scenario[section][1])):
+            if (get_current_pos()[0][1]>=(float(scenario[section][0]))) and (get_current_pos()[0][2])<=(float(scenario[section][1])):
                 # case where the next position is in the south east part
                 print('boucle 4')
-                while ((lat*get_current_pos()[0][1] >= (float(scenario[section][0]))) and ((long*get_current_pos()[0][2] <= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(lat*get_current_pos()[0][1],(float(scenario[section][0])),long*get_current_pos()[0][2],(float(scenario[section][1]))))
+                while ((get_current_pos()[0][1] >= (float(scenario[section][0]))) and ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
+                    set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),get_current_pos()[0][2],(float(scenario[section][1]))))
                     info_available(section)
                     data(savefile)
         else:
@@ -208,6 +237,7 @@ def launch():
     inst.write('SOURce:SCENario:CONTrol start')
     return('running')
 
+
 def stop():
     # Stop the scenario from running
     return inst.write('SOURce:SCENario:CONTrol stop')
@@ -217,6 +247,7 @@ def data(savefile):
     # take the data and print the result into the savefile chosen
     data = inst.query('SOURce:SCENario:LOG?')
     savefile.write(data)
+
 
 def get_data(Duration):
     # take the nmea data for the duration of the scenario
@@ -233,6 +264,7 @@ def get_data(Duration):
     savefile.close()
     return savefile
 
+
 def get_current_pos():
     # save the current position in this shape [time in HHMMSS.DD, LAT in DMS, LONG in DMS, ALT in m]
     savefile = open('current_pos.txt', 'w')
@@ -246,3 +278,4 @@ def get_current_pos():
 #print(inst.query('SOURce:SCENario:LOG?'))
 
 #done = tools.data('spectracom_data.nmeaprint(done)
+#stop()

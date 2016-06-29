@@ -49,13 +49,13 @@ class Acquire_data(Thread):
             Spectracom.scenario_reading()
 
 #thread_1 = Acquire_data(1)
-#thread_2 = Acquire_data(2)
+thread_2 = Acquire_data(2)
 thread_3 = Acquire_data(3)
 #thread_1.start()
-#thread_2.start()
+thread_2.start()
 thread_3.start()
 #thread_1.join()
-#thread_2.join()
+thread_2.join()
 thread_3.join()
 
 Spectracom.stop()
