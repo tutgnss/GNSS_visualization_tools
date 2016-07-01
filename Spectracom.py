@@ -14,7 +14,7 @@ if connection.connect_spectracom() == 'connected':
 scenario = config_parser.read_scen()
 
 
-## INITIALISATION
+# INITIALISATION
 
 def clear():
     # clears the status data structures by clearing all event registers and the error queue
@@ -28,52 +28,53 @@ def reset():
     return inst.write('*RST')
 
 
-def set_power(Power):
+def set_power(power):
     # sets the transmit power of the device. The power for ublox integrity must be less (or
     # equal) than -130 dBm!!
-    return inst.write('SOURce:POWer %f' % Power)
+    return inst.write('SOURce:POWer %f' % power)
 
 
-def set_extAttenuation(Extatt):
+def set_ext_attenuation(extatt):
     # Set the external attenuation of the device. Note : Setting not stored during
     # scenario or 1-channel mode execution. Parameter : decimal = [0, 30] in dB
-    return inst.write('SOURce:EXTATT %f' % Extatt)
+    return inst.write('SOURce:EXTATT %f' % extatt)
 
-## SET SCENARIO
+# SET SCENARIO
 
-def set_DateTime(Date, Hour):
+
+def set_datetime(date, hour):
     # Set the scenario start time as GPS time
-    return inst.write('SOURce:SCENario:DATEtime %s %s' % (Date , Hour))
+    return inst.write('SOURce:SCENario:DATEtime %s %s' % (date, hour))
 
 
-def set_position(LAT, LONG, ALT):
+def set_position(lat, long, alt):
     # set the position to the generator
-    return inst.write('SOURce:SCENario:POSition IMM, %f, %f, %f' % (LAT, LONG, ALT))
+    return inst.write('SOURce:SCENario:POSition IMM, %f, %f, %f' % (lat, long, alt))
 
 
-def set_ECEFpos(X, Y, Z):
+def set_ecefpos(x, y, z):
     # Sets the ECEF position in X, Y, Z coordinates as the start position for the loaded scenario
     # or the current position if the scenario is Running. The X, Y, Z position is given in decimal meters
-    return inst.write('SOURce:SCENario:ECEFPOSition IMM, %f, %f, %f' % X, Y, Z)
+    return inst.write('SOURce:SCENario:ECEFPOSition IMM, %f, %f, %f' % x, y, z)
 
 
-def set_duration(Start, Duration, Interval):
+def set_duration(start, duration, interval):
     # Turn on scenario observations. Start is the number of seconds from scenario start.
     # Duration is length of observations from start. Interval is the interval between the individual
     # observations in the resulting Rinex OBS file
-    return inst.write('SOURce:SCENario:OBS %f, %f, %f' %(Start, tools.Tools.get_sec(Duration), Interval))
+    return inst.write('SOURce:SCENario:OBS %f, %f, %f' % (start, tools.Tools.get_sec(duration), interval))
 
 
-def set_heading(Heading):
+def set_heading(heading):
     # sets the vehicle true heading. the heading is expressed in clockwise direction
     # from the true north representing 0 degrees, increasing to 359.999 degrees
-    return inst.write('SOURce:SCENario:HEADing imm, %f' % Heading)
+    return inst.write('SOURce:SCENario:HEADing imm, %f' % heading)
 
 
-def set_speed(Speed):
+def set_speed(speed):
     # sets the vehicle's speed over ground (WGS84 ellipsoid)
     # decimal 1D speed [0.00 to +20000.00] m/s
-    return inst.write('SOURce:SCENario:SPEed imm, %f' %Speed)
+    return inst.write('SOURce:SCENario:SPEed imm, %f' % speed)
 
 
 def set_acceleration(acceleration):
@@ -82,12 +83,12 @@ def set_acceleration(acceleration):
     return inst.write('SOURce:SCENario:ACCeleration IMM, %f' % acceleration)
 
 
-def set_rateHeadind(rateheading):
+def set_rateheadind(rateheading):
     # Set th heading change rate. Rate is expressed as degrees per second.
     return inst.write('SOURce:SCENario:RATEHEading IMM, %f' % rateheading)
 
 
-def set_turnRate(turnrate):
+def set_turnrate(turnrate):
     # Set the rate of turning. Rate is expressed as degrees per second.
     return inst.write('SOURce:SCENario:TURNRATE IMM, %f' % turnrate)
 
@@ -97,15 +98,15 @@ def set_turnradius(turnradius):
     return inst.write('SOURce:SCENario:TURNRADIUS IMM %f' % turnradius)
 
 
-def set_noise(Noise):
+def set_noise(noise):
     # set the noise simulation ON OFF
-    return inst.write('SOURce:NOISE:CONTrol %s' % Noise)
+    return inst.write('SOURce:NOISE:CONTrol %s' % noise)
 
 
-def set_cno(CN0):
+def set_cno(cno):
     # set the maximum carrier to noise density of the simulated signals
     # cn0 in dB.Hz, a decimalnumber, within the range [0.0, 56]
-    return inst.write('SOURce:NOISE:CNO %f' % CN0)
+    return inst.write('SOURce:NOISE:CNO %f' % cno)
 
 
 def set_propa(env, sky, obstruction, nlos):
@@ -116,6 +117,7 @@ def set_propa(env, sky, obstruction, nlos):
     # decimal [0.0,1.0] nlos_probability: probability for a satellite with elevation between sky limit
     # and obstruction limit to be non line of sight
     return inst.write('SOURce:SCENario:PROPenv %s, %f, %f, %f' % (env, sky, obstruction, nlos))
+
 
 def set_antenna(antenna):
     # Set the antenna model for the current scenario
@@ -128,13 +130,14 @@ def set_tropo(tropo):
     # model can be : Saastamoinen, black, Goad&Goodman, Stanag
     return inst.write('SOURce:SCENario:TROPOmodel %s' %tropo)
 
+
 def set_iono(iono):
     # Select the ionospheric model to be used in the current scenario. Permitted values are ON
     # and OFF
     return inst.write('SOURce:SCENario:IONOmodel %s' % iono)
 
 
-def set_keepAlt(keepalt):
+def set_keepalt(keepalt):
     # sets the altitude model setting for the current scenario. Default setting is ON.
     # When the model is active, the units will compensate for the altitude change resulting
     # from the difference between the ENU plane and the ellipsoid model of the earth.
@@ -142,11 +145,12 @@ def set_keepAlt(keepalt):
 
 # SCENARIO
 
-def set_init(Date, Hour, LAT, LONG, ALT, Start, Duration, Interval):
+
+def set_init(date, hour, lat, long, alt, start, duration, interval):
     # set the configuration to the Spectracom
-    set_DateTime(Date, Hour)
-    set_position(LAT, LONG, ALT)
-    set_duration(Start, Duration, Interval)
+    set_datetime(date, hour)
+    set_position(lat, long, alt)
+    set_duration(start, duration, interval)
 
 
 def heading_compute(lat1, lat2, long1, long2):
@@ -168,49 +172,81 @@ def heading_compute(lat1, lat2, long1, long2):
 def info_available(section):
     if scenario[section][4] != '':
         set_heading(float(scenario[section][4]))
-        print('heading')
     if scenario[section][5] != '':
         set_speed(float(scenario[section][5]))
-        print('speed')
     if scenario[section][6] != '':
         set_acceleration(float(scenario[section][6]))
-        print('acceleration')
     if scenario[section][7] != '':
-        set_rateHeadind(float(scenario[section][7]))
-        print('rateheading')
+        set_rateheadind(float(scenario[section][7]))
     if scenario[section][8] != '':
-        set_turnRate(float(scenario[section][8]))
-        print('turnrate')
+        set_turnrate(float(scenario[section][8]))
     if scenario[section][9] != '':
         set_turnradius(float(scenario[section][9]))
-        print('turnradius')
     if scenario[section][10] != '':
         set_noise('ON')
         set_cno(float(scenario[section][10]))
-        print('noise')
     if scenario[section][11] != '':
         info = scenario[section][11].split(',')
         set_propa(info[0], float(info[1]), float(info[2]), float(info[3]))
-        print('propagation')
     if scenario[section][12] != '':
         set_antenna(scenario[section][12])
-        print('antenna')
     if scenario[section][13] != '':
         set_tropo(scenario[section][13])
-        print('tropo')
     if scenario[section][14] != '':
         set_iono(scenario[section][14])
-        print('iono')
     if scenario[section][15] != '':
-        set_keepAlt(scenario[section][15])
-        print('altitude')
+        set_keepalt(scenario[section][15])
+
+
+def set_default(section):
+    if scenario[section][5] == '':
+        set_speed(0.0)
+    if scenario[section][6] == '':
+        set_acceleration(0.0)
+    if scenario[section][7] == '':
+        set_rateheadind(0.0)
+    if scenario[section][8] == '':
+        set_turnrate(0.0)
+    if scenario[section][9] == '':
+        set_turnradius(0.0)
+    if scenario[section][10] == '':
+        set_noise('OFF')
+    if scenario[section][11] == '':
+        set_propa('OPEN', 0.0, 0.0, 0.0)
+    if scenario[section][12] == '':
+        set_antenna('Zero model')
+    if scenario[section][13] == '':
+        set_tropo('Saastamoinen')
+    if scenario[section][14] == '':
+        set_iono('OFF')
+    if scenario[section][15] == '':
+        set_keepalt('OFF')
+
+
+def query():
+    print('position', inst.query('SOURce:SCENario:POSition?'))
+    print('heading', inst.query('SOURce:SCENario:HEADing?'))
+    print('speed', inst.query('SOURce:SCENario:SPEed?'))
+    print('acceleration', inst.query('SOURce:SCENario:ACCeleration?'))
+    print('rate heading', inst.query('SOURce:SCENario:RATEHEading?'))
+    print('turn rate', inst.query('SOURce:SCENario:TURNRATE?'))
+    print('turn radius', inst.query('SOURce:SCENario:TURNRADIUS?'))
+    print('noise control', inst.query('SOURce:NOISE:CONTRol?'))
+    print('noise cno', inst.query('SOURce:NOISE:CNO?'))
+    print('propagation model', inst.query('SOURce:SCENario:PROPenv?'))
+    print('antenna model', inst.query('SOURce:SCENario:ANTennamodel?'))
+    print('tropospheric model', inst.query('SOURce:SCENario:TROPOmodel?'))
+    print('ionospheric model', inst.query('SOURce:SCENario:IONOmodel?'))
+#    print('keep altitude', inst.query('SOURce:SCENario:KEEPALTitude?'))
+
 
 def scenario_reading():
     print('running...')
     savefile = open('spectracom_data.nmea', 'w')
     for section in range(len(scenario)-2):
-        section = section+1
+        section += 1
         print(section)
+        print(scenario[section][3])
         if scenario[section][3] == '':
             # if there is no duration given in the scenario for the section
             if ((get_current_pos()[0][1]) <= (float(scenario[section][0]))) and \
@@ -221,8 +257,9 @@ def scenario_reading():
                            ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
                     set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),
                                                 get_current_pos()[0][2],(float(scenario[section][1]))))
-                    info_available(section-1)
+                    info_available(section)
                     data(savefile)
+                set_default(section)
             if ((get_current_pos()[0][1]) <= (float(scenario[section][0]))) and \
                     ((get_current_pos()[0][2]) >= (float(scenario[section][1]))):
                 # case where the next position is in the north west part
@@ -231,8 +268,9 @@ def scenario_reading():
                            ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
                     set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),
                                                 get_current_pos()[0][2],(float(scenario[section][1]))))
-                    info_available(section-1)
+                    info_available(section)
                     data(savefile)
+                set_default(section)
             if ((get_current_pos()[0][1]) >= (float(scenario[section][0]))) and \
                     (((get_current_pos()[0][2])) >= (float(scenario[section][1]))):
                 # case where the next position is in the south west part
@@ -241,8 +279,11 @@ def scenario_reading():
                            ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
                     set_heading(heading_compute(get_current_pos()[0][1], float(scenario[section][0]),
                                                 get_current_pos()[0][1], (float(scenario[section][1]))))
-                    info_available(section-1)
+                    print(((get_current_pos()[0][2])))
+                    print(float(scenario[section][1]))
+                    info_available(section)
                     data(savefile)
+                set_default(section)
             if (get_current_pos()[0][1] >= (float(scenario[section][0]))) and \
                             (get_current_pos()[0][2]) <= (float(scenario[section][1])):
                 # case where the next position is in the south east part
@@ -251,30 +292,31 @@ def scenario_reading():
                            ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
                     set_heading(heading_compute(get_current_pos()[0][1], (float(scenario[section][0])),
                                                 get_current_pos()[0][2], (float(scenario[section][1]))))
-                    info_available(section-1)
-                    print(inst.query('SOURce:NOISE:CNO?'))
-                    print(inst.query('SOURce:NOISE:CONTRol?'))
+                    info_available(section)
                     data(savefile)
-
+                set_default(section)
         else:
             print('boucle 5')
-            if ((scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != '' )):
-                 set_position(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
-            info_available(section-1)
-            print(inst.query('SOURce:NOISE:CNO?'))
+            if (scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != ''):
+                set_position(float(scenario[section][0]), float(scenario[section][1]), float(scenario[section][2]))
+            info_available(section)
             data(savefile)
             duration = tools.Tools.get_sec(scenario[section][3])
             tps = time.time()
-            while (time.time()-tps<duration):
+            while time.time() - tps < duration:
                 data(savefile)
+            set_default(section)
+        query()
+    print('done')
     savefile.close()
+    query()
 
 # CONTROL
 
+
 def launch():
     # Launch the scenario charged previously
-    inst.write('SOURce:SCENario:CONTrol start')
-    return('running')
+    return inst.write('SOURce:SCENario:CONTrol start')
 
 
 def stop():
@@ -282,23 +324,25 @@ def stop():
     return inst.write('SOURce:SCENario:CONTrol stop')
 
 # GET DATA
+
+
 def data(savefile):
     # take the data and print the result into the savefile chosen
     data = inst.query('SOURce:SCENario:LOG?')
     savefile.write(data)
 
 
-def get_data(Duration):
+def get_data(duration):
     # take the nmea data for the duration of the scenario
     # sent by the spectracom and print them into the file
     savefile = open('spectracom_data.nmea', 'w')
-    duree = tools.Tools.get_sec(Duration)
-    i= 0
-    while i <= duree :
+    duree = tools.Tools.get_sec(duration)
+    i = 0
+    while i <= duree:
         data = inst.query('SOURce:SCENario:LOG?')
         savefile.write(data)
         time.sleep(0.8)
-        i = i+1
+        i += 1
         print(i)
     savefile.close()
     return savefile
@@ -313,8 +357,8 @@ def get_current_pos():
     pos = (tools.data('current_pos.txt'))
     return pos
 
-#print(get_current_pos())
-#print(inst.query('SOURce:SCENario:LOG?'))
+# print(get_current_pos())
+# print(inst.query('SOURce:SCENario:LOG?'))
 
-#done = tools.data('spectracom_data.nmeaprint(done)
-#stop()
+# done = tools.data('spectracom_data.nmeaprint(done)
+# stop()
