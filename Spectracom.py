@@ -1,8 +1,16 @@
-__author__ = 'tobie'
+# Tampere University of Technology
+#
+# DESCRIPTION
+# define initialisation function of the spectracom, functions used to set parameters and to read
+# information
+#
+# AUTHOR
+# Anne-Marie Tobie
 
 import pyvisa
 import time
 import math
+import interval
 import connection
 import tools
 import config_parser
@@ -15,7 +23,6 @@ scenario = config_parser.read_scen()
 
 
 # INITIALISATION
-
 def clear():
     # clears the status data structures by clearing all event registers and the error queue
     # also possible executing of scenario or signal generator is stopped
@@ -143,6 +150,25 @@ def set_keepalt(keepalt):
     # from the difference between the ENU plane and the ellipsoid model of the earth.
     return inst.write('SOURce:SCENario:KEEPALTitude %s' % keepalt)
 
+
+def set_signaltype(signal):
+    # Sets signal(s) to be simulated. Signal consists of comma separated list of signal names:
+    # parameters: string GPSL1CA, GPSL1P or GPSL1PY, GPSL2P or GPSL2PY for GPS
+    #             string GLOL1, GLOL2 for GLONASS
+    #             string GALE1, GALE5a or GALE5b for Galileo
+    #             string BDSB1, BDSB2 for BeiDou
+    pass
+
+def set_multipath(multipath):
+    # This command sets the multipath parameters for satellite with a satID. The parameters include
+    # the Range Offset in meters [-999.0, 999.0], Range Change rate in meter/interval [-99.0, 99.0],
+    # Range Interval in seconds [0.0, 600.0], Doppler Offset in meters [-99.0, 99.0],
+    # Doppler Change rate in meters/sec/interval [-99.0, 99.0], Doppler Interval in sec [0.0, 600.0],
+    # Power Offset in meters [-30.0, 0.0], Power Change rate in dB/interval [-30.0, 0,0] and
+    # Power Interval in seconds [0.0, 600.0].
+    return inst.write('SOURce:SCENario:MULtipath IMM %s' % multipath)
+
+
 # SCENARIO
 
 
@@ -196,7 +222,10 @@ def info_available(section):
         set_iono(scenario[section][14])
     if scenario[section][15] != '':
         set_keepalt(scenario[section][15])
-
+    if scenario[section][16] != '':
+        set_signaltype(scenario[section][16])
+#    if scenario[section][17] != '':
+#        set_multipath(scenario[section][17])
 
 def set_default(section):
     if scenario[section][5] == '':
@@ -221,6 +250,8 @@ def set_default(section):
         set_iono('OFF')
     if scenario[section][15] == '':
         set_keepalt('OFF')
+    if scenario[section][16] == '':
+        set_signaltype('GPSL1CA')
 
 
 def query():
@@ -237,7 +268,16 @@ def query():
     print('antenna model', inst.query('SOURce:SCENario:ANTennamodel?'))
     print('tropospheric model', inst.query('SOURce:SCENario:TROPOmodel?'))
     print('ionospheric model', inst.query('SOURce:SCENario:IONOmodel?'))
-#    print('keep altitude', inst.query('SOURce:SCENario:KEEPALTitude?'))
+    print('scenario signal type 1', inst.query('SOURce:SCENario:SIGNALtype1?'))
+    print('scenario signal type 2', inst.query('SOURce:SCENario:SIGNALtype2?'))
+    print('scenario signal type 3', inst.query('SOURce:SCENario:SIGNALtype3?'))
+    print('scenario signal type 4', inst.query('SOURce:SCENario:SIGNALtype4?'))
+    print('scenario signal type 5', inst.query('SOURce:SCENario:SIGNALtype5?'))
+    print('scenario signal type 6', inst.query('SOURce:SCENario:SIGNALtype6?'))
+    print('scenario signal type 7', inst.query('SOURce:SCENario:SIGNALtype7?'))
+    print('scenario signal type 8', inst.query('SOURce:SCENario:SIGNALtype8?'))
+    print('scenario signal type 9', inst.query('SOURce:SCENario:SIGNALtype9?'))
+
 
 
 def scenario_reading():
@@ -246,55 +286,17 @@ def scenario_reading():
     for section in range(len(scenario)-2):
         section += 1
         print(section)
-        print(scenario[section][3])
         if scenario[section][3] == '':
             # if there is no duration given in the scenario for the section
-            if ((get_current_pos()[0][1]) <= (float(scenario[section][0]))) and \
-                    ((get_current_pos()[0][2]) <= (float(scenario[section][1]))):
-                # case where the next position is in the north east part
-                print('boucle 1')
-                while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and
-                           ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),
-                                                get_current_pos()[0][2],(float(scenario[section][1]))))
-                    info_available(section)
-                    data(savefile)
-                set_default(section)
-            if ((get_current_pos()[0][1]) <= (float(scenario[section][0]))) and \
-                    ((get_current_pos()[0][2]) >= (float(scenario[section][1]))):
-                # case where the next position is in the north west part
-                print('boucle 2')
-                while (((get_current_pos()[0][1] <= (float(scenario[section][0])))) and
-                           ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),
-                                                get_current_pos()[0][2],(float(scenario[section][1]))))
-                    info_available(section)
-                    data(savefile)
-                set_default(section)
-            if ((get_current_pos()[0][1]) >= (float(scenario[section][0]))) and \
-                    (((get_current_pos()[0][2])) >= (float(scenario[section][1]))):
-                # case where the next position is in the south west part
-                print('boucle 3')
-                while ((get_current_pos()[0][1] >= (float(scenario[section][0]))) and
-                           ((get_current_pos()[0][2] >= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(get_current_pos()[0][1], float(scenario[section][0]),
-                                                get_current_pos()[0][1], (float(scenario[section][1]))))
-                    print(((get_current_pos()[0][2])))
-                    print(float(scenario[section][1]))
-                    info_available(section)
-                    data(savefile)
-                set_default(section)
-            if (get_current_pos()[0][1] >= (float(scenario[section][0]))) and \
-                            (get_current_pos()[0][2]) <= (float(scenario[section][1])):
-                # case where the next position is in the south east part
-                print('boucle 4')
-                while ((get_current_pos()[0][1] >= (float(scenario[section][0]))) and
-                           ((get_current_pos()[0][2] <= (float(scenario[section][1]))))):
-                    set_heading(heading_compute(get_current_pos()[0][1], (float(scenario[section][0])),
+            precision = 0.00006
+            while ((get_current_pos()[0][1] not in interval.Interval.between(float(scenario[section][0]) - precision, float(scenario[section][0]) + precision)) and
+                           (get_current_pos()[0][2] not in interval.Interval.between(float(scenario[section][0]) - precision, float(scenario[section][0]) + precision))):
+                set_heading(heading_compute(get_current_pos()[0][1],(float(scenario[section][0])),
                                                 get_current_pos()[0][2], (float(scenario[section][1]))))
-                    info_available(section)
-                    data(savefile)
-                set_default(section)
+                info_available(section)
+                data(savefile)
+            set_default(section)
+
         else:
             print('boucle 5')
             if (scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != ''):
@@ -310,6 +312,7 @@ def scenario_reading():
     print('done')
     savefile.close()
     query()
+
 
 # CONTROL
 
@@ -361,4 +364,4 @@ def get_current_pos():
 # print(inst.query('SOURce:SCENario:LOG?'))
 
 # done = tools.data('spectracom_data.nmeaprint(done)
-# stop()
+#stop()
