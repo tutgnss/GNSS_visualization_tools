@@ -7,11 +7,12 @@ import data_processing
 import time
 import pyvisa
 from threading import Thread
+import ublox
 
 
 res = connection.check_connection()
-#if res != 'devices connected':
-#    raise ValueError('devices not connected')
+if res != 'devices connected':
+    raise ValueError('devices not connected')
 print(res)
 
 # read the scenario
@@ -23,6 +24,8 @@ Duration = '00:00:07'
 Interval = 10
 
 inst = pyvisa.ResourceManager().open_resource('USB0::0x14EB::0x0060::200448::INSTR')
+ublox.reset(ublox.init_ublox('COM4'), 'Warm RST')
+ublox.enable(ublox.init_ublox('COM4'), 'EPH')
 scenario = config_parser.read_scen()
 
 # Set scenario to Spectracom and launch it
@@ -48,23 +51,24 @@ class Acquire_data(Thread):
         if self.nb == 1:
             Spectracom.scenario_reading()
         if self.nb == 2:
-            ser = connection.connect_ublox()
             savefile = open('ublox_data.nmea', 'wb')
             while thread_1.is_alive() == True:
-                for j in range(7):  # la valeur du range depend du nb de msg GPGSV a modifier! ici pour # msg GPGSV
-                    info = ser.readline()
-                    savefile.write(info)
+                ublox.read_data(ublox.init_ublox('COM4'), savefile)
+                ublox.get(ublox.init_ublox('COM4'), 'EPH')
+                print('ici')
             savefile.close()
 
 
 thread_1 = Acquire_data(1)
-#thread_2 = Acquire_data(2)
+thread_2 = Acquire_data(2)
 
 thread_1.start()
-#thread_2.start()
+thread_2.start()
 
 thread_1.join()
 Spectracom.stop()
+
+
 
 # computation of the root mean square error
 
