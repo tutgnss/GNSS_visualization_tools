@@ -24,7 +24,9 @@ Duration = '00:00:07'
 Interval = 10
 
 inst = pyvisa.ResourceManager().open_resource('USB0::0x14EB::0x0060::200448::INSTR')
-ublox.reset(ublox.init_ublox('COM4'), 'Warm RST')
+ublox.reset(ublox.init_ublox('COM4'), 'Cold RST')
+ublox.enable(ublox.init_ublox('COM4'), 'UBX')
+ublox.enable(ublox.init_ublox('COM4'), 'NMEA')
 ublox.enable(ublox.init_ublox('COM4'), 'EPH')
 scenario = config_parser.read_scen()
 
@@ -54,7 +56,7 @@ class Acquire_data(Thread):
             savefile = open('ublox_data.nmea', 'wb')
             while thread_1.is_alive() == True:
                 ublox.read_data(ublox.init_ublox('COM4'), savefile)
-                ublox.get(ublox.init_ublox('COM4'), 'EPH')
+                ublox.poll(ublox.init_ublox('COM4'), 'EPH')
                 print('ici')
             savefile.close()
 
