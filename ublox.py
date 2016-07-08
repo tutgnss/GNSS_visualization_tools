@@ -1,6 +1,7 @@
 # Tampere University of Technology
 #
 # DESCRIPTION
+# Configuration of ublox: enabling or disabling messages output
 # Read data from ublox
 #
 # AUTHOR
@@ -47,14 +48,21 @@ def enable(device, command):
         eph_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x01\x47\xC3'
         device.write(eph_on)
         find_message(device)
+
     if command == 'HUI':
-        hui_on = b'\xB5\x62\x06\x01\x02\x00\x0B\x02\x16\x49'
+        hui_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x02\x01\x18\x65 '
         device.write(hui_on)
         find_message(device)
+
     if command == 'RAW':
         raw_on = b'\xB5\x62\x06\x01\x03\x00\x02\x10\x01\x1D\x66'
         device.write(raw_on)
         find_message(device)
+
+    if command == 'truc':
+        device.write( b'\xB5\x62\x06\x01\x03\x00\xF0\x00\x01\xFB\x10')
+        find_message(device)
+
     if command == 'NMEA':  # receive an ack when test
         # DTM   GBS    GGA    GLL    GRS    GSA    GST    GSV    RMC
         # VTG   ZDA    PUBX 00     PUBX 03    PUBX 04
@@ -315,3 +323,21 @@ def read_data(device, savefile):
 
 # done = tools.data('ublox_data.nmea')
 # print(done)
+
+
+reset(init_ublox('COM4'), 'Cold RST')
+time.sleep(10)
+enable(init_ublox('COM4'), 'UBX')
+time.sleep(10)
+enable(init_ublox('COM4'), 'NMEA')
+time.sleep(10)
+
+savefile = open('ublox_data.txt', 'wb')
+begin = 0
+for begin in range(10):
+    #ublox.poll(ublox.init_ublox('COM4'), 'HUI')
+    info = init_ublox('COM4').readline()
+    savefile.write(info)
+    print(info)
+    begin+=1
+savefile.close()
