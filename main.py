@@ -24,10 +24,19 @@ Duration = '00:00:07'
 Interval = 10
 
 inst = pyvisa.ResourceManager().open_resource('USB0::0x14EB::0x0060::200448::INSTR')
-ublox.reset(ublox.init_ublox('COM4'), 'Cold RST')
-ublox.enable(ublox.init_ublox('COM4'), 'UBX')
-ublox.enable(ublox.init_ublox('COM4'), 'NMEA')
-ublox.enable(ublox.init_ublox('COM4'), 'EPH')
+cnx = ublox.init_ublox('COM4')
+ublox.reset(cnx, 'Cold RST')
+time.sleep(3)
+ublox.disable(cnx, 'NMEA')
+time.sleep(3)
+ublox.enable(cnx, 'EPH')
+time.sleep(3)
+ublox.enable(cnx, 'HUI')
+time.sleep(3)
+ublox.enable(cnx, 'RAW')
+time.sleep(3)
+ublox.enable(cnx, 'truc')
+time.sleep(2)
 scenario = config_parser.read_scen()
 
 # Set scenario to Spectracom and launch it
@@ -53,25 +62,28 @@ class Acquire_data(Thread):
         if self.nb == 1:
             Spectracom.scenario_reading()
         if self.nb == 2:
-            savefile = open('ublox_data.nmea', 'wb')
-            while thread_1.is_alive() == True:
-                ublox.read_data(ublox.init_ublox('COM4'), savefile)
-                ublox.poll(ublox.init_ublox('COM4'), 'EPH')
-                print('ici')
-            savefile.close()
-
+            filename = open('ublox_raw_data.txt', 'wb')
+            while True:
+                ublox.read_data(cnx, filename)
+            filename.close()
+        if self.nb == 3:
+            while True:
+                ublox.poll(cnx, 'HUI')
+                ublox.poll(cnx, 'EPH')
+                ublox.poll(cnx, 'RAW')
+                time.sleep(10)
 
 thread_1 = Acquire_data(1)
 thread_2 = Acquire_data(2)
-
+thread_3 = Acquire_data(3)
 thread_1.start()
 thread_2.start()
-
+thread_3.start()
 thread_1.join()
+
 Spectracom.stop()
 
-
-
+ublox.miseenforme()
 # computation of the root mean square error
 
 #data_processing.computation()

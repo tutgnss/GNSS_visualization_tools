@@ -10,11 +10,12 @@
 # import connection
 import serial
 import time
+import binascii
 
 
 def init_ublox(com):
     # sets initial values into the device
-    baud_rate = 9600
+    baud_rate = 4800
     data_bits = 8
     parity = 'N'
     stop_bit = 1
@@ -60,7 +61,9 @@ def enable(device, command):
         find_message(device)
 
     if command == 'truc':
-        device.write( b'\xB5\x62\x06\x01\x03\x00\xF0\x00\x01\xFB\x10')
+        truc = b'\xB5\x62\x06\x01\x03\x00\xF0\x00\x01\xFB\x10'\
+               b'\xB5\x62\x06\x01\x03\x00\xF0\x09\x01\x04\x22'
+        device.write(truc)
         find_message(device)
 
     if command == 'NMEA':  # receive an ack when test
@@ -85,13 +88,8 @@ def enable(device, command):
     if command == 'UBX':
         ubx_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x30\x01\x46\xC1'\
                  b'\xB5\x62\x06\x01\x03\x00\x0B\x50\x01\x66\x01'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0B\x32\x01\x48\xC5'\
                  b'\xB5\x62\x06\x01\x03\x00\x0B\x33\x01\x49\xC7'\
                  b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x01\x47\xC3'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0B\x02\x01\x18\x65'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0B\x01\x01\x17\x63'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0B\x00\x01\x16\x61'\
-                 b'\xB5\x62\x06\x01\x03\x00\x10\x15\x01\x30\x9A'\
                  b'\xB5\x62\x06\x01\x03\x00\x10\x02\x01\x1D\x74'\
                  b'\xB5\x62\x06\x01\x03\x00\x10\x10\x01\x2B\x90'\
                  b'\xB5\x62\x06\x01\x03\x00\x28\x00\x01\x33\xB8'\
@@ -112,56 +110,62 @@ def enable(device, command):
                  b'\xB5\x62\x06\x01\x03\x00\x0A\x2E\x01\x43\xBA'\
                  b'\xB5\x62\x06\x01\x03\x00\x0A\x08\x01\x1D\x6E'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x60\x01\x6C\x03'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x05\x01\x11\x4D'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x22\x01\x2E\x87'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x3A\x01\x46\xB7'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x31\x01\x3D\xA5'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x04\x01\x10\x4B'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x40\x01\x4C\xC3'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x61\x01\x6D\x05'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x39\x01\x45\xB5'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x09\x01\x15\x55'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x34\x01\x40\xAB'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x01\x01\x0D\x45'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x02\x01\x0E\x47'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x07\x01\x13\x51'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x3C\x01\x48\xBB'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x35\x01\x41\xAD'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x32\x01\x3E\xA7'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x06\x01\x12\x4F'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x03\x01\x0F\x49'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x3B\x01\x47\xB9'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x30\x01\x3C\xA3'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x24\x01\x30\x8B'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x25\x01\x31\x8D'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x23\x01\x2F\x89'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x20\x01\x2C\x83'\
-                 b'\xB5\x62\x06\x01\x03\x00\x01\x26\x01\x32\x8F'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x21\x01\x2D\x85'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x11\x01\x1D\x65'\
                  b'\xB5\x62\x06\x01\x03\x00\x01\x12\x01\x1E\x67'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x30\x01\x3D\xA6'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x31\x01\x3E\xA8'\
+                 b'\xB5\x62\x06\x01\x03\x00\x02\x10\x01\x1D\x66'\
+                 b'\xB5\x62\x06\x01\x03\x00\x02\x13\x01\x20\x6C'\
+                 b'\xB5\x62\x06\x01\x03\x00\x02\x20\x01\x2D\x86'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0D\x04\x01\x1C\x6F'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0D\x03\x01\x1B\x6D'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0D\x01\x01\x19\x69'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0D\x06\x01\x1E\x73'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0B\x32\x01\x48\xC5'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0B\x02\x01\x18\x65'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0B\x01\x01\x17\x63'\
+                 b'\xB5\x62\x06\x01\x03\x00\x0B\x00\x01\x16\x61'\
+                 b'\xB5\x62\x06\x01\x03\x00\x10\x15\x01\x30\x9A'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x05\x01\x11\x4D'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x3A\x01\x46\xB7'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x61\x01\x6D\x05'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x39\x01\x45\xB5'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x09\x01\x15\x55'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x34\x01\x40\xAB'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x07\x01\x13\x51'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x3C\x01\x48\xBB'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x35\x01\x41\xAD'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x3B\x01\x47\xB9'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x24\x01\x30\x8B'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x25\x01\x31\x8D'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x23\x01\x2F\x89'\
+                 b'\xB5\x62\x06\x01\x03\x00\x01\x26\x01\x32\x8F'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x61\x01\x6E\x08'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x14\x01\x21\x6E'\
-                 b'\xB5\x62\x06\x01\x03\x00\x02\x10\x01\x1D\x66'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x15\x01\x22\x70'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x59\x01\x66\xF8'\
                  b'\xB5\x62\x06\x01\x03\x00\x02\x11\x01\x1E\x68'\
-                 b'\xB5\x62\x06\x01\x03\x00\x02\x13\x01\x20\x6C'\
-                 b'\xB5\x62\x06\x01\x03\x00\x02\x20\x01\x2D\x86'\
                  b'\xB5\x62\x06\x01\x03\x00\x27\x01\x01\x33\xB7'\
                  b'\xB5\x62\x06\x01\x03\x00\x27\x03\x01\x35\xBB'\
                  b'\xB5\x62\x06\x01\x03\x00\x0D\x11\x01\x29\x89'\
                  b'\xB5\x62\x06\x01\x03\x00\x0D\x16\x01\x2E\x93'\
                  b'\xB5\x62\x06\x01\x03\x00\x0D\x13\x01\x2B\x8D'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0D\x04\x01\x1C\x6F'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0D\x03\x01\x1B\x6D'\
                  b'\xB5\x62\x06\x01\x03\x00\x0D\x12\x01\x2A\x8B'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0D\x01\x01\x19\x69'\
                  b'\xB5\x62\x06\x01\x03\x00\x0D\x15\x01\x2D\x91'\
-                 b'\xB5\x62\x06\x01\x03\x00\x0D\x06\x01\x1E\x73'\
                  b'\xB5\x62\x06\x01\x03\x00\x09\x14\x01\x28\x83'
+
         device.write(ubx_on)
         find_message(device)
 
@@ -171,15 +175,15 @@ def poll(device, command):
     if command == 'EPH':
         eph_get = b'\xB5\x62\x0B\x31\x00\x00\x3C\xBF'
         device.write(eph_get)
-        find_message(device)
     if command == 'HUI':
         hui_get = b'\xB5\x62\x0B\x02\x00\x00\x0D\x32'
         device.write(hui_get)
-        find_message(device)
     if command == 'RAW':
         raw_get = b'\xB5\x62\x02\x10\x00\x00\x12\x38'
         device.write(raw_get)
-        find_message(device)
+    if command == 'random':
+        # CFG-NAV5
+        random_get = b'\xB5\x62\x06\x24\x00\x00\x2A\x84'
 
 
 def disable(device, command):
@@ -187,15 +191,48 @@ def disable(device, command):
     if command == 'UBX':  # Receive a Nac when test -- pb : UBX msg turn off by default
         disable = b'\xB5\x62\x06\x01\x03\x00\x0B\x30\x01\x45\xC0'\
                   b'\xB5\x62\x06\x01\x03\x00\x0B\x50\x00\x65\x00'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0B\x32\x00\x47\xC4'\
                   b'\xB5\x62\x06\x01\x03\x00\x0B\x33\x00\x48\xC6'\
                   b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x00\x46\xC2'\
+                  b'\xB5\x62\x06\x01\x03\x00\x10\x02\x00\x1C\x73'\
+                  b'\xB5\x62\x06\x01\x03\x00\x10\x10\x00\x2A\x8F'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x05\x00\x19\x67'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x09\x00\x1D\x6F'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x0B\x00\x1F\x73'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x02\x00\x16\x61'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x06\x00\x1A\x69'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x07\x00\x1B\x6B'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x21\x00\x35\x9F'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0A\x08\x00\x1C\x6D'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x60\x00\x6B\x02'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x22\x00\x2D\x86'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x31\x00\x3C\xA4'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x04\x00\x0F\x4A'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x40\x00\x4B\xC2'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x01\x00\x0C\x44'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x02\x00\x0D\x46'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x32\x00\x3D\xA6'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x06\x00\x11\x4E'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x03\x00\x0E\x48'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x30\x00\x3B\xA2'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x20\x00\x2B\x82'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x21\x00\x2C\x84'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x11\x00\x1C\x64'\
+                  b'\xB5\x62\x06\x01\x03\x00\x01\x12\x00\x1D\x66'\
+                  b'\xB5\x62\x06\x01\x03\x00\x02\x30\x00\x3C\xA5'\
+                  b'\xB5\x62\x06\x01\x03\x00\x02\x31\x00\x3D\xA7'\
+                  b'\xB5\x62\x06\x01\x03\x00\x02\x10\x00\x1C\x65'\
+                  b'\xB5\x62\x06\x01\x03\x00\x02\x11\x00\x1D\x67'\
+                  b'\xB5\x62\x06\x01\x03\x00\x02\x13\x00\x1F\x6B'\
+                  b'\xB5\x62\x06\x01\x03\x00\x02\x20\x00\x2C\x85'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0D\x04\x00\x1B\x6E'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0D\x03\x00\x1A\x6C'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0D\x01\x00\x18\x68'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0D\x06\x00\x1D\x72'\
+                  b'\xB5\x62\x06\x01\x03\x00\x0B\x32\x00\x47\xC4'\
                   b'\xB5\x62\x06\x01\x03\x00\x0B\x02\x00\x17\x64'\
                   b'\xB5\x62\x06\x01\x03\x00\x0B\x01\x00\x16\x62'\
                   b'\xB5\x62\x06\x01\x03\x00\x0B\x00\x00\x15\x60'\
                   b'\xB5\x62\x06\x01\x03\x00\x10\x15\x00\x2F\x99'\
-                  b'\xB5\x62\x06\x01\x03\x00\x10\x02\x00\x1C\x73'\
-                  b'\xB5\x62\x06\x01\x03\x00\x10\x10\x00\x2A\x8F'\
                   b'\xB5\x62\x06\x01\x03\x00\x28\x00\x00\x32\xB7'\
                   b'\xB5\x62\x06\x01\x03\x00\x21\x0E\x00\x39\xBE'\
                   b'\xB5\x62\x06\x01\x03\x00\x21\x08\x00\x33\xB2'\
@@ -204,65 +241,32 @@ def disable(device, command):
                   b'\xB5\x62\x06\x01\x03\x00\x21\x0D\x00\x38\xBC'\
                   b'\xB5\x62\x06\x01\x03\x00\x13\x80\x00\x9D\x78'\
                   b'\xB5\x62\x06\x01\x03\x00\x13\x21\x00\x3E\xBA'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x05\x00\x19\x67'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x09\x00\x1D\x6F'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x0B\x00\x1F\x73'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x02\x00\x16\x61'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x06\x00\x1A\x69'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x07\x00\x1B\x6B'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x21\x00\x35\x9F'\
                   b'\xB5\x62\x06\x01\x03\x00\x0A\x2E\x00\x42\xB9'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0A\x08\x00\x1C\x6D'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x60\x00\x6B\x02'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x05\x00\x10\x4C'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x22\x00\x2D\x86'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x3A\x00\x45\xB6'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x31\x00\x3C\xA4'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x04\x00\x0F\x4A'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x40\x00\x4B\xC2'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x61\x00\x6C\x04'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x39\x00\x44\xB4'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x09\x00\x14\x54'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x34\x00\x3F\xAA'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x01\x00\x0C\x44'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x02\x00\x0D\x46'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x07\x00\x12\x50'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x3C\x00\x47\xBA'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x35\x00\x40\xAC'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x32\x00\x3D\xA6'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x06\x00\x11\x4E'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x03\x00\x0E\x48'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x3B\x00\x46\xB8'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x30\x00\x3B\xA2'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x24\x00\x2F\x8A'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x25\x00\x30\x8C'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x23\x00\x2E\x88'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x20\x00\x2B\x82'\
                   b'\xB5\x62\x06\x01\x03\x00\x01\x26\x00\x31\x8E'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x21\x00\x2C\x84'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x11\x00\x1C\x64'\
-                  b'\xB5\x62\x06\x01\x03\x00\x01\x12\x00\x1D\x66'\
-                  b'\xB5\x62\x06\x01\x03\x00\x02\x30\x00\x3C\xA5'\
-                  b'\xB5\x62\x06\x01\x03\x00\x02\x31\x00\x3D\xA7'\
                   b'\xB5\x62\x06\x01\x03\x00\x02\x61\x00\x6D\x07'\
                   b'\xB5\x62\x06\x01\x03\x00\x02\x14\x00\x20\x6D'\
-                  b'\xB5\x62\x06\x01\x03\x00\x02\x10\x00\x1C\x65'\
                   b'\xB5\x62\x06\x01\x03\x00\x02\x15\x00\x21\x6F'\
                   b'\xB5\x62\x06\x01\x03\x00\x02\x59\x00\x65\xF7'\
-                  b'\xB5\x62\x06\x01\x03\x00\x02\x11\x00\x1D\x67'\
-                  b'\xB5\x62\x06\x01\x03\x00\x02\x13\x00\x1F\x6B'\
-                  b'\xB5\x62\x06\x01\x03\x00\x02\x20\x00\x2C\x85'\
                   b'\xB5\x62\x06\x01\x03\x00\x27\x01\x00\x32\xB6'\
                   b'\xB5\x62\x06\x01\x03\x00\x27\x03\x00\x34\xBA'\
                   b'\xB5\x62\x06\x01\x03\x00\x0D\x11\x00\x28\x88'\
                   b'\xB5\x62\x06\x01\x03\x00\x0D\x16\x00\x2D\x92'\
                   b'\xB5\x62\x06\x01\x03\x00\x0D\x13\x00\x2A\x8C'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0D\x04\x00\x1B\x6E'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0D\x03\x00\x1A\x6C'\
                   b'\xB5\x62\x06\x01\x03\x00\x0D\x12\x00\x29\x8A'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0D\x01\x00\x18\x68'\
                   b'\xB5\x62\x06\x01\x03\x00\x0D\x15\x00\x2C\x90'\
-                  b'\xB5\x62\x06\x01\x03\x00\x0D\x06\x00\x1D\x72'\
                   b'\xB5\x62\x06\x01\x03\x00\x09\x14\x00\x27\x82'
         device.write(disable)
         find_message(device)
@@ -298,46 +302,160 @@ def find_message(device):
         elif line[0:4] == b'\xb5b\x05\x00':
             print('nak received')
 
+def read_data(device, file):
+    info = device.readline()
+    if info[0:2] == b'$G':
+        file.write(info)
+    else:
+        file.write(binascii.hexlify(info))
 
-def read_data(device, savefile):
-    for j in range(7):
-        info = device.readline()
-        savefile.write(info)
-
-
-# def read_data(duration):
-# read information of ublox and save them into a file
-#    ser = connection.connect_ublox()
-#    duree = tools.Tools.get_sec(duration)
-#    savefile = open('ublox_data.nmea', 'wb')
-#    i = 0
-#    while i <= duree:
-#        for j in range(7):  # la valeur du range depend du nb de msg GPGSV a modifier! ici pour # msg GPGSV
-#            info = ser.readline()
-#            savefile.write(info)
-#        i += 1
-#        print('ublox', i)
-#    savefile.close()
-
-# filename = 'ublox_data.nmea'
-
-# done = tools.data('ublox_data.nmea')
-# print(done)
+def miseenforme():
+    raw = open('ublox_raw_data.txt', 'r')
+    processed = open('ublox_processed_data.txt', 'w')
+    thing = raw.read()
+    first = thing.replace('b562', '\nb562')
+    second = first.replace('2447', '\n2447')
+    third = second.replace('0d0a$G', '\n$G')
+    processed.write(third)
+    processed.close()
+    raw.close()
 
 
-reset(init_ublox('COM4'), 'Cold RST')
-time.sleep(10)
-enable(init_ublox('COM4'), 'UBX')
-time.sleep(10)
-enable(init_ublox('COM4'), 'NMEA')
-time.sleep(10)
+def klobuchar_data():
+    # creates the matrix of ephemeris data decimal values
+    # kloa0 and klob0 in second
+    # kloa1 and klob1 in second/semicircle
+    # kloa2 and klob2 in second/semicircle^2
+    # kloa3 and klob3 in second/semicircle^3
+    file = open('ublox_processed_data.txt', 'r')
+    klobuchar = []
+    for line in file:
+        if line[0:12] == 'b5620b024800':
+            # hui message
+            kloa0 = int(line[84:92], 16)
+            kloa1 = int(line[92:100], 16)
+            kloa2 = int(line[100:108], 16)
+            kloa3 = int(line[108:116], 16)
+            klob0 = int(line[116:124], 16)
+            klob1 = int(line[124:132], 16)
+            klob2 = int(line[132:140], 16)
+            klob3 = int(line[140:148], 16)
+            klobuchar.append([kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3])
+    file.close()
+    return klobuchar
 
-savefile = open('ublox_data.txt', 'wb')
-begin = 0
-for begin in range(10):
-    #ublox.poll(ublox.init_ublox('COM4'), 'HUI')
-    info = init_ublox('COM4').readline()
-    savefile.write(info)
-    print(info)
-    begin+=1
-savefile.close()
+
+def ephemeris_data():
+    # creates the matrix of ephemeris data with application of the scale factor decimal values
+    # toc and toe in seconds, af2 in sec/sec^2, af1 in sec/sec, af0 in sec,
+    # cuc cus cic and cis in radians, sqrta in meter^0,5
+    # omega0 omega m0 and i0 in semi circles,
+    # crc and crs in meters, deltan omegadot and idot in semicircles/sec
+    file = open('ublox_processed_data.txt', 'r')
+    ephemeris = []
+    for line in file:
+        if line[0:12] == 'b5620b316800':
+            # eph message
+            hexline = int(line, 16)
+            binline = format(hexline, 'b')
+            join = ''
+            svid = int(binline[48:56], 2)
+            wn = int(binline[112:122], 2)
+            cap = int(binline[122:124], 2)
+            ura = int(binline[124:128], 2)
+            health = int(binline[128:134], 2)
+            iodc = int(join.join((binline[134:136], binline[272:280])), 2)
+            tgd = int(binline[256:264], 2)
+            toc = int(binline[280:296], 2)*pow(2, 4)
+            af2 = int(binline[304:312], 2)*pow(2, -55)
+            af1 = int(binline[312:328], 2)*pow(2, -43)
+            af0 = int(binline[336:358], 2)*pow(2, -31)
+            iodesf2 = int(binline[368:376], 2)
+            crs = int(binline[376:392], 2)*pow(2, -5)
+            deltan = int(binline[400:416], 2)*pow(2, -43)
+            m0 = int(join.join((binline[416:424], binline[432:456])), 2)*pow(2, -31)
+            cuc = int(binline[464:480], 2)*pow(2, -29)
+            e = int(join.join((binline[480:488], binline[496:520])), 2)*pow(2, -33)
+            cus = int(binline[528:544], 2)*pow(2, -29)
+            sqrta = int(join.join((binline[544:552], binline[560:584])), 2)*pow(2, -19)
+            toe = int(binline[592:608], 2)*pow(2, 4)
+            flag = int(binline[608], 2)
+            aodo = int(binline[609:614], 2)
+            cic = int(binline[624:640], 2)*pow(2, -29)
+            omega0 = int(join.join((binline[640:648], binline[656:680])), 2)*pow(2, -31)
+            cis = int(binline[688:704], 2)*pow(2, -29)
+            i0 = int(join.join((binline[704:712], binline[720:744])), 2)*pow(2, -31)
+            crc = int(binline[752:768], 2)*pow(2, -5)
+            omega = int(join.join((binline[768:776], binline[784:808])), 2)*pow(2, -31)
+            omegadot = int(binline[816:840], 2)*pow(2, -43)
+            iodesf3 = int(binline[848:856], 2)
+            idot = int(binline[856:870], 2)*pow(2, -43)
+            ephemeris.append([svid, wn, cap, ura, health, iodc, tgd, toc, af2, af1, af0, iodesf2,
+                              crs, deltan, m0, cuc, e, cus, sqrta, toe, flag, aodo, cic, omega0,
+                              cis, i0, crc, omega, omegadot, iodesf3, idot])
+    file.close()
+    return ephemeris
+
+
+def raw_data():
+    file = open('ublox_processed_data.txt', 'r')
+    raw = []
+    for line in file:
+        if line[0:8] == 'b5620210':
+            # RXM-RAW
+            # rcvtow in ms, week in weeks, cpmes in cycles, prmes in m, domes in Hz, cno in dBHz
+            inter = []
+            rcvtow = int(line[12:20], 16)
+            week = int(line[20:24], 16)
+            numsv = int(line[24:26], 16)
+            for sat in range(numsv):
+                cpmes = int(line[(28 + 24*sat):(44 + 24*sat)], 16)
+                prmes = int(line[(44 + 24*sat):(60 + 24*sat)], 16)
+                domes = int(line[(60 + 24*sat):(68 + 24*sat)], 16)
+                sv = int(line[(68 + 24*sat):(70 + 24*sat)], 16)
+                mesqi = int(line[(70 + 24*sat):(72 + 24*sat)], 16)
+                cno = int(line[(72 + 24*sat):(74 + 24*sat)], 16)
+                lli = int(line[(74 + 24*sat):(76 + 24*sat)], 16)
+                inter.append([cpmes, prmes, domes, sv, mesqi, cno, lli])
+            raw.append([rcvtow, week, numsv, inter])
+    file.close()
+    return raw
+
+
+def random_data():
+    file = open('ublox_processed_data.txt', 'r')
+    nav = []
+    dop = []
+    for line in file:
+        if line[0:12] == 'b56206242400':
+            # CFG-NAV5
+            # fixedalt in m, fixedaltvar in m^2, minelev in deg, pacc and tacc in m,
+            # staticholdthresh in cm/s, dgpstimeout in s, cnothresh in dBHz
+            dynmodel = int(line[16:18], 16)
+            fixmode = int(line[18:20], 16)
+            fixedalt = int(line[20:28], 16)
+            fixedaltvar = int(line[28:36], 16)
+            minelev = int(line[36:38], 16)
+            pdop = int(line[40:44], 16)
+            tdop = int(line[44:48], 16)
+            pacc = int(line[48:52], 16)
+            tacc = int(line[52:56], 16)
+            staticholdthresh = int(line[56:58], 16)
+            dgpstimeout = int(line[58:60], 16)
+            cnothreshnumsv = int(line[60:62], 16)
+            cnothresh = int(line[62:64], 16)
+            nav.append([dynmodel, fixmode, fixedalt, fixedaltvar, minelev, pdop, tdop,
+                        pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh])
+        if line[0:12] == 'b56201041200':
+            # NAV-DOP
+            itow = int(line[12:20], 16)
+            gdop = int(line[20:24], 16)
+            pdop = int(line[24:28], 16)
+            tdop = int(line[28:32], 16)
+            vdop = int(line[32:36], 16)
+            hdop = int(line[36:40], 16)
+            ndop = int(line[40:44], 16)
+            edop = int(line[44:48], 16)
+            dop.append([itow, gdop, pdop, tdop, vdop, hdop, ndop, edop])
+    file.close()
+    return nav, dop
