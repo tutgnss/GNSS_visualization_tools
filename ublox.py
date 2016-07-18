@@ -2,7 +2,7 @@
 #
 # DESCRIPTION
 # Configuration of ublox: enabling or disabling messages output
-# Read data from ublox
+# Read data from ublox and store them into matrix
 #
 # AUTHOR
 # Anne-Marie Tobie
@@ -60,11 +60,6 @@ def enable(device, command):
         device.write(raw_on)
         find_message(device)
 
-    if command == 'truc':
-        truc = b'\xB5\x62\x06\x01\x03\x00\xF0\x00\x01\xFB\x10'\
-               b'\xB5\x62\x06\x01\x03\x00\xF0\x09\x01\x04\x22'
-        device.write(truc)
-        find_message(device)
 
     if command == 'NMEA':  # receive an ack when test
         # DTM   GBS    GGA    GLL    GRS    GSA    GST    GSV    RMC
@@ -171,7 +166,7 @@ def enable(device, command):
 
 
 def poll(device, command):
-    # read ephemerides and ionosphere message
+    # poll messages
     if command == 'EPH':
         eph_get = b'\xB5\x62\x0B\x31\x00\x00\x3C\xBF'
         device.write(eph_get)
@@ -182,8 +177,11 @@ def poll(device, command):
         raw_get = b'\xB5\x62\x02\x10\x00\x00\x12\x38'
         device.write(raw_get)
     if command == 'random':
-        # CFG-NAV5
-        random_get = b'\xB5\x62\x06\x24\x00\x00\x2A\x84'
+        # CFG-NAV5  NAV-DOP  RXM-SVSI
+        random_get = b'\xB5\x62\x06\x24\x00\x00\x2A\x84'\
+                     b'\xB5\x62\x01\x04\x00\x00\x05\x10'\
+                     b'\xB5\x62\x02\x20\x00\x00\x22\x68'
+        device.write(random_get)
 
 
 def disable(device, command):
@@ -302,23 +300,27 @@ def find_message(device):
         elif line[0:4] == b'\xb5b\x05\x00':
             print('nak received')
 
+
 def read_data(device, file):
     info = device.readline()
-    if info[0:2] == b'$G':
-        file.write(info)
-    else:
+    if info[0:2] != b'$P' and info[0:2] != b'$G':
         file.write(binascii.hexlify(info))
+    else:
+        file.write(info)
+
 
 def miseenforme():
-    raw = open('ublox_raw_data.txt', 'r')
-    processed = open('ublox_processed_data.txt', 'w')
-    thing = raw.read()
+    data = open('ublox_raw_data.txt', 'r')
+    thing = data.read()
+    data.close()
+
     first = thing.replace('b562', '\nb562')
     second = first.replace('2447', '\n2447')
     third = second.replace('0d0a$G', '\n$G')
-    processed.write(third)
-    processed.close()
-    raw.close()
+
+    data = open('ublox_processed_data.txt', 'w')
+    data.write(third)
+    data.close()
 
 
 def klobuchar_data():
@@ -398,6 +400,13 @@ def ephemeris_data():
 
 
 def raw_data():
+    # Stores the PRN data under this way :
+    # print(raw) == [['a', 'b', 'c', [[15, 1, 2, 3, 4, 5, 6], [16, 2, 3, 4, 5, 6, 7]]], ['a', 'b', 'c', ...
+    # to access data of the first message :
+    # print(raw[0]) == ['a', 'b', 'c', [[15, 1, 2, 3, 4, 5, 6], [16, 2, 3, 4, 5, 6, 7]]]
+    # to access rcvtow : print(raw[0][1])
+    # to access the inter matrix : print(raw[0][3]
+    # to access the cpmes of the first satellite : print(raw[0][3][0][0])
     file = open('ublox_processed_data.txt', 'r')
     raw = []
     for line in file:
@@ -426,6 +435,7 @@ def random_data():
     file = open('ublox_processed_data.txt', 'r')
     nav = []
     dop = []
+    svsi = []
     for line in file:
         if line[0:12] == 'b56206242400':
             # CFG-NAV5
@@ -457,5 +467,94 @@ def random_data():
             ndop = int(line[40:44], 16)
             edop = int(line[44:48], 16)
             dop.append([itow, gdop, pdop, tdop, vdop, hdop, ndop, edop])
+        if line[0:8] == 'b5620220':
+            # RXM-SVSI
+            # itow in ms, week in weeks
+            # to access the svid of the first satellite : print(svid[0][4][0][0])
+            itow = int(line[12:20], 16)
+            week = int(line[20:24], 16)
+            numvis = int(line[24:26], 16)
+            numsv = int(line[26:28], 16)
+            inter = []
+            for sat in range(numvis):
+                svid = int(line[28:30], 16)
+                azim = int(line[32:36], 16)
+                elev = int(line[36:38], 16)
+                age = int(line[38:40], 16)
+                inter.append([svid, azim, elev, age])
+            svsi.append([itow, week, numvis, numsv, inter])
     file.close()
-    return nav, dop
+    return nav, dop, svsi
+
+
+def nmea_data_gbs():
+    file = open('ublox_processed_data.txt', 'r')
+    SatFaultDetection = []
+    for line in file:
+        if line[3:6] == 'GBS':
+            # errlat, errlong, erralt are expected error in LLA in meters
+            # svid gives the sat ID of most likely failed sat
+            data = line.split(',')
+            time = data[1]
+            errlat = data[2]
+            errlong = data[3]
+            erralt = data[4]
+            svid = data[5]
+            SatFaultDetection.append([time, errlat, errlong, erralt, svid])
+    file.close()
+    return SatFaultDetection
+
+
+def nmea_data_gsa():
+    file = open('ublox_processed_data.txt', 'r')
+    DopAndActiveSat = []
+    for line in file:
+        if line[3:6] == 'GSA':
+            data = line.split(',')
+            activesat = data[3:14]
+            pdop = data[15]
+            hdop = data[16]
+            vdop = data[17]
+            DopAndActiveSat.append([activesat, pdop, hdop, vdop])
+    file.close()
+    return DopAndActiveSat
+
+
+def nmea_data_vtg():
+    file = open('ublox_processed_data.txt', 'r')
+    CourseAndSpeed = []
+    for line in file:
+        if line[3:6] == 'VTG':
+            # spd = speed over ground in knot/s
+            # cogt = course over ground true in degrees
+            # kph = speed over ground in kilometer per hour
+            data = line.split(',')
+            cogt = data[1]
+            spd = data[5]
+            kph = data[7]
+            CourseAndSpeed.append([cogt, spd, kph])
+    file.close()
+    return CourseAndSpeed
+
+
+def nmea_data_pubx3():
+    file = open('ublox_processed_data.txt', 'r')
+    SatInView = []
+    for line in file:
+        if line[0:8] == '$PUBX,03':
+            # az = azimut in degrees
+            # elev = elevation in degrees
+            # cno in dBHz
+            data = line.split(',')
+            Inter = []
+            nbsat = int(data[2])
+            for i in range(nbsat):
+                svid = data[3 + i*6]
+                svstatus = data[4 + i*6]
+                az = data[5 + i*6]
+                elev = data[6 + i*6]
+                cno = data[7 + i*6]
+                Inter.append([svid, svstatus, az, elev, cno])
+            SatInView.append([nbsat, Inter])
+    file.close()
+    return SatInView
