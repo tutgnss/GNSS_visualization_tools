@@ -15,6 +15,7 @@ import config_parser
 
 scenario = config_parser.read_scen()
 
+
 class Spectracom:
     # Makes the connection with the Spectracom, clear it and reset it
     def __init__(self, com):
@@ -230,9 +231,8 @@ class Spectracom:
             else:
                 print('boucle 5')
                 if (scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != ''):
-                    self.set_position(float(scenario[section][0]),
-                                                                float(scenario[section][1]),
-                                                                float(scenario[section][2]))
+                    self.set_position(float(scenario[section][0]), float(scenario[section][1]),
+                                      float(scenario[section][2]))
                 self.info_available(section)
                 self.data(savefile)
                 duration = tools.Tools.get_sec(scenario[section][3])
@@ -285,4 +285,3 @@ class Spectracom:
         savefile.close()
         pos = (tools.data('current_pos.txt'))
         return pos
-

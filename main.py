@@ -14,7 +14,7 @@ from threading import Thread
 from ublox import Ublox
 
 
-class Acquire_data(Thread):
+class AcquireData(Thread):
     def __init__(self, nb):
         Thread.__init__(self)
         self.nb = nb
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     time.sleep(50)
 
     # set spectracom initial parameters
-    spectracomcnx.set_datetime( date='01-01-2001', hour='15:01:00.0')
+    spectracomcnx.set_datetime(date='01-01-2001', hour='15:01:00.0')
     spectracomcnx.set_position(float(scenario[0][0]), float(scenario[0][1]), float(scenario[0][2]))
 
     # set ublox parameters
@@ -61,14 +61,14 @@ if __name__ == "__main__":
     ubloxcnx.disable(command='UBX')
     ubloxcnx.enable(command='GGA')
 
-    thread_1 = Acquire_data(1)
-    thread_2 = Acquire_data(2)
+    thread_1 = AcquireData(1)
+    thread_2 = AcquireData(2)
     thread_2.start()
 
     time.sleep(270)
 
     # read data comming from both the Spectracom and the Ublox at the same time while the scenario is running
-    thread_3 = Acquire_data(3)
+    thread_3 = AcquireData(3)
     thread_1.start()
     thread_3.start()
     thread_1.join()
@@ -78,5 +78,3 @@ if __name__ == "__main__":
 
     # computation of the root mean square error
     data_processing.computation()
-
-
