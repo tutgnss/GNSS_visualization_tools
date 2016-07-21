@@ -23,27 +23,37 @@ class Ublox:
         self.timeout = timeout
         try:
             self.device = serial.Serial(self.com, timeout=timeout, stopbits=stop_bit, write_timeout=None,
-                                   bytesize=data_bits, rtscts=False, xonxoff=False, parity=parity,
-                                   baudrate=baud_rate, inter_byte_timeout=None, dsrdtr=False)
+                                        bytesize=data_bits, rtscts=False, xonxoff=False, parity=parity,
+                                        baudrate=baud_rate, inter_byte_timeout=None, dsrdtr=False)
         except:
             raise ValueError('connexion with Ublox device failed')
+
+    def find_message(self):
+        msgsent = time.time()
+        wait = 1
+        while time.time() < wait + msgsent:
+            line = self.device.readline()
+            if line[0:4] == b'\xb5b\x05\x01':
+                print('ack received')
+            elif line[0:4] == b'\xb5b\x05\x00':
+                print('nak received')
 
     def reset(self, command):
         # Permits to make a cold, warm or a hot start reset
         if command == 'Cold RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\xFF\xA1\x02\x00\xB0\x47'
             self.device.write(reset)
-            find_message(self.device)
+            self.find_message()
 
         elif command == 'Warm RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\x01\x00\x02\x00\x11\x6C'
             self.device.write(reset)
-            find_message(self.device)
+            self.find_message()
 
         elif command == 'Hot RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\x00\x00\x02\x00\x10\x68'
             self.device.write(reset)
-            find_message(self.device)
+            self.find_message()
 
         else:
             raise ValueError('Unknown resetting command')
@@ -54,21 +64,22 @@ class Ublox:
         if command == 'EPH':
             eph_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x01\x47\xC3'
             self.device.write(eph_on)
-            find_message(self.device)
+            self.find_message()
 
         elif command == 'HUI':
             hui_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x02\x01\x18\x65 '
             self.device.write(hui_on)
-            find_message(self.device)
+            self.find_message()
 
         elif command == 'RAW':
             raw_on = b'\xB5\x62\x06\x01\x03\x00\x02\x10\x01\x1D\x66'
             self.device.write(raw_on)
-            find_message(self.device)
+            self.find_message()
 
         elif command == 'GGA':
             gga = b'\xB5\x62\x06\x01\x03\x00\xF0\x00\x01\xFB\x10'
             self.device.write(gga)
+            self.find_message()
 
         elif command == 'NMEA':  # receive an ack when test
             # DTM   GBS    GGA    GLL    GRS    GSA    GST    GSV    RMC
@@ -88,7 +99,7 @@ class Ublox:
                       b'\xB5\x62\x06\x01\x03\x00\xF1\x03\x01\xFF\x19'\
                       b'\xB5\x62\x06\x01\x03\x00\xF1\x04\x01\x00\x1B'
             self.device.write(nmea_on)
-            find_message(self.device)
+            self.find_message()
         elif command == 'UBX':
             ubx_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x30\x01\x46\xC1'\
                      b'\xB5\x62\x06\x01\x03\x00\x0B\x50\x01\x66\x01'\
@@ -170,7 +181,7 @@ class Ublox:
                      b'\xB5\x62\x06\x01\x03\x00\x0D\x15\x01\x2D\x91'\
                      b'\xB5\x62\x06\x01\x03\x00\x09\x14\x01\x28\x83'
             self.device.write(ubx_on)
-            find_message(self.device)
+            self.find_message()
         else:
             raise ValueError('Unknown Enabling Command')
 
@@ -281,7 +292,7 @@ class Ublox:
                       b'\xB5\x62\x06\x01\x03\x00\x0D\x15\x00\x2C\x90'\
                       b'\xB5\x62\x06\x01\x03\x00\x09\x14\x00\x27\x82'
             self.device.write(disable)
-            find_message(self.device)
+            self.find_message()
 
         elif command == 'NMEA':
             # DTM   GBS    GGA    GLL    GRS    GSA    GST    GSV    RMC
@@ -301,7 +312,7 @@ class Ublox:
                       b'\xB5\x62\x06\x01\x03\x00\xF1\x03\x00\xFE\x18'\
                       b'\xB5\x62\x06\x01\x03\x00\xF1\x04\x00\xFF\x1A'
             self.device.write(disable)
-            find_message(self.device)
+            self.find_message()
 
         else:
             raise ValueError('Unknown Disabling Command')
@@ -557,22 +568,9 @@ class Ublox:
         file.close()
         return satinview
 
-
-def find_message(device):
-    #
-    msgsent = time.time()
-    wait = 1
-    while time.time() < wait + msgsent:
-        line = device.readline()
-        if line[0:4] == b'\xb5b\x05\x01':
-            print('ack received')
-        elif line[0:4] == b'\xb5b\x05\x00':
-            print('nak received')
-
-
-def read_data(device, file):
-    info = device.readline()
-    if info[0:2] != b'$P' and info[0:2] != b'$G':
-        file.write(binascii.hexlify(info))
-    else:
-        file.write(info)
+    def read_data(self, file):
+        info = self.device.readline()
+        if info[0:2] != b'$P' and info[0:2] != b'$G':
+            file.write(binascii.hexlify(info))
+        else:
+            file.write(info)
