@@ -12,77 +12,65 @@ import time
 import binascii
 
 
-class UbloxInit:
+class Ublox:
     # this class makes the connexion with the ublox device
-    def __init__(self, com):
+    def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1):
         self.com = com
-
-    def init_ublox(self):
-        # sets initial values into the device
-        baud_rate = 4800
-        data_bits = 8
-        parity = 'N'
-        stop_bit = 1
-        timeout = 1
+        self.baud_rate = baud_rate
+        self.data_bits = data_bits
+        self.parity = parity
+        self.stop_bit = stop_bit
+        self.timeout = timeout
         try:
-            device = serial.Serial(self.com, timeout=timeout, stopbits=stop_bit, write_timeout=None,
+            self.device = serial.Serial(self.com, timeout=timeout, stopbits=stop_bit, write_timeout=None,
                                    bytesize=data_bits, rtscts=False, xonxoff=False, parity=parity,
                                    baudrate=baud_rate, inter_byte_timeout=None, dsrdtr=False)
-            return device
         except:
             raise ValueError('connexion with Ublox device failed')
 
-
-
-class UbloxCommand:
-    # this chlass defines commands that can be sent to the device:
-    # - enable : UBX, NMEA, RAW, EPH, HUI
-    # - poll : RAW, EPH, HUI, random (CFG-NAV5  NAV-DOP  RXM-SVSI)
-    # - disable: NMEA, UBX
-    def __init__(self, device, command):
-        self.device = device
-        self.command = command
-
-    def reset(self):
+    def reset(self, command):
         # Permits to make a cold, warm or a hot start reset
-        if self.command == 'Cold RST':
+        if command == 'Cold RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\xFF\xA1\x02\x00\xB0\x47'
             self.device.write(reset)
             find_message(self.device)
-        if self.command == 'Warm RST':
+
+        elif command == 'Warm RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\x01\x00\x02\x00\x11\x6C'
             self.device.write(reset)
             find_message(self.device)
-        if self.command == 'Hot RST':
+
+        elif command == 'Hot RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\x00\x00\x02\x00\x10\x68'
             self.device.write(reset)
             find_message(self.device)
-        if self.command != 'Cold RST' and self.command != 'Warm RST' and self.command !='Hot RST':
+
+        else:
             raise ValueError('Unknown resetting command')
 
-    def enable(self):
+    def enable(self, command):
         # set ephemerides, ionosphere and pseudo range message available
         # ste all ubx, nmea messages enable
-        if self.command == 'EPH':
+        if command == 'EPH':
             eph_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x01\x47\xC3'
             self.device.write(eph_on)
             find_message(self.device)
 
-        if self.command == 'HUI':
+        elif command == 'HUI':
             hui_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x02\x01\x18\x65 '
             self.device.write(hui_on)
             find_message(self.device)
 
-        if self.command == 'RAW':
+        elif command == 'RAW':
             raw_on = b'\xB5\x62\x06\x01\x03\x00\x02\x10\x01\x1D\x66'
             self.device.write(raw_on)
             find_message(self.device)
 
-        if self.command == 'GGA':
+        elif command == 'GGA':
             gga = b'\xB5\x62\x06\x01\x03\x00\xF0\x00\x01\xFB\x10'
             self.device.write(gga)
 
-        if self.command == 'NMEA':  # receive an ack when test
+        elif command == 'NMEA':  # receive an ack when test
             # DTM   GBS    GGA    GLL    GRS    GSA    GST    GSV    RMC
             # VTG   ZDA    PUBX 00     PUBX 03    PUBX 04
             nmea_on = b'\xB5\x62\x06\x01\x03\x00\xF0\x0A\x01\x05\x24'\
@@ -101,7 +89,7 @@ class UbloxCommand:
                       b'\xB5\x62\x06\x01\x03\x00\xF1\x04\x01\x00\x1B'
             self.device.write(nmea_on)
             find_message(self.device)
-        if self.command == 'UBX':
+        elif command == 'UBX':
             ubx_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x30\x01\x46\xC1'\
                      b'\xB5\x62\x06\x01\x03\x00\x0B\x50\x01\x66\x01'\
                      b'\xB5\x62\x06\x01\x03\x00\x0B\x33\x01\x49\xC7'\
@@ -183,33 +171,36 @@ class UbloxCommand:
                      b'\xB5\x62\x06\x01\x03\x00\x09\x14\x01\x28\x83'
             self.device.write(ubx_on)
             find_message(self.device)
-        if self.command != 'EPH' and self.command != 'HUI' and self.command != 'RAW' and self.command != 'NMEA'\
-                and self.command != 'UBX'and self.command != 'GGA':
+        else:
             raise ValueError('Unknown Enabling Command')
 
-    def poll(self):
+    def poll(self, command):
         # poll messages
-        if self.command == 'EPH':
+        if command == 'EPH':
             eph_get = b'\xB5\x62\x0B\x31\x00\x00\x3C\xBF'
             self.device.write(eph_get)
-        if self.command == 'HUI':
+
+        elif command == 'HUI':
             hui_get = b'\xB5\x62\x0B\x02\x00\x00\x0D\x32'
             self.device.write(hui_get)
-        if self.command == 'RAW':
+
+        elif command == 'RAW':
             raw_get = b'\xB5\x62\x02\x10\x00\x00\x12\x38'
             self.device.write(raw_get)
-        if self.command == 'random':
+
+        elif command == 'random':
             # CFG-NAV5  NAV-DOP  RXM-SVSI
             random_get = b'\xB5\x62\x06\x24\x00\x00\x2A\x84'\
                          b'\xB5\x62\x01\x04\x00\x00\x05\x10'\
                          b'\xB5\x62\x02\x20\x00\x00\x22\x68'
             self.device.write(random_get)
-        if self.command != 'EPH' and self.command != 'HUI' and self.command != 'RAW' and self.command != 'random':
+
+        else:
             raise ValueError('Unknown Polling Command')
 
-    def disable(self):
+    def disable(self, command):
         # disable UBX or NMEA message
-        if self.command == 'UBX':  # Receive a Nac when test -- pb : UBX msg turn off by default
+        if command == 'UBX':  # Receive a Nac when test -- pb : UBX msg turn off by default
             disable = b'\xB5\x62\x06\x01\x03\x00\x0B\x30\x01\x45\xC0'\
                       b'\xB5\x62\x06\x01\x03\x00\x0B\x50\x00\x65\x00'\
                       b'\xB5\x62\x06\x01\x03\x00\x0B\x33\x00\x48\xC6'\
@@ -291,7 +282,8 @@ class UbloxCommand:
                       b'\xB5\x62\x06\x01\x03\x00\x09\x14\x00\x27\x82'
             self.device.write(disable)
             find_message(self.device)
-        if self.command == 'NMEA':
+
+        elif command == 'NMEA':
             # DTM   GBS    GGA    GLL    GRS    GSA    GST    GSV    RMC
             # VTG   ZDA    PUBX 00     PUBX 03    PUBX 04
             disable = b'\xB5\x62\x06\x01\x03\x00\xF0\x0A\x00\x04\x23'\
@@ -310,12 +302,10 @@ class UbloxCommand:
                       b'\xB5\x62\x06\x01\x03\x00\xF1\x04\x00\xFF\x1A'
             self.device.write(disable)
             find_message(self.device)
-        if self.command != 'UBX' and self.command != 'NMEA':
+
+        else:
             raise ValueError('Unknown Disabling Command')
 
-
-class UbloxStoreData:
-    # this class creates matrix according to available information
     @staticmethod
     def miseenforme():
         data = open('ublox_raw_data.txt', 'r')
