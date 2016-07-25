@@ -149,7 +149,59 @@ class Spectracom:
         # Doppler Change rate in meters/sec/interval [-99.0, 99.0], Doppler Interval in sec [0.0, 600.0],
         # Power Offset in meters [-30.0, 0.0], Power Change rate in dB/interval [-30.0, 0,0] and
         # Power Interval in seconds [0.0, 600.0].
-        return self.spectracom.write('SOURce:SCENario:MULtipath IMM %s' % multipath)
+        return self.spectracom.write('SOURce:SCENario:MULtipath IMM, %s' % multipath)
+
+    def set_velocity(self, speed, heading):
+        # Sets the vehicle's speed over ground (WGS84 ellipsoid) and heading in degrees
+        # parameter: Decimal 1D speed [0.000 to +20000.000] m/s
+        #            Decimal bearing [0, 359.999] true bearing in decimal degrees
+        return self.spectracom.write('SOURce:SCENario:VELocity IMM, %f, %f' % (speed, heading))
+
+    def set_verticalspeed(self, vspeed):
+        # Sets the vehicle's vertical speed
+        # parameter: Decimal 1D Speed [-20000.00 to +20000.00] m/s
+        return self.spectracom.write('SOURce:SCENario:VSPEed IMM, %f' % vspeed)
+
+    def set_enuvel(self, vest, vnorth, vup):
+        # Sets the velocity expressed in ENU coordinates when scenario is running
+        # Parameters: velocity East, North, Up in [-20000.00 to +20000.00] m/s
+        return self.spectracom.write('SOURce:SCENario:ENUVELocity IMM, %f, %f, %f' % (vest, vnorth, vup))
+
+    def set_ecefvel(self, velx, vely, velz):
+        # Sets the current ECEF velocity in X, Y and Z coordinates when the scenario is running
+        # Parameters: velocity X, Y, Z in [-20000.00 to +20000.00] m/s
+        return self.spectracom.write('SOURce:SCENario:ECEFVELocity IMM, %f, %f, %f' % (velx, vely, velz))
+
+    def set_vacceleration(self, vaccel):
+        # Sets the vehicle's vertical acceleration
+        # Parameter: Decimal 1D Acceleration [-981 to +981] m/s^2 equivalent to [-100G to +100G]
+        return self.spectracom.write('SOURce:SCENario:VACCel IMM, %f' % vaccel)
+
+    def set_enuaccel(self, aest, anorth, aup):
+        # Sets the acceleration expressed in ENU coordinates when scenario is running
+        # Parameter: Acceleration East, North, Up [-981 to +981] m/s^2 equivalent to [-100G to +100G]
+        return self.spectracom.write('SOURce:SCENario:ENUACCel IMM, %f, %f, %f' % (aest, anorth, aup))
+
+    def set_ecefaccel(self, accelx, accely, accelz):
+        # Sets the ECEF acceleration in 3-dimensions as acceleration X, Y, Z when scenario is running
+        # Parameter: Acceleration X, Y, Z [-981 to +981] m/s^2 equivalent to [-100G to +100G]
+        return self.spectracom.write('SOURce:SCENario:ECEFACCel IMM, %f, %f, %f' % (accelx, accely, accelz))
+
+    def set_pryattitude(self, pitch, roll, yaw):
+        # Sets the vehicle attitude in 3-dimension about the center of mass as Pitch, Roll and Yaw
+        # when scenario is running, parameters are in radians
+        return self.spectracom.write('SOURce:SCENario:PRYattitude IMM, %f, %f, %f' % (pitch, roll, yaw))
+
+    def set_dpryatt(self, pitch, roll, yaw):
+        # Sets the vehicle attitude in 3-dimension about the center of mass as Pitch, Roll and Yaw
+        # when scenario is running, parameters are in degrees [-180, +180]
+        return self.spectracom.write('SOURce:SCENario:DPRYattitude IMM, %f, %f, %f' % (pitch, roll, yaw))
+
+    def set_kepler(self, meananomaly, eccentricity, semimajoraxis, ascension, inclination, argumentperigee):
+        # Sets the Kepler orbit parameters
+        # Parameters: Mean anomaly, ascension of ascending node, inclination and argument of perigee are in radians
+        return self.spectracom.write('SOURce:SCENario:KEPLER IMM, %f, %f, %f, %f, %f, %f' % (
+                                     meananomaly, eccentricity, semimajoraxis, ascension, inclination, argumentperigee))
 
     def info_available(self, section):
         if scenario[section][4] != '':
