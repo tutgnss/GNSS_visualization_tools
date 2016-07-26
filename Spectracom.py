@@ -48,6 +48,9 @@ class Spectracom:
         # equal) than-130 dBm!!
         return self.spectracom.write('SOURce:POWer %f' % power)
 
+    def set_observation(self):
+        self.spectracom.write('SOURce:SCENario:OBS 10,3800, 1')
+
     def set_ext_attenuation(self, extatt):
         # Set the external attenuation of the device. Note : Setting not stored during
         # scenario or 1-channel mode execution. Parameter : decimal = [0, 30] in dB
@@ -133,14 +136,6 @@ class Spectracom:
         # When the model is active, the units will compensate for the altitude change resulting
         # from the difference between the ENU plane and the ellipsoid model of the earth.
         return self.spectracom.write('SOURce:SCENario:KEEPALTitude %s' % keepalt)
-
-    # def set_signaltype(signal):
-        # Sets signal(s) to be simulated. Signal consists of comma separated list of signal names:
-        # parameters: string GPSL1CA, GPSL1P or GPSL1PY, GPSL2P or GPSL2PY for GPS
-        #             string GLOL1, GLOL2 for GLONASS
-        #             string GALE1, GALE5a or GALE5b for Galileo
-        #             string BDSB1, BDSB2 for BeiDou
-    #    pass
 
     def set_multipath(self, multipath):
         # This command sets the multipath parameters for satellite with a satID. The parameters include
@@ -337,3 +332,32 @@ class Spectracom:
         savefile.close()
         pos = (tools.data('current_pos.txt'))
         return pos
+
+    def get_almanach(self):
+        # returns a matrix of almanach data, almanach[i] contains:
+        # [ID, Health, Eccentricity, Time of Applicability in seconds, Orbital Inclination in rad,
+        # Rate of Right Ascen in rad/s, SQRT(A) in m 1/2, Right Ascen at Week(rad), Argument of Perigee in rad
+        # Mean Anom in rad, Af0 in s, Af1 in s/s, week]
+        self.spectracom.write('MMEMory:CDIRectory observations')
+        file = open('almanach.txt', 'w')
+        file.write(self.spectracom.query('MMEMory:DATA? alm_gps.txt'))
+        file.close()
+        file = open('almanach.txt', 'r')
+        i = 0
+        almanach = []
+        inter = []
+        for line in file:
+            if line[0] == '#' or line[0] == '\n':
+                pass
+            elif line[0] == '*':
+                i += 1
+                almanach.append(inter)
+                inter = []
+            else:
+                b=0
+                while line[27 + b] != '\n':
+                    b+=1
+                inter.append(line[27:(27 + b)])
+        almanach.append(inter)
+        file.close()
+        return almanach

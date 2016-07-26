@@ -10,6 +10,7 @@
 import serial
 import time
 import binascii
+import math
 
 
 class Ublox:
@@ -335,22 +336,22 @@ class Ublox:
     def klobuchar_data():
         # creates the matrix of ephemeris data decimal values
         # kloa0 and klob0 in second
-        # kloa1 and klob1 in second/semicircle
-        # kloa2 and klob2 in second/semicircle^2
-        # kloa3 and klob3 in second/semicircle^3
+        # kloa1 and klob1 in second/radian (semi circle*pi)
+        # kloa2 and klob2 in second/radian^2
+        # kloa3 and klob3 in second/radian^3
         file = open('ublox_processed_data.txt', 'r')
         klobuchar = []
         for line in file:
             if line[0:12] == 'b5620b024800':
                 # hui message
                 kloa0 = int(line[84:92], 16)*pow(2, -30)
-                kloa1 = int(line[92:100], 16)*pow(2, -27)
-                kloa2 = int(line[100:108], 16)*pow(2, -24)
-                kloa3 = int(line[108:116], 16)*pow(2, -24)
+                kloa1 = int(line[92:100], 16)*pow(2, -27)/math.pi
+                kloa2 = int(line[100:108], 16)*pow(2, -24)/pow(2, math.pi)
+                kloa3 = int(line[108:116], 16)*pow(2, -24)/pow(3, math.pi)
                 klob0 = int(line[116:124], 16)*pow(2, 11)
-                klob1 = int(line[124:132], 16)*pow(2, 14)
-                klob2 = int(line[132:140], 16)*pow(2, 16)
-                klob3 = int(line[140:148], 16)*pow(2, 16)
+                klob1 = int(line[124:132], 16)*pow(2, 14)/math.pi
+                klob2 = int(line[132:140], 16)*pow(2, 16)/pow(2, math.pi)
+                klob3 = int(line[140:148], 16)*pow(2, 16)/pow(3, math.pi)
                 klobuchar.append([kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3])
         file.close()
         return klobuchar
@@ -360,8 +361,8 @@ class Ublox:
         # creates the matrix of ephemeris data with application of the scale factor decimal values
         # toc and toe in seconds, af2 in sec/sec^2, af1 in sec/sec, af0 in sec,
         # cuc cus cic and cis in radians, sqrta in meter^0,5
-        # omega0 omega m0 and i0 in semi circles,
-        # crc and crs in meters, deltan omegadot and idot in semicircles/sec
+        # omega0 omega m0 and i0 in radians (semi circles * pi),
+        # crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
         file = open('ublox_processed_data.txt', 'r')
         ephemeris = []
         for line in file:
@@ -384,7 +385,7 @@ class Ublox:
                 iodesf2 = int(binline[368:376], 2)
                 crs = int(binline[376:392], 2)*pow(2, -5)
                 deltan = int(binline[400:416], 2)*pow(2, -43)
-                m0 = int(join.join((binline[416:424], binline[432:456])), 2)*pow(2, -31)
+                m0 = int(join.join((binline[416:424], binline[432:456])), 2)*pow(2, -31)*math.pi
                 cuc = int(binline[464:480], 2)*pow(2, -29)
                 e = int(join.join((binline[480:488], binline[496:520])), 2)*pow(2, -33)
                 cus = int(binline[528:544], 2)*pow(2, -29)
@@ -393,14 +394,14 @@ class Ublox:
                 flag = int(binline[608], 2)
                 aodo = int(binline[609:614], 2)
                 cic = int(binline[624:640], 2)*pow(2, -29)
-                omega0 = int(join.join((binline[640:648], binline[656:680])), 2)*pow(2, -31)
+                omega0 = int(join.join((binline[640:648], binline[656:680])), 2)*pow(2, -31)*math.pi
                 cis = int(binline[688:704], 2)*pow(2, -29)
-                i0 = int(join.join((binline[704:712], binline[720:744])), 2)*pow(2, -31)
+                i0 = int(join.join((binline[704:712], binline[720:744])), 2)*pow(2, -31)*math.pi
                 crc = int(binline[752:768], 2)*pow(2, -5)
-                omega = int(join.join((binline[768:776], binline[784:808])), 2)*pow(2, -31)
-                omegadot = int(binline[816:840], 2)*pow(2, -43)
+                omega = int(join.join((binline[768:776], binline[784:808])), 2)*pow(2, -31)*math.pi
+                omegadot = int(binline[816:840], 2)*pow(2, -43)*math.pi
                 iodesf3 = int(binline[848:856], 2)
-                idot = int(binline[856:870], 2)*pow(2, -43)
+                idot = int(binline[856:870], 2)*pow(2, -43)*math.pi
                 ephemeris.append([svid, wn, cap, ura, health, iodc, tgd, toc, af2, af1, af0, iodesf2,
                                   crs, deltan, m0, cuc, e, cus, sqrta, toe, flag, aodo, cic, omega0,
                                   cis, i0, crc, omega, omegadot, iodesf3, idot])

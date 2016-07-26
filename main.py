@@ -26,7 +26,6 @@ class AcquireData(Thread):
             begin = time.time()
             ubloxfile = open('ublox_raw_data.txt', 'wb')
             while (time.time() < 300 + begin) or (thread_1.is_alive() is True):
-                print(thread_1.is_alive())
                 ubloxcnx.read_data(ubloxfile)
             ubloxfile.close()
         if self.nb == 3:
@@ -52,14 +51,15 @@ if __name__ == "__main__":
     time.sleep(50)
 
     # set spectracom initial parameters
+    spectracomcnx.set_observation()
     spectracomcnx.set_datetime(date='01-01-2001', hour='15:01:00.0')
+    spectracomcnx.set_power('-130')
     spectracomcnx.set_position(float(scenario[0][0]), float(scenario[0][1]), float(scenario[0][2]))
 
     # set ublox parameters
     ubloxcnx.reset(command='Cold RST')
-    ubloxcnx.disable(command='NMEA')
-    ubloxcnx.disable(command='UBX')
-    ubloxcnx.enable(command='GGA')
+    ubloxcnx.enable(command='NMEA')
+    ubloxcnx.enable(command='UBX')
 
     thread_1 = AcquireData(1)
     thread_2 = AcquireData(2)
