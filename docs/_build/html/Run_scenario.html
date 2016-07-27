@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Run the scenario &mdash; gnss_visualisation 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="gnss_visualisation 0.0 documentation" href="index.rst.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="run-the-scenario">
+<h1>Run the scenario<a class="headerlink" href="#run-the-scenario" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="choose-your-scenario">
+<h2>Choose your scenario<a class="headerlink" href="#choose-your-scenario" title="Permalink to this headline">¶</a></h2>
+<p>Once you have create your own scenario, or if you want to run a pre-defined scenario, in the main file fill
+the argument of config_parser.read_scen()with the name of your scenario like this for example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">scenario</span> <span class="o">=</span> <span class="n">config_parser</span><span class="o">.</span><span class="n">read_scen</span><span class="p">(</span><span class="s1">&#39;test/test_6.ini&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ublox-initialisation">
+<h2>Ublox initialisation<a class="headerlink" href="#ublox-initialisation" title="Permalink to this headline">¶</a></h2>
+<p>Then you have to initialise the communication with the Ublox receiver.
+First of all, fill the COM port like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ubloxcnx</span> <span class="o">=</span> <span class="n">Ublox</span><span class="p">(</span><span class="n">com</span><span class="o">=</span><span class="s1">&#39;COM6&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you have to choose which reset you want to make between &#8216;Cold RST&#8217;, &#8216;Warm RST&#8217; or &#8216;Hot RST&#8217;, like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ubloxcnx</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;Cold RST&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you have to enable and disable which message you want or don&#8217;t want to receive from the receiver, you can:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>enable:</dt>
+<dd><ul class="first last simple">
+<li>ephemerides message thanks to &#8216;EPH&#8217;</li>
+<li>ionospheric messages thanks to &#8216;HUI&#8217;</li>
+<li>pseudo-range messages thanks to &#8216;RAW&#8217;</li>
+<li>if you want all the UBX data just put &#8216;UBX&#8217;</li>
+<li>position messages thanks to &#8216;GGA&#8217;</li>
+<li>if you want all the NMEA data just put &#8216;NMEA&#8217;</li>
+</ul>
+</dd>
+<dt>disable:</dt>
+<dd><ul class="first last simple">
+<li>all NMEA message thanks to &#8216;NMEA&#8217;</li>
+<li>all UBX message thanks to &#8216;UBX&#8217;</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p>Here is an example of how to enable/disable message:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ubloxcnx</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;NMEA&#39;</span><span class="p">)</span>
+<span class="n">ubloxcnx</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;UBX&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you don&#8217;t want to get any UBX message, please comment the following line:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">thread_3</span> <span class="o">=</span> <span class="n">AcquireData</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">thread_3</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="spectracom-initialisation">
+<h2>Spectracom initialisation<a class="headerlink" href="#spectracom-initialisation" title="Permalink to this headline">¶</a></h2>
+<p>To make the connexion with the Spectracom, you need to fill the argument of Spectracom(), like this for example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">spectracomcnx</span> <span class="o">=</span> <span class="n">Spectracom</span><span class="p">(</span><span class="s1">&#39;USB0::0x14EB::0x0060::200448::INSTR&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.rst.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Run the scenario</a><ul>
+<li><a class="reference internal" href="#choose-your-scenario">Choose your scenario</a></li>
+<li><a class="reference internal" href="#ublox-initialisation">Ublox initialisation</a></li>
+<li><a class="reference internal" href="#spectracom-initialisation">Spectracom initialisation</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.rst.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Run_scenario.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, am, yd.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/Run_scenario.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
