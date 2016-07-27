@@ -92,11 +92,11 @@ def rms_3d(lat_error, long_error, alt_error, new_spec):
 
 def computation():
     # Open files
-    spec = open('spectracom_data.nmea', 'r')
-    ublox = open('ublox_processed_data.txt', 'r')
+    spec = open('data/spectracom_data.nmea', 'r')
+    ublox = open('data/ublox_processed_data.txt', 'r')
     # data processing [time, Lat, Long, Alt]
-    speclist = tools.data('spectracom_data.nmea')
-    ubloxlist = tools.data('ublox_processed_data.txt')
+    speclist = tools.data('data/spectracom_data.nmea')
+    ubloxlist = tools.data('data/ublox_processed_data.txt')
     if speclist != [] and ubloxlist != []:
         # time synchronisation
         new_spec = synchronisation(speclist, ubloxlist)[0]
