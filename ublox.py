@@ -14,7 +14,7 @@ import math
 
 
 class Ublox:
-    # this class makes the connexion with the ublox device
+
     def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1):
         self.com = com
         self.baud_rate = baud_rate
@@ -60,8 +60,8 @@ class Ublox:
             raise ValueError('Unknown resetting command')
 
     def enable(self, command):
-        # set ephemerides, ionosphere and pseudo range message available
-        # ste all ubx, nmea messages enable
+        # set ephemerides, ionosphere, pseudo range and GGA messages available
+        # set all ubx, nmea messages enable
         if command == 'EPH':
             eph_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x01\x47\xC3'
             self.device.write(eph_on)
@@ -320,7 +320,7 @@ class Ublox:
 
     @staticmethod
     def miseenforme():
-        data = open('ublox_raw_data.txt', 'r')
+        data = open('data/ublox_raw_data.txt', 'r')
         thing = data.read()
         data.close()
 
@@ -328,7 +328,7 @@ class Ublox:
         second = first.replace('2447', '\n2447')
         third = second.replace('0d0a$G', '\n$G')
 
-        data = open('ublox_processed_data.txt', 'w')
+        data = open('data/ublox_processed_data.txt', 'w')
         data.write(third)
         data.close()
 
@@ -339,7 +339,7 @@ class Ublox:
         # kloa1 and klob1 in second/radian (semi circle*pi)
         # kloa2 and klob2 in second/radian^2
         # kloa3 and klob3 in second/radian^3
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         klobuchar = []
         for line in file:
             if line[0:12] == 'b5620b024800':
@@ -363,7 +363,7 @@ class Ublox:
         # cuc cus cic and cis in radians, sqrta in meter^0,5
         # omega0 omega m0 and i0 in radians (semi circles * pi),
         # crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         ephemeris = []
         for line in file:
             if line[0:12] == 'b5620b316800':
@@ -417,7 +417,7 @@ class Ublox:
         # to access rcvtow : print(raw[0][1])
         # to access the inter matrix : print(raw[0][3]
         # to access the cpmes of the first satellite : print(raw[0][3][0][0])
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         raw = []
         for line in file:
             if line[0:8] == 'b5620210':
@@ -442,7 +442,7 @@ class Ublox:
 
     @staticmethod
     def random_data():
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         nav = []
         dop = []
         svsi = []
@@ -498,7 +498,7 @@ class Ublox:
 
     @staticmethod
     def nmea_data_gbs():
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         satfaultdetection = []
         for line in file:
             if line[3:6] == 'GBS':
@@ -516,7 +516,7 @@ class Ublox:
 
     @staticmethod
     def nmea_data_gsa():
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         dopandactivesat = []
         for line in file:
             if line[3:6] == 'GSA':
@@ -531,11 +531,11 @@ class Ublox:
 
     @staticmethod
     def nmea_data_vtg():
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         courseandspeed = []
         for line in file:
             if line[3:6] == 'VTG':
-                # spd = speed over ground in knot/s
+                # spd = speed over ground in knots
                 # cogt = course over ground true in degrees
                 # kph = speed over ground in kilometer per hour
                 data = line.split(',')
@@ -548,7 +548,7 @@ class Ublox:
 
     @staticmethod
     def nmea_data_pubx3():
-        file = open('ublox_processed_data.txt', 'r')
+        file = open('data/ublox_processed_data.txt', 'r')
         satinview = []
         for line in file:
             if line[0:8] == '$PUBX,03':

@@ -1,7 +1,7 @@
 # Tampere University of Technology
 #
 # DESCRIPTION
-# define initialisation functions of the spectracom, functions used to set parameters and to read
+# defines initialisation functions of the spectracom, functions used to set parameters and to read
 # information
 #
 # AUTHOR
@@ -13,11 +13,8 @@ import interval
 import tools
 import config_parser
 
-scenario = config_parser.read_scen()
-
-
 class Spectracom:
-    # Makes the connection with the Spectracom, clear it and reset it
+
     def __init__(self, com):
         self.com = com
         try:
@@ -198,7 +195,7 @@ class Spectracom:
         return self.spectracom.write('SOURce:SCENario:KEPLER IMM, %f, %f, %f, %f, %f, %f' % (
                                      meananomaly, eccentricity, semimajoraxis, ascension, inclination, argumentperigee))
 
-    def info_available(self, section):
+    def info_available(self, scenario, section):
         if scenario[section][4] != '':
             self.set_heading(float(scenario[section][4]))
         if scenario[section][5] != '':
@@ -230,7 +227,7 @@ class Spectracom:
 #    if scenario[section][17] != '':
 #        set_multipath(scenario[section][17])
 
-    def set_default(self, section):
+    def set_default(self, scenario,  section):
         if scenario[section][5] == '':
             self.set_speed(0.0)
         if scenario[section][6] == '':
@@ -256,8 +253,8 @@ class Spectracom:
 #    if scenario[section][16] == '':
 #        SpectracomCommand.set_signaltype('GPSL1CA')
 
-    def scenario_reading(self):
-        savefile = open('spectracom_data.nmea', 'w')
+    def scenario_reading(self, scenario):
+        savefile = open('data/spectracom_data.nmea', 'w')
         for section in range(len(scenario)-2):
             section += 1
             print(section)
@@ -271,22 +268,22 @@ class Spectracom:
                     self.set_heading(tools.heading_compute(
                         self.get_current_pos()[0][1], (float(scenario[section][0])),
                         self.get_current_pos()[0][2], (float(scenario[section][1]))))
-                    self.info_available(section)
+                    self.info_available(scenario, section)
                     self.data(savefile)
-                self.set_default(section)
+                self.set_default(scenario, section)
 
             else:
                 print('boucle 5')
                 if (scenario[section][0] != '') or (scenario[section][1] != '') or (scenario[section][2] != ''):
                     self.set_position(float(scenario[section][0]), float(scenario[section][1]),
                                       float(scenario[section][2]))
-                self.info_available(section)
+                self.info_available(scenario, section)
                 self.data(savefile)
                 duration = tools.Tools.get_sec(scenario[section][3])
                 tps = time.time()
                 while time.time() - tps < duration:
                     self.data(savefile)
-                self.set_default(section)
+                self.set_default(scenario, section)
             self.query()
         print('done')
         savefile.close()
@@ -316,7 +313,7 @@ class Spectracom:
     def get_data(self):
         # take the nmea data for the duration of the scenario
         # sent by the spectracom and print them into the file
-        savefile = open('spectracom_data.nmea', 'w')
+        savefile = open('data/spectracom_data.nmea', 'w')
         while True:
             data = self.spectracom.query('SOURce:SCENario:LOG?')
             savefile.write(data)
@@ -339,10 +336,10 @@ class Spectracom:
         # Rate of Right Ascen in rad/s, SQRT(A) in m 1/2, Right Ascen at Week(rad), Argument of Perigee in rad
         # Mean Anom in rad, Af0 in s, Af1 in s/s, week]
         self.spectracom.write('MMEMory:CDIRectory observations')
-        file = open('almanach.txt', 'w')
+        file = open('data/almanach.txt', 'w')
         file.write(self.spectracom.query('MMEMory:DATA? alm_gps.txt'))
         file.close()
-        file = open('almanach.txt', 'r')
+        file = open('data/almanach.txt', 'r')
         i = 0
         almanach = []
         inter = []

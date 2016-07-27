@@ -1,7 +1,8 @@
 # Tampere University of Technology
 #
 # DESCRIPTION
-# makes connexion and initialisation of devices then run the chosen scenario, stores data and make rms computation
+# makes connexion and initialisation of devices then run the chosen scenario,
+# stores data and make rms computation
 #
 # AUTHOR
 # Anne-Marie Tobie
@@ -21,10 +22,10 @@ class AcquireData(Thread):
 
     def run(self):
         if self.nb == 1:
-            spectracomcnx.scenario_reading()
+            spectracomcnx.scenario_reading(scenario)
         if self.nb == 2:
             begin = time.time()
-            ubloxfile = open('ublox_raw_data.txt', 'wb')
+            ubloxfile = open('data/ublox_raw_data.txt', 'wb')
             while (time.time() < 300 + begin) or (thread_1.is_alive() is True):
                 ubloxcnx.read_data(ubloxfile)
             ubloxfile.close()
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     spectracomcnx = Spectracom('USB0::0x14EB::0x0060::200448::INSTR')
 
     # Read scenario
-    scenario = config_parser.read_scen()
+    scenario = config_parser.read_scen('test/test_6.ini')
 
     # Launch spectracom
     spectracomcnx.control(control='start')
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     # set spectracom initial parameters
     spectracomcnx.set_observation()
     spectracomcnx.set_datetime(date='01-01-2001', hour='15:01:00.0')
-    spectracomcnx.set_power('-130')
+    spectracomcnx.set_power(-130)
     spectracomcnx.set_position(float(scenario[0][0]), float(scenario[0][1]), float(scenario[0][2]))
 
     # set ublox parameters
