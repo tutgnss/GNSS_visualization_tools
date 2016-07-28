@@ -43,7 +43,10 @@ The project is licensed under the MIT license.
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   define_the_scenario
+   Run_scenario
+
 
