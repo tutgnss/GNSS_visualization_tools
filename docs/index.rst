@@ -8,7 +8,7 @@ Welcome to  GNSS_visualization_tools' documentation!
 
 
 Contents:
-
+---------
 .. toctree::
    :maxdepth: 2
    :glob:
