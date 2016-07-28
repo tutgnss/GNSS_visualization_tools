@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Define the scenario &mdash; gnss_visualisation 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="gnss_visualisation 0.0 documentation" href="index.rst.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="define-the-scenario">
+<h1>Define the scenario<a class="headerlink" href="#define-the-scenario" title="Permalink to this headline">¶</a></h1>
+<p>Create a new .ini file and use this template:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">START</span><span class="p">]</span>
+<span class="n">LAT</span><span class="p">:</span>
+<span class="n">LONG</span><span class="p">:</span>
+<span class="n">ALT</span><span class="p">:</span>
+<span class="n">Duration</span><span class="p">:</span>
+<span class="n">Heading</span><span class="p">:</span>
+<span class="n">Speed</span><span class="p">:</span>
+<span class="n">Acceleration</span><span class="p">:</span>
+<span class="n">Rateheading</span><span class="p">:</span>
+<span class="n">Turnrate</span><span class="p">:</span>
+<span class="n">Turnradius</span><span class="p">:</span>
+<span class="n">Cn0</span><span class="p">:</span>
+<span class="n">Propagation</span><span class="p">:</span>
+<span class="n">Antenna</span><span class="p">:</span>
+<span class="n">Tropo</span><span class="p">:</span>
+<span class="n">Iono</span><span class="p">:</span>
+<span class="n">keepalt</span><span class="p">:</span>
+<span class="n">ECEFpos</span><span class="p">:</span>
+<span class="n">Multipath</span><span class="p">:</span>
+<span class="n">SpeedOverGround</span><span class="p">:</span>
+<span class="n">Verticalspeed</span><span class="p">:</span>
+<span class="n">Enuvel</span><span class="p">:</span>
+<span class="n">Ecefvel</span><span class="p">:</span>
+<span class="n">VerticalAcceleration</span><span class="p">:</span>
+<span class="n">ENUAccel</span><span class="p">:</span>
+<span class="n">ECEFAccel</span><span class="p">:</span>
+<span class="n">PRYattitude</span><span class="p">:</span>
+<span class="n">DPRYattitude</span><span class="p">:</span>
+<span class="n">Kepler</span><span class="p">:</span>
+<span class="p">[</span><span class="n">SECTION</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">LAT</span><span class="p">:</span>
+<span class="n">LONG</span><span class="p">:</span>
+<span class="n">ALT</span><span class="p">:</span>
+<span class="n">Duration</span><span class="p">:</span>
+<span class="n">Heading</span><span class="p">:</span>
+<span class="n">Speed</span><span class="p">:</span>
+<span class="n">Acceleration</span><span class="p">:</span>
+<span class="n">Rateheading</span><span class="p">:</span>
+<span class="n">Turnrate</span><span class="p">:</span>
+<span class="n">Turnradius</span><span class="p">:</span>
+<span class="n">Cn0</span><span class="p">:</span>
+<span class="n">Propagation</span><span class="p">:</span>
+<span class="n">Antenna</span><span class="p">:</span>
+<span class="n">Tropo</span><span class="p">:</span>
+<span class="n">Iono</span><span class="p">:</span>
+<span class="n">keepalt</span><span class="p">:</span>
+<span class="n">signaltype</span><span class="p">:</span>
+<span class="n">ECEFpos</span><span class="p">:</span>
+<span class="n">Multipath</span><span class="p">:</span>
+<span class="n">SpeedOverGround</span><span class="p">:</span>
+<span class="n">Verticalspeed</span><span class="p">:</span>
+<span class="n">Enuvel</span><span class="p">:</span>
+<span class="n">Ecefvel</span><span class="p">:</span>
+<span class="n">VerticalAcceleration</span><span class="p">:</span>
+<span class="n">ENUAccel</span><span class="p">:</span>
+<span class="n">ECEFAccel</span><span class="p">:</span>
+<span class="n">PRYattitude</span><span class="p">:</span>
+<span class="n">DPRYattitude</span><span class="p">:</span>
+<span class="n">Kepler</span><span class="p">:</span>
+<span class="p">[</span><span class="n">END</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In the [START] section, just fill the Latitude, Longitude and altitude information.</p>
+<p>Copy/Paste the number of [SECTION] needed.</p>
+<p>In each section, put all the parameters you want to set from (section-1) to the section, if not given, default
+parameters will be set.
+Pay attention:</p>
+<blockquote>
+<div><ul class="simple">
+<li>fill LAT, LONG, ALT or Duration, Heading not both!</li>
+<li>fill LAT, LONG, ALT or ECEFpos not both</li>
+<li>fill ENUvel or ECEFvel or Speed or SpeedOverGround not four of them</li>
+<li>fill ENUaccel or ECEFaccel or Acceleration not three of them</li>
+<li>fill PRYattitue or DPRYattitude not both</li>
+</ul>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.rst.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/define_the_scenario.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, am, yd.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/define_the_scenario.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -8,7 +8,7 @@ Welcome to  GNSS_visualization_tools' documentation!
 
 
 Contents:
----------
+
 .. toctree::
    :maxdepth: 2
    :glob:
@@ -43,10 +43,7 @@ The project is licensed under the MIT license.
 Indices and tables
 ==================
 
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   define_the_scenario
-   Run_scenario
-
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
 

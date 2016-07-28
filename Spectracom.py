@@ -358,3 +358,4 @@ class Spectracom:
         almanach.append(inter)
         file.close()
         return almanach
+
