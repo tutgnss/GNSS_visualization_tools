@@ -15,13 +15,16 @@ import math
 
 class Ublox:
 
-    def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1):
+    def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1,
+                 rawdatafile='data/ublox_raw_data.txt', procdatafile='data/ublox_processed_data.txt'):
         self.com = com
         self.baud_rate = baud_rate
         self.data_bits = data_bits
         self.parity = parity
         self.stop_bit = stop_bit
         self.timeout = timeout
+        self.rawdatafile = rawdatafile
+        self.procdatafile = procdatafile
         try:
             self.device = serial.Serial(self.com, timeout=timeout, stopbits=stop_bit, write_timeout=None,
                                         bytesize=data_bits, rtscts=False, xonxoff=False, parity=parity,
@@ -30,6 +33,9 @@ class Ublox:
             raise ValueError('connexion with Ublox device failed')
 
     def find_message(self):
+        # look after a ack or nack message
+        # Return:
+        # Nak or ack received
         msgsent = time.time()
         wait = 1
         while time.time() < wait + msgsent:
@@ -40,7 +46,11 @@ class Ublox:
                 print('nak received')
 
     def reset(self, command):
-        # Permits to make a cold, warm or a hot start reset
+        # Permits to make a cold, warm or a hot start reset on the Ublox receiver
+        # Input:
+        # command: which reset you want to, valid commands: 'Cold RST', 'Warm RST', 'Hot RST'
+        # Raise:
+        # an error is raised if the command is not valid
         if command == 'Cold RST':
             reset = b'\xB5\x62\x06\x04\x04\x00\xFF\xA1\x02\x00\xB0\x47'
             self.device.write(reset)
@@ -60,8 +70,17 @@ class Ublox:
             raise ValueError('Unknown resetting command')
 
     def enable(self, command):
-        # set ephemerides, ionosphere, pseudo range and GGA messages available
-        # set all ubx, nmea messages enable
+        # Sets enable messages specified by the command argument
+        # Input:
+        # command: which message to set enable, valid commands are:
+        #               'EPH' to set ephemerides enable
+        #               'HUI' to set ionosphere enable
+        #               'RAW' to set pseudo range enable
+        #               'GGA' to set GGA messages enable
+        #               'UBX' to set all ubx messages enable
+        #               'NMEA' to set al nmea messages enable
+        # Raise:
+        # an error is raised if the command is not valid
         if command == 'EPH':
             eph_on = b'\xB5\x62\x06\x01\x03\x00\x0B\x31\x01\x47\xC3'
             self.device.write(eph_on)
@@ -188,6 +207,14 @@ class Ublox:
 
     def poll(self, command):
         # poll messages
+        # Input:
+        # command: which message to poll, valid commands are:
+        #               'EPH' to set ephemerides enable
+        #               'HUI' to set ionosphere enable
+        #               'RAW' to set pseudo range enable
+        #               'random' to set CFG-NAV5,NAV-DOP and RXM-SVSI available
+        # Raise:
+        # an error is raised if the command is not valid
         if command == 'EPH':
             eph_get = b'\xB5\x62\x0B\x31\x00\x00\x3C\xBF'
             self.device.write(eph_get)
@@ -212,6 +239,12 @@ class Ublox:
 
     def disable(self, command):
         # disable UBX or NMEA message
+        # Input:
+        # command: which message to disable, valid commands are:
+        #               'UBX' to set all UBX messages disable
+        #               'NMEA' to set all NMEA messages disable
+        # Raise:
+        # an error is raised if the command is not valid
         if command == 'UBX':  # Receive a Nac when test -- pb : UBX msg turn off by default
             disable = b'\xB5\x62\x06\x01\x03\x00\x0B\x30\x01\x45\xC0'\
                       b'\xB5\x62\x06\x01\x03\x00\x0B\x50\x00\x65\x00'\
@@ -318,9 +351,9 @@ class Ublox:
         else:
             raise ValueError('Unknown Disabling Command')
 
-    @staticmethod
-    def miseenforme():
-        data = open('data/ublox_raw_data.txt', 'r')
+    def miseenforme(self):
+        # UBX messages doesn't include \n at the end of each messages, this function explicitly put them
+        data = open(self.rawdatafile, 'r')
         thing = data.read()
         data.close()
 
@@ -328,18 +361,19 @@ class Ublox:
         second = first.replace('2447', '\n2447')
         third = second.replace('0d0a$G', '\n$G')
 
-        data = open('data/ublox_processed_data.txt', 'w')
+        data = open(self.procdatafile, 'w')
         data.write(third)
         data.close()
 
-    @staticmethod
-    def klobuchar_data():
-        # creates the matrix of ephemeris data decimal values
-        # kloa0 and klob0 in second
-        # kloa1 and klob1 in second/radian (semi circle*pi)
-        # kloa2 and klob2 in second/radian^2
-        # kloa3 and klob3 in second/radian^3
-        file = open('data/ublox_processed_data.txt', 'r')
+    def klobuchar_data(self):
+        # creates the matrix of ionospheric data decimal values
+        # Return:
+        # klobuchar: [[kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3]][...]]
+        # where: kloa0 and klob0 in second
+        #        kloa1 and klob1 in second/radian (semi circle*pi)
+        #        kloa2 and klob2 in second/radian^2
+        #        kloa3 and klob3 in second/radian^3
+        file = open(self.procdatafile, 'r')
         klobuchar = []
         for line in file:
             if line[0:12] == 'b5620b024800':
@@ -356,14 +390,17 @@ class Ublox:
         file.close()
         return klobuchar
 
-    @staticmethod
-    def ephemeris_data():
+    def ephemeris_data(self):
         # creates the matrix of ephemeris data with application of the scale factor decimal values
-        # toc and toe in seconds, af2 in sec/sec^2, af1 in sec/sec, af0 in sec,
-        # cuc cus cic and cis in radians, sqrta in meter^0,5
-        # omega0 omega m0 and i0 in radians (semi circles * pi),
-        # crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
-        file = open('data/ublox_processed_data.txt', 'r')
+        # Return:
+        # ephemeris: [[svid, wn, cap, ura, health, iodc, tgd, toc, af2, af1, af0, iodesf2,
+        #              crs, deltan, m0, cuc, e, cus, sqrta, toe, flag, aodo, cic, omega0,
+        #              cis, i0, crc, omega, omegadot, iodesf3, idot]
+        # where: toc and toe in seconds, af2 in sec/sec^2, af1 in sec/sec, af0 in sec,
+        #        cuc cus cic and cis in radians, sqrta in meter^0,5
+        #        omega0 omega m0 and i0 in radians (semi circles * pi),
+        #        crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
+        file = open(self.procdatafile, 'r')
         ephemeris = []
         for line in file:
             if line[0:12] == 'b5620b316800':
@@ -408,21 +445,21 @@ class Ublox:
         file.close()
         return ephemeris
 
-    @staticmethod
-    def raw_data():
+    def raw_data(self):
         # Stores the PRN data under this way :
-        # print(raw) == [['a', 'b', 'c', [[15, 1, 2, 3, 4, 5, 6], [16, 2, 3, 4, 5, 6, 7]]], ['a', 'b', 'c', ...
+        # Return:
+        # raw: [[rcvtow, week, numsv, [[cpmes, prmes, domes, sv, mesqi, cno, lli],[...]]][...]]
+        # rcvtow in ms, week in weeks, cpmes in cycles, prmes in m, domes in Hz, cno in dBHz
         # to access data of the first message :
         # print(raw[0]) == ['a', 'b', 'c', [[15, 1, 2, 3, 4, 5, 6], [16, 2, 3, 4, 5, 6, 7]]]
         # to access rcvtow : print(raw[0][1])
-        # to access the inter matrix : print(raw[0][3]
+        # to access the inter matrix : print(raw[0][3])
         # to access the cpmes of the first satellite : print(raw[0][3][0][0])
-        file = open('data/ublox_processed_data.txt', 'r')
+        file = open(self.procdatafile, 'r')
         raw = []
         for line in file:
             if line[0:8] == 'b5620210':
                 # RXM-RAW
-                # rcvtow in ms, week in weeks, cpmes in cycles, prmes in m, domes in Hz, cno in dBHz
                 inter = []
                 rcvtow = int(line[12:20], 16)
                 week = int(line[20:24], 16)
@@ -440,9 +477,14 @@ class Ublox:
         file.close()
         return raw
 
-    @staticmethod
-    def random_data():
-        file = open('data/ublox_processed_data.txt', 'r')
+    def random_data(self):
+        # Stores navigation data, DOP data and SVSI data into matrix
+        # Return:
+        # nav: [[dynmodel, fixmode, fixedalt, fixedaltvar, minelev, pdop, tdop,
+        #           pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh][...]]
+        # dop: [[itow, gdop, pdop, tdop, vdop, hdop, ndop, edop][...]]
+        # svsi: [[itow, week, numvis, numsv, inter][...]]
+        file = open(self.procdatafile, 'r')
         nav = []
         dop = []
         svsi = []
@@ -496,14 +538,17 @@ class Ublox:
         file.close()
         return nav, dop, svsi
 
-    @staticmethod
-    def nmea_data_gbs():
-        file = open('data/ublox_processed_data.txt', 'r')
+    def nmea_data_gbs(self):
+        # Stores NMEA GBS data into a matrix
+        # Return:
+        # satfaultdetection: [[tme, errlat, errlong, erralt, svid][...]]
+        # where: tme is time in seconds
+        #        errlat, errlong, erralt are expected error in LLA in meters
+        #        svid gives the sat ID of most likely failed sat
+        file = open(self.procdatafile, 'r')
         satfaultdetection = []
         for line in file:
             if line[3:6] == 'GBS':
-                    # errlat, errlong, erralt are expected error in LLA in meters
-                # svid gives the sat ID of most likely failed sat
                 data = line.split(',')
                 tme = data[1]
                 errlat = data[2]
@@ -514,9 +559,11 @@ class Ublox:
         file.close()
         return satfaultdetection
 
-    @staticmethod
-    def nmea_data_gsa():
-        file = open('data/ublox_processed_data.txt', 'r')
+    def nmea_data_gsa(self):
+        # Stores NMEA GSA data into a matrix
+        # Return:
+        # dopandactivesat: [[activesat, pdop, hdop, vdop][...]]
+        file = open(self.procdatafile, 'r')
         dopandactivesat = []
         for line in file:
             if line[3:6] == 'GSA':
@@ -529,15 +576,17 @@ class Ublox:
         file.close()
         return dopandactivesat
 
-    @staticmethod
-    def nmea_data_vtg():
-        file = open('data/ublox_processed_data.txt', 'r')
+    def nmea_data_vtg(self):
+        # Stores NMEA VTG data into a matrix
+        # Return:
+        # courseandspeed: [[cogt, spd, kph][...]]
+        # where: spd = speed over ground in knots
+        #        cogt = course over ground true in degrees
+        #        kph = speed over ground in kilometer per hour
+        file = open(self.procdatafile, 'r')
         courseandspeed = []
         for line in file:
             if line[3:6] == 'VTG':
-                # spd = speed over ground in knots
-                # cogt = course over ground true in degrees
-                # kph = speed over ground in kilometer per hour
                 data = line.split(',')
                 cogt = data[1]
                 spd = data[5]
@@ -546,15 +595,18 @@ class Ublox:
         file.close()
         return courseandspeed
 
-    @staticmethod
-    def nmea_data_pubx3():
-        file = open('data/ublox_processed_data.txt', 'r')
+    def nmea_data_pubx3(self):
+        # Stores NMEA PUBX 03 data into a matrix
+        # Return:
+        # satinview: [[nbsat, [[svid, svstatus, az, elev, cno][svid,...]]][...]]
+        # where: az = azimut in degrees
+        #        elev = elevation in degrees
+        #        cno in dBHz
+        file = open(self.procdatafile, 'r')
         satinview = []
         for line in file:
             if line[0:8] == '$PUBX,03':
-                # az = azimut in degrees
-                # elev = elevation in degrees
-                # cno in dBHz
+
                 data = line.split(',')
                 inter = []
                 nbsat = int(data[2])
@@ -569,7 +621,10 @@ class Ublox:
         file.close()
         return satinview
 
-    def read_data(self, file):
+    def store_data(self, file):
+        # Store into a file data comming from the receiver and make data processing if data are UBX message
+        # Input:
+        # file: open file where data will be written
         info = self.device.readline()
         if info[0:2] != b'$P' and info[0:2] != b'$G':
             file.write(binascii.hexlify(info))

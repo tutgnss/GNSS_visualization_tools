@@ -25,9 +25,9 @@ class AcquireData(Thread):
             spectracomcnx.scenario_reading(scenario)
         if self.nb == 2:
             begin = time.time()
-            ubloxfile = open('data/ublox_raw_data.txt', 'wb')
+            ubloxfile = open(ubloxcnx.rawdatafile, 'wb')
             while (time.time() < 300 + begin) or (thread_1.is_alive() is True):
-                ubloxcnx.read_data(ubloxfile)
+                ubloxcnx.store_data(ubloxfile)
             ubloxfile.close()
         if self.nb == 3:
             while thread_1.is_alive() is True:
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     spectracomcnx = Spectracom('USB0::0x14EB::0x0060::200448::INSTR')
 
     # Read scenario
-    scenario = tools.read_scen('test/test_6.ini')
+    scenario = tools.read_scen('test/test_2.ini')
 
     # Launch spectracom
     spectracomcnx.control(control='start')
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     thread_1.join()
 
     spectracomcnx.control(control='stop')
-    Ublox.miseenforme()
+    ubloxcnx.miseenforme()
 
     # computation of the root mean square error
     data_processing.computation()
