@@ -8,9 +8,9 @@
 # Anne-Marie Tobie
 
 from Spectracom import Spectracom
-import config_parser
 import data_processing
 import time
+import tools
 from threading import Thread
 from ublox import Ublox
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     spectracomcnx = Spectracom('USB0::0x14EB::0x0060::200448::INSTR')
 
     # Read scenario
-    scenario = config_parser.read_scen('test/test_6.ini')
+    scenario = tools.read_scen('test/test_6.ini')
 
     # Launch spectracom
     spectracomcnx.control(control='start')

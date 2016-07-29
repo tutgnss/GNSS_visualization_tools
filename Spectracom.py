@@ -11,7 +11,7 @@ import pyvisa
 import time
 import interval
 import tools
-import config_parser
+
 
 class Spectracom:
 
@@ -23,72 +23,102 @@ class Spectracom:
             raise ValueError('Connection with spectracom device failed')
 
     def clear(self):
-        # clears the status data structures by clearing all event registers and the error queue
+        # Clears the status data structures by clearing all event registers and the error queue
         # also possible executing of scenario or signal generator is stopped
         return self.spectracom.write('*CLS')
 
     def reset(self):
-        # Reset the device, any ongoing activity is stopped and the device is prepared to start new
+        # Resets the device, any ongoing activity is stopped and the device is prepared to start new
         # operations
         return self.spectracom.write('*RST')
 
     def set_datetime(self, date, hour):
-        # Set the scenario start time as GPS time
+        # Sets the scenario start time as GPS time
+        # Inputs: string format:
+        # date: MM-DD-YYYY,  MM=Month {01- 12}, DD=day of month {01- 31}, YYYY=year
+        # hour: hh:mm:ss.s, hh=hours {00- 23}, mm=minutes {00-59}
         return self.spectracom.write('SOURce:SCENario:DATEtime %s %s' % (date, hour))
 
     def control(self, control):
-        # Launch or stop the scenario
+        # Launches, holds, arms or stops the scenario
+        # Inputs:
+        # control: {START,STOP,HOLD,ARM}
         return self.spectracom.write('SOURce:SCENario:CONTrol %s' % control)
 
     def set_power(self, power):
         # sets the transmit power of the device. The power for ublox integrity must be less (or
         # equal) than-130 dBm!!
+        # Input:
+        # power: decimal [-160,-65] dBm
         return self.spectracom.write('SOURce:POWer %f' % power)
 
     def set_observation(self):
         self.spectracom.write('SOURce:SCENario:OBS 10,3800, 1')
 
     def set_ext_attenuation(self, extatt):
-        # Set the external attenuation of the device. Note : Setting not stored during
-        # scenario or 1-channel mode execution. Parameter : decimal = [0, 30] in dB
+        # Sets the external attenuation of the device. Note : Setting not stored during
+        # scenario or 1-channel mode execution.
+        # Input:
+        # extatt: decimal = [0, 30] in dB
         return self.spectracom.write('SOURce:EXTATT %f' % extatt)
 
     def set_position(self, lat, long, alt):
-        # set the position to the generator
+        # Sets the position to the generator
+        # Input:
+        # lat: Decimal Latitude [-89.99999999, +89.99999999] degrees North
+        # long: Decimal Longitude [-360.00000000, +360.00000000] degrees East
+        # alt: Decimal Altitude [-1000.00, +20,200,000.00] meters
         return self.spectracom.write('SOURce:SCENario:POSition IMM, %f, %f, %f' % (lat, long, alt))
 
     def set_ecefpos(self, x, y, z):
         # Sets the ECEF position in X, Y, Z coordinates as the start position for the loaded scenario
-        # or the current position if the scenario is Running. The X, Y, Z position is given in decimal meters
+        # or the current position if the scenario is Running.
+        # Inputs:
+        # x: Decimal X Position [-26 500 000.00, +26 500 000.00] meters
+        # y: Decimal Y Position [-26 500 000.00, +26 500 000.00] meters
+        # z: Decimal Z Position [-26 500 000.00, +26 500 000.00] meters
         return self.spectracom.write('SOURce:SCENario:ECEFPOSition IMM, %f, %f, %f' % x, y, z)
 
     def set_duration(self, start, duration, inter):
-        # Turn on scenario observations. Start is the number of seconds from scenario start.
-        # Duration is length of observations from start. Interval is the interval between the individual
-        # observations in the resulting Rinex OBS file
-        return self.spectracom.write('SOURce:SCENario:OBS %f, %f, %f' % (start, tools.Tools.get_sec(duration), inter))
+        # Turn on scenario observations.
+        # Inputs:
+        # start: Decimal start [-1,nnn] seconds. If ‘-1’ is used the logging will start immediately when a command is
+        #        received number of seconds from scenario start.
+        # duration: length of observations from start.
+        # interval: the interval between the individual observations in the resulting Rinex OBS file
+        return self.spectracom.write('SOURce:SCENario:OBS %f, %f, %f' % (start, tools.get_sec(duration), inter))
 
     def set_heading(self, heading):
-        # sets the vehicle true heading. the heading is expressed in clockwise direction
-        # from the true north representing 0 degrees, increasing to 359.999 degrees
+        # Sets the vehicle true heading.
+        # Input:
+        # heading: Decimal Heading [0, 359.999] true heading in decimal degrees the heading is expressed
+        #          in clockwise direction from the true north representing 0 degrees, increasing to 359.999 degrees
         return self.spectracom.write('SOURce:SCENario:HEADing imm, %f' % heading)
 
     def set_speed(self, speed):
-        # sets the vehicle's speed over ground (WGS84 ellipsoid)
-        # decimal 1D speed [0.00 to +20000.00] m/s
+        # Sets the vehicle's speed over ground (WGS84 ellipsoid)
+        # Input:
+        # speed: decimal 1D speed [0.00 to +20000.00] m/s
         return self.spectracom.write('SOURce:SCENario:SPEed imm, %f' % speed)
 
     def set_acceleration(self, acceleration):
-        # Sets the 1D acceleration expressed in m/s2 when scenario is running. Parameter: decimal 1d
-        # acceleration [-981 to +981] m/s2, ie [-100G to +100g]
+        # Sets the 1D acceleration expressed in m/s2 when scenario is running.
+        # Input:
+        # acceleration: decimal 1d acceleration [-981 to +981] m/s2, ie [-100G to +100g]
         return self.spectracom.write('SOURce:SCENario:ACCeleration IMM, %f' % acceleration)
 
     def set_rateheadind(self, rateheading):
-        # Set th heading change rate. Rate is expressed as degrees per second.
+        # Set the heading change rate.
+        # Input:
+        # rateheading: Decimal RateHeading [-180.000, 180.000] true heading change in decimal degrees per second
+        #              Positive value correspond to right turn, negative – left turn.
         return self.spectracom.write('SOURce:SCENario:RATEHEading IMM, %f' % rateheading)
 
     def set_turnrate(self, turnrate):
-        # Set the rate of turning. Rate is expressed as degrees per second.
+        # Set the rate of turning.
+        # Input:
+        # turnrate: Decimal TurnRate [- 180.000, 180.000] desired average heading rate (over single full closed circle)
+        #           in decimal degrees per second. Positive value correspond to right turn, negative – left turn.
         return self.spectracom.write('SOURce:SCENario:TURNRATE IMM, %f' % turnrate)
 
     def set_turnradius(self, turnradius):
