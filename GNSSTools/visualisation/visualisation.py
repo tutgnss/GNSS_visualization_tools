@@ -1,22 +1,11 @@
-import pylab
-from spyderlib.widgets import ipython
-
 __author__ = 'defrance'
 
 # Import
 
-from matplotlib import pyplot as plt
-import matplotlib.cbook as cbook
-from matplotlib import animation
-from pylab import *
-import time
-import numpy as np
-from scipy.misc import imread
-import test
-import tools
 from tkinter import *
-import simplekml
-import pandas
+
+from pylab import *
+
 
 
 

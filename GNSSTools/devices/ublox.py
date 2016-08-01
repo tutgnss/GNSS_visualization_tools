@@ -16,7 +16,7 @@ import math
 class Ublox:
 
     def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1,
-                 rawdatafile='data/ublox_raw_data.txt', procdatafile='data/ublox_processed_data.txt'):
+                 rawdatafile='datatxt/ublox_raw_data.txt', procdatafile='datatxt/ublox_processed_data.txt'):
         self.com = com
         self.baud_rate = baud_rate
         self.data_bits = data_bits

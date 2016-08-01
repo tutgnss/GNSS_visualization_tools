@@ -7,12 +7,12 @@
 # AUTHOR
 # Anne-Marie Tobie
 
-from Spectracom import Spectracom
-import data_processing
 import time
-import tools
 from threading import Thread
-from ublox import Ublox
+
+from GNSSTools.devices import Spectracom
+from GNSSTools import tools
+from GNSSTools.devices.ublox import Ublox
 
 
 class AcquireData(Thread):
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     spectracomcnx = Spectracom('USB0::0x14EB::0x0060::200448::INSTR')
 
     # Read scenario
-    scenario = tools.read_scen('test/test_2.ini')
+    scenario = tools.read_scen('data/test_2.ini')
 
     # Launch spectracom
     spectracomcnx.control(control='start')
@@ -78,4 +78,4 @@ if __name__ == "__main__":
     ubloxcnx.miseenforme()
 
     # computation of the root mean square error
-    data_processing.computation()
+    tools.computation()

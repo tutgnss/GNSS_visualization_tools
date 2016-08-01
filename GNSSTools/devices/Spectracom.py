@@ -7,15 +7,17 @@
 # AUTHOR
 # Anne-Marie Tobie
 
-import pyvisa
 import time
+
+import pyvisa
 import interval
-import tools
+
+from GNSSTools import tools
 
 
 class Spectracom:
 
-    def __init__(self, com, datafile='data/spectracom_data.nmea', currentposfile='current_pos.txt', almanach='almanach.txt'):
+    def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='current_pos.txt', almanach='almanach.txt'):
         self.com = com
         self.datafile = datafile
         self.currentposfile = currentposfile
