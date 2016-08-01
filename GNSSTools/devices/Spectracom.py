@@ -8,16 +8,16 @@
 # Anne-Marie Tobie
 
 import time
-
 import pyvisa
 import interval
-
 from GNSSTools import tools
+from GNSSTools.devices.device import Device
 
 
-class Spectracom:
+class Spectracom(Device):
 
     def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='current_pos.txt', almanach='almanach.txt'):
+        super(Spectracom, self).__init__()
         self.com = com
         self.datafile = datafile
         self.currentposfile = currentposfile
@@ -318,7 +318,7 @@ class Spectracom:
             self.set_multipath(scenario[section][17])
         if scenario[section][18] != '':
             info = scenario[section][18].split(',')
-            self.set_velocity(float(info[0]),float(info[1]))
+            self.set_velocity(float(info[0]), float(info[1]))
         if scenario[section][19] != '':
             self.set_verticalspeed(scenario[section][19])
         if scenario[section][20] != '':
@@ -373,7 +373,6 @@ class Spectracom:
         if scenario[section][15] == '':
             self.set_keepalt('OFF')
         if scenario[section][18] != '':
-            info = scenario[section][18].split(',')
             self.set_velocity(0.0, 0)
         if scenario[section][19] != '':
             self.set_verticalspeed(0.0)
@@ -391,8 +390,6 @@ class Spectracom:
             self.set_pryattitude(0, 0, 0)
         if scenario[section][26] != '':
             self.set_dpryatt(0, 0, 0)
-
-
 
     def scenario_reading(self, scenario):
         # Run the scenario chosen, set parameters and save data in a file
@@ -509,11 +506,10 @@ class Spectracom:
                 almanach.append(inter)
                 inter = []
             else:
-                b=0
+                b = 0
                 while line[27 + b] != '\n':
-                    b+=1
+                    b += 1
                 inter.append(line[27:(27 + b)])
         almanach.append(inter)
         file.close()
         return almanach
-

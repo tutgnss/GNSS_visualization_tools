@@ -11,12 +11,14 @@ import serial
 import time
 import binascii
 import math
+from GNSSTools.devices.device import Device
 
 
-class Ublox:
+class Ublox(Device):
 
     def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1,
                  rawdatafile='datatxt/ublox_raw_data.txt', procdatafile='datatxt/ublox_processed_data.txt'):
+        super(Ublox, self).__init__()
         self.com = com
         self.baud_rate = baud_rate
         self.data_bits = data_bits

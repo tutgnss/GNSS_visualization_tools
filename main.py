@@ -10,9 +10,9 @@
 import time
 from threading import Thread
 
-from GNSSTools.devices import Spectracom
+from GNSSTools import Spectracom
 from GNSSTools import tools
-from GNSSTools.devices.ublox import Ublox
+from GNSSTools import Ublox
 
 
 class AcquireData(Thread):
