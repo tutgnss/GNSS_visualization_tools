@@ -1,3 +1,12 @@
+# Tampere University of Technology
+#
+# DESCRIPTION
+# Using folium, defines a function that can create a map and plot the estimated trajectory of the receiver
+# and the true trajectory given by the generator
+#
+# AUTHOR
+# Yannick DEFRANCE
+
 # This Python file uses the following encoding: utf-8
 
 import folium
@@ -16,7 +25,7 @@ def create_map(P,Q):
     for i in range(len(P)):
         a.append([P[i][1],P[i][2]])
 
-    for i in range(len(P)):
+    for i in range(len(Q)):
         b.append([Q[i][1],Q[i][2]])
 
 # Ploting of the trajectory
