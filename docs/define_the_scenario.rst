@@ -39,12 +39,11 @@ Create your scenario
 
 You can also create your own scenario, let's explain that with an example.
 
+Let's imagine you want to go from the point A to C passing by B.
+
 .. image:: images/scenario.png
    :height: 300px
    :width: 400 px
-   :align: right
-
-Let's imagine you want to go from the point A to C passing by B.
 
     - 1st step:
 Create a new .ini file and use this template::
@@ -159,15 +158,14 @@ For each section, you can now fill all parameters you need but pay attention:
 
 For our example:
 
+We know latitude, longitude and altitude of point A and B, and we want to put this 4 parameters
+(acceleration, antenna model, ionosperic model and tropospheric model).
+
 .. image:: images/scenarioAtoB.png
    :height: 300px
    :width: 400 px
-   :alt: alternate text
-   :align: right
 
-We know latitude, longitude and altitude of point A and B, and we want to put this 4 parameters
-(acceleration, antenna model, ionosperic model and tropospheric model), then our [SECTION1] will
-look like::
+Then our [SECTION1] will look like::
 
         [SECTION1]
         LAT: latitude of B in decimal degrees
@@ -200,15 +198,17 @@ look like::
         Kepler:
 
 
+Now, to reach C from B, we have to head South West for a minute. During this seond section,
+we want to set 4 other parameters (speed, propagation model, antenna model and tropospheric
+model).
+
 .. image:: images/scenarioBtoC.png
    :height: 300px
    :width: 400 px
    :alt: alternate text
    :align: right
 
-Now, to reach C from B, we have to head South West for a minute. During this seond section,
-we want to set 4 other parameters (speed, propagation model, antenna model and tropospheric
-model), then our [SECTION2] will look like::
+Then our [SECTION2] will look like::
 
         [SECTION2]
         LAT:
