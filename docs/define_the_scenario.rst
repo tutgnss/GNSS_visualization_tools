@@ -40,9 +40,8 @@ Create your scenario
 You can also create your own scenario, let's explain that with an example.
 
 .. image:: images/scenario.png
-   :height: 200px
-   :width: 300 px
-   :alt: alternate text
+   :height: 300px
+   :width: 400 px
    :align: right
 
 Let's imagine you want to go from the point A to C passing by B.
@@ -161,8 +160,8 @@ For each section, you can now fill all parameters you need but pay attention:
 For our example:
 
 .. image:: images/scenarioAtoB.png
-   :height: 200px
-   :width: 300 px
+   :height: 300px
+   :width: 400 px
    :alt: alternate text
    :align: right
 
@@ -202,8 +201,8 @@ look like::
 
 
 .. image:: images/scenarioBtoC.png
-   :height: 200px
-   :width: 300 px
+   :height: 300px
+   :width: 400 px
    :alt: alternate text
    :align: right
 
