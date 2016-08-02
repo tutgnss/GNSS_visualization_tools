@@ -42,10 +42,10 @@ You can also create your own scenario, let's explain that with an example.
 Let's imagine you want to go from the point A to C passing by B.
 
 .. image:: images/scenario.png
-   :height: 300px
-   :width: 400 px
+   :height: 500px
+   :width: 600 px
 
-    - 1st step:
+- 1st step:
 Create a new .ini file and use this template::
 
         [START]
@@ -163,9 +163,8 @@ We know latitude, longitude and altitude of point A and B, and we want to put th
 (acceleration, antenna model, ionosperic model and tropospheric model).
 
 .. image:: images/scenarioAtoB.png
-   :height: 300px
-   :width: 400 px
-   
+   :height: 500px
+   :width: 600 px
 
 Then our [SECTION1] will look like::
 
@@ -205,8 +204,8 @@ we want to set 4 other parameters (speed, propagation model, antenna model and t
 model).
 
 .. image:: images/scenarioBtoC.png
-   :height: 300px
-   :width: 400 px
+   :height: 500px
+   :width: 600 px
 
 Then our [SECTION2] will look like::
 
