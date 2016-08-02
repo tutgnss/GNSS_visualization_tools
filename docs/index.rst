@@ -26,7 +26,7 @@ Table of contents
    :glob:
    :caption: Define your scenario
 
-    define_the_scenario
+   define_the_scenario
 
 .. _Run_scen:
 
@@ -35,7 +35,7 @@ Table of contents
    :glob:
    :caption: Run your scenario
 
-    Run_scenario
+   Run_scenario
 
 Features
 --------
