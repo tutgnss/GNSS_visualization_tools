@@ -46,7 +46,13 @@ class Device:
         # Read data collected and store into matrix RMC data
         # Return:
         # rmc: [[time, lat, NS, long, EW, speed_over_ground, course_over_ground][...]]
-        # where:
+        # where: time - hhmmss.ss - UTC time
+        #        lat - ddmm.mmmmm - Latitude (degrees & minutes)
+        #        NS - character - North/South indicator
+        #        long - dddmm.mmmmm - Longitude (degrees & minutes)
+        #        EW - character - East/West indicator
+        #        speed_ovr_ground - knots - numeric - Speed over ground
+        #        course_over_ground - degrees - numeric - Course over ground
         file = open(self.datafile, 'r')
         rmc = []
         for line in file:
@@ -64,15 +70,25 @@ class Device:
         return rmc
 
     def nmea_gsv_store(self):
+        # Read data collected and store into matrix GSV data
+        # Return:
+        # rmc: [[[sv, elev, az, cno][sv, elev, az, cno][sv, elev, az, cno](...][...]]
+        # where: sv - numeric - Satellite ID
+        #        elv - deg - numeric - Elevation (range 0-90)
+        #        az - deg - numeric - Azimuth, (range 0-359)
+        #        cno - dBHz - numeric - Signal strength (C/N0, range 0-99), blank when not tracking
         file = open('datatxt/ublox_processed_data.txt', 'r')
-        rmc = []
+        gsv = []
 
         def collect(nsat):
             for i in range(nsat):
                 sv = data[4 + 4*i]
                 elev = data[5 + 4*i]
                 az = data[6 + 4*i]
-                cno = data[7 + 4*i]
+                if data[7 + 4*i][0:1] != '*':
+                    cno = data[7 + 4*i][0:2]
+                else:
+                    cno = ''
                 satif = [sv, elev, az, cno]
                 first.append(satif)
             return first
@@ -88,10 +104,10 @@ class Device:
                     first = []
                     collect(nsat)
                     if data[2] == data[1]:
-                        rmc.append(first)
+                        gsv.append(first)
                 elif data[2] != data[1]:
                     collect(nsat)
                 else:
                     collect(nsat)
-                    rmc.append(first)
-        return rmc
+                    gsv.append(first)
+        return gsv
