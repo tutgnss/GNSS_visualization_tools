@@ -43,7 +43,7 @@ if __name__ == "__main__":
     spectracomcnx = Spectracom('USB0::0x14EB::0x0060::200448::INSTR')
 
     # Read scenario
-    scenario = tools.read_scen('data/test_2.ini')
+    scenario = tools.read_scen('data/scenariotest/test_2.ini')
 
     # Launch spectracom
     spectracomcnx.control(control='start')

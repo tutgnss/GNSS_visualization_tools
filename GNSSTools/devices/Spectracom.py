@@ -17,7 +17,7 @@ from GNSSTools.devices.device import Device
 class Spectracom(Device):
 
     def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='current_pos.txt', almanach='almanach.txt'):
-        super(Spectracom, self).__init__()
+        super(Spectracom, self).__init__(datafile)
         self.com = com
         self.datafile = datafile
         self.currentposfile = currentposfile

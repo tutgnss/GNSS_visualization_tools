@@ -1,7 +1,7 @@
 # Tampere University of Technology
 #
 # DESCRIPTION
-#
+# Parent class
 #
 # AUTHOR
 # Anne-Marie Tobie
