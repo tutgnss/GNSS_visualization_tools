@@ -37,9 +37,17 @@ reliability when passing from a free space to a urban space.
 Create your scenario
 --------------------
 
-If you want to create your own scenario, follow the following step:
+You can also create your own scenario, let's explain that with an example.
 
-- 1st step:
+.. image:: images/scenario.png
+   :height: 200px
+   :width: 300 px
+   :alt: alternate text
+   :align: right
+
+Let's imagine you want to go from the point A to C passing by B.
+
+    - 1st step:
 Create a new .ini file and use this template::
 
         [START]
@@ -103,25 +111,133 @@ Create a new .ini file and use this template::
         Kepler:
         [END]
 
-.. note:: In the [START] section, just fill the Latitude, Longitude and altitude information of your
-departure position.
+.. note:: In the [START] section, just fill the Latitude, Longitude and Altitude information of your
+departure position. In our case the [START] section will look like::
+
+        [START]
+        LAT: latitude of A in decimal degrees
+        LONG: longitude of A in decimal degrees
+        ALT: altitude of A in meters
+        Duration:
+        Heading:
+        Speed:
+        Acceleration:
+        Rateheading:
+        Turnrate:
+        Turnradius:
+        Cn0:
+        Propagation:
+        Antenna:
+        Tropo:
+        Iono:
+        keepalt:
+        ECEFpos:
+        Multipath:
+        SpeedOverGround:
+        Verticalspeed:
+        Enuvel:
+        Ecefvel:
+        VerticalAcceleration:
+        ENUAccel:
+        ECEFAccel:
+        PRYattitude:
+        DPRYattitude:
+        Kepler:
 
 - 2nd step:
-Copy/Paste the number of [SECTION] needed.
 
-.. image:: images/scenario.png
-   :height: 100px
-   :width: 200 px
+Copy/Paste the number of [SECTION] needed. In our example, there is two sections:
+        -- Section 1 between A and B
+        -- Section 2 between B and C
+
+For each section, you can now fill all parameters you need but pay attention:
+
+        - Either fill a position information or a duration and a heading, not both
+        - fill LAT, LONG, ALT or ECEFpos not both
+        - fill ENUvel or ECEFvel or Speed or SpeedOverGround not four of them
+        - fill ENUaccel or ECEFaccel or Acceleration not three of them
+        - fill PRYattitude or DPRYattitude not both
+
+For our example:
+
+.. image:: images/scenarioAtoB.png
+   :height: 200px
+   :width: 300 px
    :alt: alternate text
    :align: right
 
-In each section, put all the parameters you want to set from (section-1) to the section, if not given, default
-parameters will be set.
-Pay attention:
+We know latitude, longitude and altitude of point A and B, and we want to put this 4 parameters
+(acceleration, antenna model, ionosperic model and tropospheric model), then our [SECTION1] will
+look like::
 
-    - fill LAT, LONG, ALT or Duration, Heading not both!
-    - fill LAT, LONG, ALT or ECEFpos not both
-    - fill ENUvel or ECEFvel or Speed or SpeedOverGround not four of them
-    - fill ENUaccel or ECEFaccel or Acceleration not three of them
-    - fill PRYattitue or DPRYattitude not both
+        [SECTION1]
+        LAT: latitude of B in decimal degrees
+        LONG: longitude of B in decimal degrees
+        ALT: altitude of B in meters
+        Duration:
+        Heading:
+        Speed:
+        Acceleration: 5.0
+        Rateheading:
+        Turnrate:
+        Turnradius:
+        Cn0:
+        Propagation:
+        Antenna: Patch
+        Tropo: Saastamoinen
+        Iono: ON
+        keepalt:
+        ECEFpos:
+        Multipath:
+        SpeedOverGround:
+        Verticalspeed:
+        Enuvel:
+        Ecefvel:
+        VerticalAcceleration:
+        ENUAccel:
+        ECEFAccel:
+        PRYattitude:
+        DPRYattitude:
+        Kepler:
+
+
+.. image:: images/scenarioBtoC.png
+   :height: 200px
+   :width: 300 px
+   :alt: alternate text
+   :align: right
+
+Now, to reach C from B, we have to head South West for a minute. During this seond section,
+we want to set 4 other parameters (speed, propagation model, antenna model and tropospheric
+model), then our [SECTION2] will look like::
+
+        [SECTION2]
+        LAT:
+        LONG:
+        ALT:
+        Duration: 00:00:01:00
+        Heading: 220
+        Speed: 10.0
+        Acceleration:
+        Rateheading:
+        Turnrate:
+        Turnradius:
+        Cn0:
+        Propagation: URBAN,25.0,10.0,0.5
+        Antenna: Zero model
+        Tropo: black
+        Iono:
+        keepalt:
+        ECEFpos:
+        Multipath:
+        SpeedOverGround:
+        Verticalspeed:
+        Enuvel:
+        Ecefvel:
+        VerticalAcceleration:
+        ENUAccel:
+        ECEFAccel:
+        PRYattitude:
+        DPRYattitude:
+        Kepler:
 
