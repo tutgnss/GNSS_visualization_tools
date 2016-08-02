@@ -2,7 +2,7 @@
 Define the scenario
 ===================
 
-There is already some scenario define in ''data/scenariotest'' but you can also define your own
+There is already some scenario define in ``data/scenariotest`` but you can also define your own
 scenario
 
 Scenarios already define
@@ -11,27 +11,27 @@ Scenarios already define
 6 scenarios have been defined for you to test your devices:
 
 **- test_1:**
-This is the ''static case'', for a minute, data are taken from your simulator and/or your
+This is the `static case`, for a minute, data are taken from your simulator and/or your
 receiver(s).
 
 **- test_2:**
-This is the ''temporal square test'', the simulator run a path representing a square at constant speed
+This is the `temporal square test`, the simulator run a path representing a square at constant speed
 , each section last a minute. It basically test if the receiver(s) is well responding to a brutal
 change of direction.
 
 **- test_3:**
-This is the ''temporal circle test'', the simulator run a path representing a circle at constant
+This is the `temporal circle test`, the simulator run a path representing a circle at constant
 speed, during 2 minutes.
 
 **- test_4:**
-This is the test of ''constant acceleration'' in straight line.
+This is the test of `constant acceleration` in straight line.
 
 **- test_5:**
-This is the ''sensitivity test'', staying static, the C/N0 is increased. The goal is to see until
+This is the `sensitivity test`, staying static, the C/N0 is increased. The goal is to see until
 which C/N0 it is still possible to receive something
 
 **- test_6:**
-This is the 'Free to Urban space test'. The goal is to test if the receiver can keep its
+This is the `Free to Urban space test`. The goal is to test if the receiver can keep its
 reliability when passing from a free space to a urban space.
 
 Create your scenario
@@ -148,8 +148,8 @@ In our case the [START] section will look like::
 
 Copy/Paste the number of [SECTION] needed. In our example, there is two sections:
 
-    - Section 1 between A and B
-    - Section 2 between B and C
+    ^ Section 1 between A and B
+    ^ Section 2 between B and C
 
 For each section, you can now fill all parameters you need but pay attention:
 
