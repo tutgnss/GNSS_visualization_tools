@@ -205,8 +205,6 @@ model).
 .. image:: images/scenarioBtoC.png
    :height: 300px
    :width: 400 px
-   :alt: alternate text
-   :align: right
 
 Then our [SECTION2] will look like::
 
