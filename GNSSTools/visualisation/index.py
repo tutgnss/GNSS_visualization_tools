@@ -1,7 +1,14 @@
-__author__ = 'defrance'
+# Tampere University of Technology
+#
+# DESCRIPTION
+# Defines the html script of the web page
+#
+# AUTHOR
+# Yannick DEFRANCE
 
 #!/usr/bin/python3
 # -*- coding: utf-8 -*
+
 
 import cgi
 import project2.create_map

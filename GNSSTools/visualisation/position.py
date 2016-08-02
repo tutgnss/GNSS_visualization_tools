@@ -21,9 +21,6 @@ import pandas
 from project2.tools import Tools
 
 
-filename = 'project2/ublox_data_Circle.txt'
-
-
 def position(filename):
     # Extract latitude, longitude, altitude and time from NMEA file and return gpgga
     # gpgga = [time in HHMMSS.DD, LAT in DMS, LONG in DMS, ALT in m]
