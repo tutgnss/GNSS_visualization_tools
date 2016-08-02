@@ -11,13 +11,14 @@
 
 import http.server
 
-PORT = 8888
-server_address = ("", PORT)
+if __name__ == __main__ :
+    PORT = 8888
+    server_address = ("", PORT)
 
-server = http.server.HTTPServer
-handler = http.server.CGIHTTPRequestHandler
-handler.cgi_directories = ["/"]
-print(("Serving files at port :", PORT))
+    server = http.server.HTTPServer
+    handler = http.server.CGIHTTPRequestHandler
+    handler.cgi_directories = ["/"]
+    print(("Serving files at port :", PORT))
 
-httpd = server(server_address, handler)
-httpd.serve_forever()
+    httpd = server(server_address, handler)
+    httpd.serve_forever()
