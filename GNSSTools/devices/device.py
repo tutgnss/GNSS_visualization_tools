@@ -64,4 +64,34 @@ class Device:
         return rmc
 
     def nmea_gsv_store(self):
-        pass
+        file = open('datatxt/ublox_processed_data.txt', 'r')
+        rmc = []
+
+        def collect(nsat):
+            for i in range(nsat):
+                sv = data[4 + 4*i]
+                elev = data[5 + 4*i]
+                az = data[6 + 4*i]
+                cno = data[7 + 4*i]
+                satif = [sv, elev, az, cno]
+                first.append(satif)
+            return first
+
+        for line in file:
+            if line[3:6] == 'GSV' and len(line)>17:
+                data = line.split(',')
+                if (int(data[1]) > 1) and (data[1] != data[2]):
+                    nsat = 4
+                else:
+                    nsat = int(data[3])%4
+                if data[2] == '1':
+                    first = []
+                    collect(nsat)
+                    if data[2] == data[1]:
+                        rmc.append(first)
+                elif data[2] != data[1]:
+                    collect(nsat)
+                else:
+                    collect(nsat)
+                    rmc.append(first)
+        return rmc
