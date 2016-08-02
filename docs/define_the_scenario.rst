@@ -109,8 +109,9 @@ Create a new .ini file and use this template::
         Kepler:
         [END]
 
-.. note:: In the [START] section, just fill the Latitude, Longitude and Altitude information of your
-departure position. In our case the [START] section will look like::
+.. note:: In the [START] section, just fill the Latitude, Longitude and Altitude information of your departure position.
+
+In our case the [START] section will look like::
 
         [START]
         LAT: latitude of A in decimal degrees
@@ -145,8 +146,8 @@ departure position. In our case the [START] section will look like::
 - 2nd step:
 
 Copy/Paste the number of [SECTION] needed. In our example, there is two sections:
-        -- Section 1 between A and B
-        -- Section 2 between B and C
+        - Section 1 between A and B
+        - Section 2 between B and C
 
 For each section, you can now fill all parameters you need but pay attention:
 
@@ -164,6 +165,7 @@ We know latitude, longitude and altitude of point A and B, and we want to put th
 .. image:: images/scenarioAtoB.png
    :height: 300px
    :width: 400 px
+   
 
 Then our [SECTION1] will look like::
 
