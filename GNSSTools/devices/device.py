@@ -7,11 +7,12 @@
 # Anne-Marie Tobie
 
 import GNSSTools.tools as tools
+import urllib.request
 
 
 class Device:
 
-    def __init__(self, datafile='datatxt/spectracom_data.nmea'):
+    def __init__(self, datafile):
         self.datafile = datafile
 
     def open(self):
@@ -20,12 +21,22 @@ class Device:
     def close(self):
         pass
 
+    def fileopen(self):
+        try:
+            f = urllib.request.urlopen(self.datafile)
+        except:
+            try:
+                f = open(self.datafile, 'r')
+            except ValueError:
+                print("Can't open this")
+        return f
+
     def nmea_gga_store(self):
         # Read file and take only the information GGA (global positioning system fix data) data
         # Return:
         # gga: list of GGA data parsing this way:
         #      gga = [[time in HHMMSS.DD, LAT in DD, LONG in DD, ALT in m][...]]
-        read = open(self.datafile, 'r')
+        read = self.fileopen()
         gga = []
         a = 1
         b = 1
@@ -53,7 +64,7 @@ class Device:
         #        EW - character - East/West indicator
         #        speed_ovr_ground - knots - numeric - Speed over ground
         #        course_over_ground - degrees - numeric - Course over ground
-        file = open(self.datafile, 'r')
+        file = self.fileopen()
         rmc = []
         for line in file:
             if line[3:6] == 'GBS':
@@ -77,7 +88,7 @@ class Device:
         #        elv - deg - numeric - Elevation (range 0-90)
         #        az - deg - numeric - Azimuth, (range 0-359)
         #        cno - dBHz - numeric - Signal strength (C/N0, range 0-99), blank when not tracking
-        file = open('datatxt/ublox_processed_data.txt', 'r')
+        file = self.fileopen()
         gsv = []
 
         def collect(nsat):
@@ -110,4 +121,5 @@ class Device:
                 else:
                     collect(nsat)
                     gsv.append(first)
+        file.close()
         return gsv

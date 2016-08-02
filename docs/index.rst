@@ -6,12 +6,20 @@
 Welcome to  GNSS_visualization_tools' documentation!
 ====================================================
 
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   define_the_scenario
+   Run_scenario
 
 Contents:
 ---------
 .. toctree::
    :maxdepth: 2
    :glob:
+
+   define_the_scenario
+   Run_scenario
 
 The aim of the project is to create your own scenario that you want to launch on a Multi-GNSS Simulator 
 Spectracom, to run this scenario and to visualize a range of data coming from both the Spectracom and 
@@ -43,10 +51,6 @@ The project is licensed under the MIT license.
 Indices and tables
 ==================
 
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   define_the_scenario
-   Run_scenario
+
 
 
