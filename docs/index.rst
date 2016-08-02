@@ -13,13 +13,7 @@ The aim of the project is to create your own scenario that you want to launch on
 Spectracom, to run this scenario and to visualize a range of data coming from both the Spectracom and 
 a Ublox receiver.
 
-Table of contents
------------------
-
-* :ref:`Def_scen`
-* :ref:`Run_scen`
-
-.. _Def_scen:
+The main documentation for the site is organized into a couple sections:
 
 .. toctree::
    :maxdepth: 2
@@ -27,8 +21,6 @@ Table of contents
    :caption: Define your scenario
 
    define_the_scenario
-
-.. _Run_scen:
 
 .. toctree::
    :maxdepth: 2
