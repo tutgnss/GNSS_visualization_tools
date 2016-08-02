@@ -10,27 +10,27 @@ Scenarios already define
 
 6 scenarios have been defined for you to test your devices:
 
-        test_1:
+- test_1:
 This is the static case, for a minute, data are taken from your simulator and/or your
 receiver(s).
 
-        test_2:
+- test_2:
 This is the temporal square test, the simulator run a path representing a square at constant speed
 , each section last a minute. It basically test if the receiver(s) is well responding to a brutal
 change of direction.
 
-        test_3:
+- test_3:
 This is the temporal circle test, the simulator run a path representing a circle at constant
 speed, during 2 minutes.
 
-        test_4:
+- test_4:
 This is the test of constant acceleration in straight line.
 
-        test_5:
+- test_5:
 This is the sensitivity test, staying static, the C/N0 is increased. The goal is to see until
 which C/N0 it is still possible to receive something
 
-        test_6:
+- test_6:
 This is the Free to Urban space test. The goal is to test if the receiver can keep its
 reliability when passing from a free space to a urban space.
 
@@ -39,7 +39,7 @@ Create your scenario
 
 If you want to create your own scenario, follow the following step:
 
-    1st step:
+- 1st step:
 Create a new .ini file and use this template::
 
         [START]
@@ -106,7 +106,7 @@ Create a new .ini file and use this template::
 .. note:: In the [START] section, just fill the Latitude, Longitude and altitude information of your
 departure position.
 
-    2nd step:
+- 2nd step:
 Copy/Paste the number of [SECTION] needed.
 .. image:: images/scenario.png
 
