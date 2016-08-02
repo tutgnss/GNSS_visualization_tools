@@ -8,7 +8,7 @@ Choose your scenario
 Once you have create your own scenario, or if you want to run a pre-defined scenario, in the main file fill
 the argument of config_parser.read_scen()with the name of your scenario like this for example::
 
-        scenario = config_parser.read_scen('test/test_6.ini')
+        scenario = config_parser.read_scen('data/scenariotest/test_6.ini')
 
 Ublox initialisation
 --------------------
