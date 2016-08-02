@@ -108,7 +108,12 @@ departure position.
 
 - 2nd step:
 Copy/Paste the number of [SECTION] needed.
+
 .. image:: images/scenario.png
+   :height: 100px
+   :width: 200 px
+   :alt: alternate text
+   :align: right
 
 In each section, put all the parameters you want to set from (section-1) to the section, if not given, default
 parameters will be set.
