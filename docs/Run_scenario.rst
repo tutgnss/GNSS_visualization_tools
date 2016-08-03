@@ -15,6 +15,7 @@ Ublox initialisation
 --------------------
 
 There is different steps to configure the receiver(s):
+
 - First of all, fill the COM port like this::
 
         ubloxcnx = Ublox(com='COM6')
@@ -42,7 +43,7 @@ Here is an example of how to enable/disable message::
         ubloxcnx.enable(command='NMEA')
         ubloxcnx.disable(command='UBX')
 
-.. note::If you don't want to get any UBX message, please comment the following lines::
+.. note:: If you don't want to get any UBX message, please comment the following lines::
             thread_3 = AcquireData(3)
             thread_3.start()
 
