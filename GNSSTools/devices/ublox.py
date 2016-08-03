@@ -11,6 +11,7 @@ import serial
 import time
 import binascii
 import math
+import json
 from GNSSTools.devices.device import Device
 
 
@@ -564,53 +565,98 @@ class Ublox(Device):
     def nmea_data_gsa(self):
         # Stores NMEA GSA data into a matrix
         # Return:
-        # dopandactivesat: [[activesat, pdop, hdop, vdop][...]]
+        # dopandactivesat:{
+        # "0": {
+        #        "PDOP": "5.72",
+        #        "active sat": [
+        #            "09",
+        #            "27",
+        #            "12"
+        #        ],
+        #        "HDOP": "5.64",
+        #        "VDOP": "1.00"
+        #    }
+        #    "1": {...}
+        # }
         file = self.fileopen()
-        dopandactivesat = []
+        dopandactivesat = {}
+        i = 0
         for line in file:
             if line[3:6] == 'GSA':
                 data = line.split(',')
-                activesat = data[3:14]
+                j = 0
+                while data[3 + j] != '' and j < 14:
+                    j += 1
+                activesat = data[3: (3 + j)]
                 pdop = data[15]
                 hdop = data[16]
-                vdop = data[17]
-                dopandactivesat.append([activesat, pdop, hdop, vdop])
+                k = 0
+                while data[17][k] != '*':
+                    k += 1
+                vdop = data[17][0: k]
+                dopandactivesat[i] = {'active sat': activesat, 'PDOP': pdop, 'HDOP': hdop,
+                                      'VDOP': vdop}
+                i += 1
         file.close()
-        return dopandactivesat
+        return json.dumps(dopandactivesat, indent=4)
 
     def nmea_data_vtg(self):
         # Stores NMEA VTG data into a matrix
         # Return:
-        # courseandspeed: [[cogt, spd, kph][...]]
-        # where: spd = speed over ground in knots
-        #        cogt = course over ground true in degrees
-        #        kph = speed over ground in kilometer per hour
+        # courseandspeed: {
+        #    "0": {
+        #        "speed in knots": speed over ground in knots,
+        #        "speed in km per hour": speed over ground in kilometer per hour,
+        #        "course over ground": course over ground true in degrees
+        #    },
+        #    "1":{...
+        #    }
+        #}
         file = self.fileopen()
-        courseandspeed = []
+        courseandspeed = {}
+        i = 0
         for line in file:
             if line[3:6] == 'VTG':
                 data = line.split(',')
                 cogt = data[1]
                 spd = data[5]
                 kph = data[7]
-                courseandspeed.append([cogt, spd, kph])
+                courseandspeed[i] = {'course over ground': cogt,'speed in knots': spd,
+                                     'speed in km per hour': kph}
+                i += 1
         file.close()
-        return courseandspeed
+        return json.dumps(courseandspeed, indent=4)
 
     def nmea_data_pubx3(self):
         # Stores NMEA PUBX 03 data into a matrix
         # Return:
-        # satinview: [[nbsat, [[svid, svstatus, az, elev, cno][svid,...]]][...]]
-        # where: az = azimut in degrees
-        #        elev = elevation in degrees
-        #        cno in dBHz
+        # satinview: {
+        #    "0": {
+        #        "nb of sat": 1,
+        #        "info": {
+        #            "0": {
+        #                "azimuth": azimut in degrees,
+        #                "SV ID": ,
+        #                "elevation": elevation in degrees,
+        #                "SV status": ,
+        #                "C/N0": cno in dBHz
+        #            }
+        #        }
+        #    },
+        #    "1": {...
+        #       }
+        #   }
+        # where: az =
+        #        elev =
+        #
         file = self.fileopen()
-        satinview = []
+        satinview = {}
+        k = 0
         for line in file:
-            if line[0:8] == '$PUBX,03':
-
+            if line[0:8] == '$PUBX,03' and len(line) > 17:
                 data = line.split(',')
-                inter = []
+                inter = {}
+                j = 0
                 nbsat = int(data[2])
                 for i in range(nbsat):
                     svid = data[3 + i*6]
@@ -618,10 +664,13 @@ class Ublox(Device):
                     az = data[5 + i*6]
                     elev = data[6 + i*6]
                     cno = data[7 + i*6]
-                    inter.append([svid, svstatus, az, elev, cno])
-                satinview.append([nbsat, inter])
+                    inter[j] = {'SV ID': svid, 'SV status': svstatus, 'azimuth': az,
+                                'elevation': elev, 'C/N0': cno}
+                    j += 1
+                satinview[k] = {'nb of sat': nbsat, 'info': inter}
+                k += 1
         file.close()
-        return satinview
+        return json.dumps(satinview, indent=4)
 
     def store_data(self, file):
         # Store into a file data comming from the receiver and make data processing if data are UBX message
