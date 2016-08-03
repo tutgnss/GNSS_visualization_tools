@@ -6,16 +6,34 @@
 Welcome to  GNSS_visualization_tools' documentation!
 ====================================================
 
-
 Contents:
 ---------
+
+The aim of the project is to compare simulated and broadcast data. For that you will be able to
+create scenario that you want to launch on a Multi-GNSS Simulator Spectracom,
+to run this scenario and then, thanks to a simple graphical interface visualize a range of data
+coming from the simulator and the receiver(s).
+
+The main documentation for the site is organized into a couple sections:
+
 .. toctree::
    :maxdepth: 2
    :glob:
+   :caption: Define your scenario
 
-The aim of the project is to create your own scenario that you want to launch on a Multi-GNSS Simulator 
-Spectracom, to run this scenario and to visualize a range of data coming from both the Spectracom and 
-a Ublox receiver.
+   define_the_scenario
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   :caption: Run your scenario
+
+   Run_scenario
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   :caption: Visualisation Web Page
 
 Features
 --------
@@ -40,13 +58,5 @@ License
 The project is licensed under the MIT license.
 
 
-Indices and tables
-==================
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   define_the_scenario
-   Run_scenario
 
 

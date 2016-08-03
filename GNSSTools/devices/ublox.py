@@ -11,12 +11,14 @@ import serial
 import time
 import binascii
 import math
+from GNSSTools.devices.device import Device
 
 
-class Ublox:
+class Ublox(Device):
 
     def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1,
                  rawdatafile='datatxt/ublox_raw_data.txt', procdatafile='datatxt/ublox_processed_data.txt'):
+        super(Ublox, self).__init__(procdatafile)
         self.com = com
         self.baud_rate = baud_rate
         self.data_bits = data_bits
@@ -361,7 +363,7 @@ class Ublox:
         second = first.replace('2447', '\n2447')
         third = second.replace('0d0a$G', '\n$G')
 
-        data = open(self.procdatafile, 'w')
+        data = self.fileopen()
         data.write(third)
         data.close()
 
@@ -373,7 +375,7 @@ class Ublox:
         #        kloa1 and klob1 in second/radian (semi circle*pi)
         #        kloa2 and klob2 in second/radian^2
         #        kloa3 and klob3 in second/radian^3
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         klobuchar = []
         for line in file:
             if line[0:12] == 'b5620b024800':
@@ -400,7 +402,7 @@ class Ublox:
         #        cuc cus cic and cis in radians, sqrta in meter^0,5
         #        omega0 omega m0 and i0 in radians (semi circles * pi),
         #        crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         ephemeris = []
         for line in file:
             if line[0:12] == 'b5620b316800':
@@ -455,7 +457,7 @@ class Ublox:
         # to access rcvtow : print(raw[0][1])
         # to access the inter matrix : print(raw[0][3])
         # to access the cpmes of the first satellite : print(raw[0][3][0][0])
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         raw = []
         for line in file:
             if line[0:8] == 'b5620210':
@@ -484,7 +486,7 @@ class Ublox:
         #           pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh][...]]
         # dop: [[itow, gdop, pdop, tdop, vdop, hdop, ndop, edop][...]]
         # svsi: [[itow, week, numvis, numsv, inter][...]]
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         nav = []
         dop = []
         svsi = []
@@ -545,7 +547,7 @@ class Ublox:
         # where: tme is time in seconds
         #        errlat, errlong, erralt are expected error in LLA in meters
         #        svid gives the sat ID of most likely failed sat
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         satfaultdetection = []
         for line in file:
             if line[3:6] == 'GBS':
@@ -563,7 +565,7 @@ class Ublox:
         # Stores NMEA GSA data into a matrix
         # Return:
         # dopandactivesat: [[activesat, pdop, hdop, vdop][...]]
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         dopandactivesat = []
         for line in file:
             if line[3:6] == 'GSA':
@@ -583,7 +585,7 @@ class Ublox:
         # where: spd = speed over ground in knots
         #        cogt = course over ground true in degrees
         #        kph = speed over ground in kilometer per hour
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         courseandspeed = []
         for line in file:
             if line[3:6] == 'VTG':
@@ -602,7 +604,7 @@ class Ublox:
         # where: az = azimut in degrees
         #        elev = elevation in degrees
         #        cno in dBHz
-        file = open(self.procdatafile, 'r')
+        file = self.fileopen()
         satinview = []
         for line in file:
             if line[0:8] == '$PUBX,03':
