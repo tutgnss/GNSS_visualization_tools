@@ -10,7 +10,7 @@
 # This Python file uses the following encoding: utf-8
 
 import folium
-from project2.position import data, data2
+import position
 
 
 ## Create a map ##

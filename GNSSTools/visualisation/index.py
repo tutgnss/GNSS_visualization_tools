@@ -10,30 +10,13 @@
 # -*- coding: utf-8 -*
 
 import cgi
-import project2.create_map
-import project2.position
+import create_map
+import position
+
 
 form = cgi.FieldStorage()
-print("Content-type: text/html; charset=utf-8\n")
 
-if form.getvalue("select") == 'None' :
-    P = project2.position.position('project2/ublox/ublox_data_Static.txt')
-    Q = project2.position.position('project2/spectracom/spectracom_data_Static.txt')
-else :
-    P = project2.position.position('project2/ublox/ublox_data_'+str(form.getvalue("select"))+'.txt')
-    Q = project2.position.position('project2/spectracom/spectracom_data_'+str(form.getvalue("select"))+'.txt')
-
-
-a = []
-b = []
-for i in range(len(P)):
-    a.append([P[i][1],P[i][2]])
-
-for i in range(len(Q)):
-    b.append([Q[i][1],Q[i][2]])
-
-project2.create_map.create_map(P,Q)
-
+content = "Content-type: text/html; charset=utf-8\n"
 html = """<!DOCTYPE html>
 <nav></nav>
 <head>
@@ -132,7 +115,25 @@ html6="""
 </html>
 """
 
-print(html+str(form.getvalue("select"))+html2)
+if form.getvalue("select") == 'None' :
+    P = position.position('project2/ublox/ublox_data_Static.txt')
+    Q = position.position('project2/spectracom/spectracom_data_Static.txt')
+else :
+    P = position.position('project2/ublox/ublox_data_'+str(form.getvalue("select"))+'.txt')
+    Q = position.position('project2/spectracom/spectracom_data_'+str(form.getvalue("select"))+'.txt')
+
+
+a = []
+b = []
+for i in range(len(P)):
+    a.append([P[i][1],P[i][2]])
+
+for i in range(len(Q)):
+    b.append([Q[i][1],Q[i][2]])
+
+create_map.create_map(P,Q)
+
+print(content+html+str(form.getvalue("select"))+html2)
 print(html4+str(a)+html5+str(b)+html6)
 
 
