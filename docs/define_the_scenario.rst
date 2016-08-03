@@ -148,8 +148,8 @@ In our case the [START] section will look like::
 
 Copy/Paste the number of [SECTION] needed. In our example, there is two sections:
 
-    ^ Section 1 between A and B
-    ^ Section 2 between B and C
+    - Section 1 between A and B
+    - Section 2 between B and C
 
 For each section, you can now fill all parameters you need but pay attention:
 
