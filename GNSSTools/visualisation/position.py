@@ -6,18 +6,10 @@
 # AUTHOR
 # Yannick DEFRANCE
 
+import sys
+sys.path.append('P:\\My Documents\\Desktop\\GitHub\\GNSS_visualization_tools\\GNSSTools')
+import tools
 
-
-def dm_to_dd(position):
-    # Converts degrees, minutes to decimal degrees
-    # Input:
-    # position: position given in DD.MMMM format
-    # Return:
-    # dd: position converts into decimal degrees
-    deg = math.modf(position)[1]
-    minu = ((position - deg)*100)
-    dd = float(deg) + float(minu)/60
-    return dd
 
 def position(filename):
     # Extract latitude, longitude, altitude and time from NMEA file and return gpgga
@@ -34,8 +26,8 @@ def position(filename):
                     a =-1
                 if split[5] == 'W':
                     b = -1
-                gpgga.append([split[1], a*dm_to_dd(float(split[2])/100),
-                              b*dm_to_dd(float(split[4])/100), split[9]])
+                gpgga.append([split[1], a*tools.dm_to_dd(float(split[2])/100),
+                              b*tools.dm_to_dd(float(split[4])/100), split[9]])
     read.close()
     return gpgga
 
