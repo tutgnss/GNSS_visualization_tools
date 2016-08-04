@@ -404,93 +404,133 @@ class Ublox(Device):
         #        omega0 omega m0 and i0 in radians (semi circles * pi),
         #        crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
         file = self.fileopen()
-        ephemeris = []
+        ephemeris = {}
+        i = 0
         for line in file:
             if line[0:12] == 'b5620b316800':
-                # eph message
-                hexline = int(line, 16)
-                binline = format(hexline, 'b')
                 join = ''
-                svid = int(binline[48:56], 2)
-                wn = int(binline[112:122], 2)
-                cap = int(binline[122:124], 2)
-                ura = int(binline[124:128], 2)
-                health = int(binline[128:134], 2)
-                iodc = int(join.join((binline[134:136], binline[272:280])), 2)
-                tgd = int(binline[256:264], 2)
-                toc = int(binline[280:296], 2)*pow(2, 4)
-                af2 = int(binline[304:312], 2)*pow(2, -55)
-                af1 = int(binline[312:328], 2)*pow(2, -43)
-                af0 = int(binline[336:358], 2)*pow(2, -31)
-                iodesf2 = int(binline[368:376], 2)
-                crs = int(binline[376:392], 2)*pow(2, -5)
-                deltan = int(binline[400:416], 2)*pow(2, -43)
-                m0 = int(join.join((binline[416:424], binline[432:456])), 2)*pow(2, -31)*math.pi
-                cuc = int(binline[464:480], 2)*pow(2, -29)
-                e = int(join.join((binline[480:488], binline[496:520])), 2)*pow(2, -33)
-                cus = int(binline[528:544], 2)*pow(2, -29)
-                sqrta = int(join.join((binline[544:552], binline[560:584])), 2)*pow(2, -19)
-                toe = int(binline[592:608], 2)*pow(2, 4)
-                flag = int(binline[608], 2)
-                aodo = int(binline[609:614], 2)
-                cic = int(binline[624:640], 2)*pow(2, -29)
-                omega0 = int(join.join((binline[640:648], binline[656:680])), 2)*pow(2, -31)*math.pi
-                cis = int(binline[688:704], 2)*pow(2, -29)
-                i0 = int(join.join((binline[704:712], binline[720:744])), 2)*pow(2, -31)*math.pi
-                crc = int(binline[752:768], 2)*pow(2, -5)
-                omega = int(join.join((binline[768:776], binline[784:808])), 2)*pow(2, -31)*math.pi
-                omegadot = int(binline[816:840], 2)*pow(2, -43)*math.pi
-                iodesf3 = int(binline[848:856], 2)
-                idot = int(binline[856:870], 2)*pow(2, -43)*math.pi
-                ephemeris.append([svid, wn, cap, ura, health, iodc, tgd, toc, af2, af1, af0, iodesf2,
-                                  crs, deltan, m0, cuc, e, cus, sqrta, toe, flag, aodo, cic, omega0,
-                                  cis, i0, crc, omega, omegadot, iodesf3, idot])
+                svid = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
+                wn = int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16)
+
+                sf1d0 = format(int(join.join((line[32:34], line[30:32], line[28:30])), 16), 'b')
+                wn = int(join.join((sf1d0[8:10], sf1d0[16:24])), 2)
+                cap = int(sf1d0[10:12], 2)
+                ura = int(sf1d0[12:16], 2)
+                health = int(sf1d0[0:6], 2)
+                tgd = int(line[64:66], 16)
+
+                sf1d5 = format(int(line[68:70], 16), 'b')
+                iodc = int(join.join((sf1d0[6:8], sf1d5)), 2)
+                toc = int(join.join((line[72:74], line[70:72])), 16)*pow(2, 4)
+
+                af2 = int(line[76:78], 16)*pow(2, -55)
+                af1 = int(join.join((line[80:82], line[78:80])), 16)*pow(2, -43)
+
+                sf1d7 = format(int(join.join((line[88:90], line[86:88], line[84:86])), 16), 'b')
+                af0 = int(join.join((sf1d7[0:6], sf1d7[8:24])), 2)*pow(2, -31)
+
+                iodesf2 = int(line[92:94], 16)
+                crs = int(join.join((line[96:98], line[94:96])), 16)*pow(2, -5)
+                deltan = int(join.join((line[102:104], line[100:102])), 16)*pow(2, -43)
+                m0 = int(join.join((line[112:114], line[110:112], line[108:110], line[104:106])), 16)*pow(2, -31)*math.pi
+                cuc = int(join.join((line[118:120], line[116:118])), 16)*pow(2, -29)
+                e = int(join.join((line[128:130], line[126:128], line[124:126], line[120:122])), 16)*pow(2, -33)
+                cus = int(join.join((line[134:136], line[132:134])), 16)*pow(2, -29)
+                sqrta = int(join.join((line[144:146], line[142:144], line[140:142], line[136:138])), 16)*pow(2, -19)
+                toe = int(join.join((line[150:152], line[148:150])), 16)*pow(2, 4)
+
+                sf2d7 = format(int(line[152:154], 16), 'b')
+                flag = int(sf2d7[0], 2)
+                aodo = int(sf2d7[1:6], 2)
+
+                cic = int(join.join((line[158:160], line[156:158])), 16)*pow(2, -29)
+                omega0 = int(join.join((line[168:170], line[166:168], line[164:166], line[160:162])), 16)*pow(2, -31)*math.pi
+                cis = int(join.join((line[174:176], line[172:174])), 16)*pow(2, -29)
+                i0 = int(join.join((line[184:186], line[182:184], line[180:182], line[176:178])), 16)*pow(2, -31)*math.pi
+                crc = int(join.join((line[190:192], line[188:190])), 16)*pow(2, -5)
+                omega = int(join.join((line[200:202], line[198:200], line[196:198], line[192:194])), 16)*pow(2, -31)*math.pi
+                omegadot = int(join.join((line[208:210], line[206:208], line[204:206])), 16)*pow(2, -43)*math.pi
+                iodesf3 = int(line[212:214], 16)
+
+                sf3d7 = format(int(join.join((line[216:218], line[214:216])), 16), 'b')
+                idot = int(join.join((sf3d7[0:2], sf3d7[4:16])), 2)*pow(2, -43)*math.pi
+
+                ephemeris[i] = {'svid': svid, 'wn': wn, 'cap': cap, 'ura': ura, 'health': health,
+                                'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
+                                'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
+                                'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,
+                                'toe': toe, 'flag': flag, 'aodo': aodo, 'cic': cic, 'omega0': omega0,
+                                'cis': cis, 'i0': i0, 'crc': crc, 'omega': omega, 'omegadot': omegadot,
+                                'iodesf3': iodesf3, 'idot': idot}
+                i += 1
         file.close()
-        return ephemeris
+        return json.dumps(ephemeris, indent=4)
 
     def raw_data(self):
         # Stores the PRN data under this way :
         # Return:
-        # raw: [[rcvtow, week, numsv, [[cpmes, prmes, domes, sv, mesqi, cno, lli],[...]]][...]]
-        # rcvtow in ms, week in weeks, cpmes in cycles, prmes in m, domes in Hz, cno in dBHz
-        # to access data of the first message :
-        # print(raw[0]) == ['a', 'b', 'c', [[15, 1, 2, 3, 4, 5, 6], [16, 2, 3, 4, 5, 6, 7]]]
-        # to access rcvtow : print(raw[0][1])
-        # to access the inter matrix : print(raw[0][3])
-        # to access the cpmes of the first satellite : print(raw[0][3][0][0])
+        # raw: {{rcvtow, week, numsv, {{cpmes, prmes, domes, sv, mesqi, cno, lli},{...}}}{...}}
+        # where:
+        #       rcvtow in ms, Measurement time of week in receiver local time
+        #       week in weeks,  Measurement week number in receiver local time
+        #       numsv,
+        #       cpmes in cycles, Carrier phase measurement [L1 cycles]
+        #       prmes in m, Pseudorange measurement [m]
+        #       domes in Hz, Doppler measurement (positive sign for approaching satellites) [Hz]
+        #       sv, Space Vehicle number
+        #       mesqi,  Nav Measurements Quality Indicator: >=4 : PR+DO OK   >=5 : PR+DO+CP OK
+        #                                   <6 : likely loss of carrier lock in previous interval
+        #       cno in dBHz,  Signal strength C/No
         file = self.fileopen()
-        raw = []
+        raw = {}
+        r = 0
+        join = ''
         for line in file:
             if line[0:8] == 'b5620210':
                 # RXM-RAW
-                inter = []
+                inter = {}
+                i = 0
                 rcvtow = int(line[12:20], 16)
                 week = int(line[20:24], 16)
                 numsv = int(line[24:26], 16)
                 for sat in range(numsv):
-                    cpmes = int(line[(28 + 24*sat):(44 + 24*sat)], 16)
-                    prmes = int(line[(44 + 24*sat):(60 + 24*sat)], 16)
-                    domes = int(line[(60 + 24*sat):(68 + 24*sat)], 16)
+                    cpmes = int(join.join((line[(42 + 24*sat):(44 + 24*sat)], line[(40 + 24*sat):(42 + 24*sat)],
+                                           line[(38 + 24*sat):(40 + 24*sat)], line[(36 + 24*sat):(38 + 24*sat)],
+                                           line[(34 + 24*sat):(36 + 24*sat)], line[(32 + 24*sat):(34 + 24*sat)],
+                                           line[(30 + 24*sat):(32 + 24*sat)], line[(28 + 24*sat):(30 + 24*sat)])), 16)
+                    prmes = int(join.join((line[(58 + 24*sat):(60 + 24*sat)], line[(56 + 24*sat):(58 + 24*sat)],
+                                           line[(54 + 24*sat):(56 + 24*sat)], line[(52 + 24*sat):(54 + 24*sat)],
+                                           line[(50 + 24*sat):(52 + 24*sat)], line[(48 + 24*sat):(50 + 24*sat)],
+                                           line[(46 + 24*sat):(48 + 24*sat)], line[(44 + 24*sat):(46 + 24*sat)])), 16)
+                    domes = int(join.join((line[(66 + 24*sat):(68 + 24*sat)], line[(64 + 24*sat):(66 + 24*sat)],
+                                           line[(62 + 24*sat):(64 + 24*sat)], line[(60 + 24*sat):(62 + 24*sat)])), 16)
                     sv = int(line[(68 + 24*sat):(70 + 24*sat)], 16)
                     mesqi = int(line[(70 + 24*sat):(72 + 24*sat)], 16)
                     cno = int(line[(72 + 24*sat):(74 + 24*sat)], 16)
                     lli = int(line[(74 + 24*sat):(76 + 24*sat)], 16)
-                    inter.append([cpmes, prmes, domes, sv, mesqi, cno, lli])
-                raw.append([rcvtow, week, numsv, inter])
+                    inter[i] = {'cpmes': cpmes, 'prmes': prmes, 'domes': domes, 'sv': sv,
+                                'mesqui': mesqi, 'C/N0': cno, 'lli': lli}
+                    i += 1
+                raw[r] = {rcvtow, week, numsv, inter}
+                r += 1
         file.close()
-        return raw
+        return json.dumps(raw, indent=4)
 
     def random_data(self):
-        # Stores navigation data, DOP data and SVSI data into matrix
+        # Stores navigation data, DOP data and SVSI data into dictionaries
         # Return:
-        # nav: [[dynmodel, fixmode, fixedalt, fixedaltvar, minelev, pdop, tdop,
-        #           pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh][...]]
-        # dop: [[itow, gdop, pdop, tdop, vdop, hdop, ndop, edop][...]]
-        # svsi: [[itow, week, numvis, numsv, inter][...]]
+        # nav: {{dynmodel, fixmode, fixedalt, fixedaltvar, minelev, pdop, tdop,
+        #           pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh}{...}}
+        # dop: {{itow, gdop, pdop, tdop, vdop, hdop, ndop, edop}{...}}
+        # svsi: {{itow, week, numvis, numsv, {{svid, elev, az, age}{...}}}{...}}
         file = self.fileopen()
-        nav = []
-        dop = []
-        svsi = []
+        nav = {}
+        n = 0
+        dop = {}
+        d = 0
+        svsi = {}
+        s = 0
+        join = ''
         for line in file:
             if line[0:12] == 'b56206242400':
                 # CFG-NAV5
@@ -498,58 +538,79 @@ class Ublox(Device):
                 # staticholdthresh in cm/s, dgpstimeout in s, cnothresh in dBHz
                 dynmodel = int(line[16:18], 16)
                 fixmode = int(line[18:20], 16)
-                fixedalt = int(line[20:28], 16)
-                fixedaltvar = int(line[28:36], 16)
+                fixedalt = int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16)
+                fixedaltvar = int(join.join((line[34:36], line[32:34], line[30:32], line[28:30])), 16)
                 minelev = int(line[36:38], 16)
-                pdop = int(line[40:44], 16)
-                tdop = int(line[44:48], 16)
-                pacc = int(line[48:52], 16)
-                tacc = int(line[52:56], 16)
+                pdop = int(join.join((line[42:44], line[40:42])), 16)
+                tdop = int(join.join((line[46:48], line[44:46])), 16)
+                pacc = int(join.join((line[50:52], line[50:52])), 16)
+                tacc = int(join.join((line[54:56], line[52:54])), 16)
                 staticholdthresh = int(line[56:58], 16)
                 dgpstimeout = int(line[58:60], 16)
                 cnothreshnumsv = int(line[60:62], 16)
                 cnothresh = int(line[62:64], 16)
-                nav.append([dynmodel, fixmode, fixedalt, fixedaltvar, minelev, pdop, tdop,
-                            pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh])
+                nav[n] = {'Dynmodel': dynmodel, 'fixmode': fixmode, 'fixedalt': fixedalt,
+                          'fixedaltvar': fixedaltvar, 'minelev': minelev, 'pdop': pdop,
+                          'tdop': tdop, 'pacc': pacc, 'tacc': tacc, 'staticholdthresh': staticholdthresh,
+                          'dgpstimeout': dgpstimeout, 'cnothreshnumsv': cnothreshnumsv,
+                          'cnothresh': cnothresh}
+                n += 1
+
             if line[0:12] == 'b56201041200':
                 # NAV-DOP
-                itow = int(line[12:20], 16)
-                gdop = int(line[20:24], 16)
-                pdop = int(line[24:28], 16)
-                tdop = int(line[28:32], 16)
-                vdop = int(line[32:36], 16)
-                hdop = int(line[36:40], 16)
-                ndop = int(line[40:44], 16)
-                edop = int(line[44:48], 16)
-                dop.append([itow, gdop, pdop, tdop, vdop, hdop, ndop, edop])
+                itow = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
+                gdop = int(join.join((line[22:24], line[20:22])), 16)/100
+                pdop = int(join.join((line[26:28], line[24:26])), 16)/100
+                tdop = int(join.join((line[30:32], line[28:30])), 16)/100
+                vdop = int(join.join((line[34:36], line[32:34])), 16)/100
+                hdop = int(join.join((line[38:40], line[36:38])), 16)/100
+                ndop = int(join.join((line[42:44], line[40:42])), 16)/100
+                edop = int(join.join((line[46:48], line[44:46])), 16)/100
+                dop[d] = {'itow': itow, 'gdop': gdop, 'pdop': pdop, 'tdop': tdop, 'vdop': vdop,
+                          'hdop': hdop, 'ndop': ndop, 'edop': edop}
+                d += 1
+
             if line[0:8] == 'b5620220':
                 # RXM-SVSI
                 # itow in ms, week in weeks
-                # to access the svid of the first satellite : print(svid[0][4][0][0])
-                itow = int(line[12:20], 16)
-                week = int(line[20:24], 16)
+                itow = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
+                week = int(join.join((line[22:24], line[20:22])), 16)
                 numvis = int(line[24:26], 16)
                 numsv = int(line[26:28], 16)
-                inter = []
-                for sat in range(numvis):
-                    svid = int(line[28:30], 16)
-                    azim = int(line[32:36], 16)
-                    elev = int(line[36:38], 16)
-                    age = int(line[38:40], 16)
-                    inter.append([svid, azim, elev, age])
-                svsi.append([itow, week, numvis, numsv, inter])
+                inter = {}
+                i = 0
+                for sat in range(numsv):
+                    svid = int(line[(28+12*sat):(30+12*sat)], 16)
+                    azim = int(join.join((line[(34+12*sat):(36+12*sat)], line[(32+12*sat):(34+12*sat)])), 16)
+                    elev = int(line[(36+12*sat):(38+12*sat)], 16)
+                    age = int(line[(38+12*sat):(40+12*sat)], 16)
+                    inter[i] = {'svid': svid, 'azim': azim, 'elev': elev, 'age': age}
+                    i += 1
+                svsi[s] = {'itow': itow, 'week': week, 'numvis': numvis, 'numsv': numsv,
+                           'info': inter}
+                s += 1
+        navdumps = json.dumps(nav, indent=4)
+        dopdumps = json.dumps(dop, indent=4)
+        svsidumps = json.dumps(svsi, indent=4)
         file.close()
-        return nav, dop, svsi
+        return navdumps, dopdumps, svsidumps
 
     def nmea_data_gbs(self):
-        # Stores NMEA GBS data into a matrix
+        # Stores NMEA GBS data into a dictionary
         # Return:
-        # satfaultdetection: [[tme, errlat, errlong, erralt, svid][...]]
-        # where: tme is time in seconds
-        #        errlat, errlong, erralt are expected error in LLA in meters
-        #        svid gives the sat ID of most likely failed sat
+        # satfaultdetection:{
+        #    "0": {
+        #        "Errlat": expected error in latitude in meters,
+        #        "Errlong": expected error in longitude in meters,
+        #        "Erralt": expected error in altitude in meters,
+        #        "time": time in seconds,
+        #        "SatIDfailed": gives the sat ID of most likely failed sat
+        #     }
+        #     {...}
+        # }
         file = self.fileopen()
-        satfaultdetection = []
+        satfaultdetection = {}
+        i = 0
         for line in file:
             if line[3:6] == 'GBS':
                 data = line.split(',')
@@ -558,12 +619,14 @@ class Ublox(Device):
                 errlong = data[3]
                 erralt = data[4]
                 svid = data[5]
-                satfaultdetection.append([tme, errlat, errlong, erralt, svid])
+                satfaultdetection[i] = {'time': tme, 'Errlat': errlat, 'Errlong': errlong,
+                                        'Erralt': erralt, 'SatIDfailed': svid}
+                i += 1
         file.close()
-        return satfaultdetection
+        return json.dumps(satfaultdetection, indent=4)
 
     def nmea_data_gsa(self):
-        # Stores NMEA GSA data into a matrix
+        # Stores NMEA GSA data into a dictionary
         # Return:
         # dopandactivesat:{
         # "0": {
@@ -601,7 +664,7 @@ class Ublox(Device):
         return json.dumps(dopandactivesat, indent=4)
 
     def nmea_data_vtg(self):
-        # Stores NMEA VTG data into a matrix
+        # Stores NMEA VTG data into a dictionary
         # Return:
         # courseandspeed: {
         #    "0": {
@@ -611,7 +674,7 @@ class Ublox(Device):
         #    },
         #    "1":{...
         #    }
-        #}
+        # }
         file = self.fileopen()
         courseandspeed = {}
         i = 0
@@ -621,14 +684,14 @@ class Ublox(Device):
                 cogt = data[1]
                 spd = data[5]
                 kph = data[7]
-                courseandspeed[i] = {'course over ground': cogt,'speed in knots': spd,
+                courseandspeed[i] = {'course over ground': cogt, 'speed in knots': spd,
                                      'speed in km per hour': kph}
                 i += 1
         file.close()
         return json.dumps(courseandspeed, indent=4)
 
     def nmea_data_pubx3(self):
-        # Stores NMEA PUBX 03 data into a matrix
+        # Stores NMEA PUBX 03 data into a dictionary
         # Return:
         # satinview: {
         #    "0": {

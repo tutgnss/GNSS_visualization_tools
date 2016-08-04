@@ -107,19 +107,15 @@ class Device:
         # gsv: {
         # "0": {
         #        "0": {
-        #            "Sat ID": "09",
-        #            "azimuth": "039",
-        #            "C/N0": "39",
-        #            "elevation": "82"
+        #            "Sat ID": numeric - Satellite ID,
+        #            "azimuth": deg - numeric - Azimuth, (range 0-359),
+        #            "C/N0":  cno - dBHz - numeric - Signal strength (C/N0, range 0-99), blank when not tracking,
+        #            "elevation": deg - numeric - Elevation (range 0-90)
         #        },
         #        "1": {...
         #        }
         #   }
         #}
-        # where: sv - numeric - Satellite ID
-        #        elv - deg - numeric - Elevation (range 0-90)
-        #        az - deg - numeric - Azimuth, (range 0-359)
-        #        cno - dBHz - numeric - Signal strength (C/N0, range 0-99), blank when not tracking
         file = self.fileopen()
         gsv = {}
         k = 0
