@@ -14,7 +14,7 @@
 
 
 
-html = """<!DOCTYPE html>
+init = """<!DOCTYPE html>
 <nav></nav>
 <head>
 	<meta charset="UTF-8">
@@ -167,7 +167,7 @@ color: red;
     <legend>Visualisation of the
 """
 
-html2="""
+tileLayer = """
     scenario</legend>
     <div id="mapid">
     <script src="sample-geojson.js" type="text/javascript"></script>
@@ -184,37 +184,41 @@ html2="""
 		}).addTo(mymap);
 """
 
-html4="""
+varUblox = """
 
         var ublox = L.polyline("""
 
-html5="""
+varSpectracom = """
         , {color: 'red'}).addTo(mymap);
 
         mymap.fitBounds(ublox.getBounds());
 
         var spectracom = L.polyline("""
 
-html6="""
+popup = """
         , {color: 'blue'}).addTo(mymap);
 
-        var popup ;
+        var road = L.geoJson(ublox).addTo(mymap);
 
-        popup = L.popup({minWidth: 250});
+                road.addEventListener('click dblclick', function(e) {
+                    alert("hello");
+                });
 
-        function onMapClick(e) {
-            popup
-                .setLatLng(e.latlng)
-                .setContent(e.latlng.toString())
-                .openOn(mymap);
-        }
-
-        mymap.on('click', onMapClick);
-
-	</script>
+    </script>
 	</div>
 </fieldset>
+"""
 
+test = """
+
+<fieldset>
+<legend>Test</legend>
+    <p>test</p>
+</fieldset>
+
+"""
+
+end = """
 
 </body>
 </html>

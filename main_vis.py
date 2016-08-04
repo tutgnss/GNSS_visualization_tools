@@ -1,4 +1,14 @@
-__author__ = 'defrance'
+# Tampere University of Technology
+#
+# DESCRIPTION
+# Calls the html script. Processing functions are added.
+# This file is launched on the browser
+#
+# AUTHOR
+# Yannick DEFRANCE
+
+#!/usr/bin/python3
+# -*- coding: utf-8 -*
 
 import sys
 sys.path.append('P:\\My Documents\\Desktop\\GitHub\\GNSS_visualization_tools\\data')
@@ -37,5 +47,5 @@ if __name__ == '__main__':
 
 
 
-    print(index.html+str(form.getvalue("select"))+index.html2)
-    print(index.html4+str(a)+index.html5+str(b)+index.html6)
+    print(index.init+str(form.getvalue("select"))+index.tileLayer)
+    print(index.varUblox+str(a)+index.varSpectracom+str(b)+index.popup+index.test+index.end)
