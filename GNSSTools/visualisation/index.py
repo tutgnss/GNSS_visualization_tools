@@ -9,16 +9,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*
 
-import sys
-sys.path.append('P:\\My Documents\\Desktop\\GitHub\\GNSS_visualization_tools\\data')
-import cgi
-import create_map
-import position
-import database
 
-form = cgi.FieldStorage()
 
-print("Content-type: text/html; charset=utf-8\n")
+
+
+
 html = """<!DOCTYPE html>
 <nav></nav>
 <head>
@@ -152,7 +147,7 @@ color: red;
     <article id="change">
         <h2>Change scenario</h2>
         <p>Select the scenario you want to play</p>
-        <form method="post" action="/index.py" enctype=multipqrt/form-data">
+        <form method="post" action="/main_vis.py" enctype=multipqrt/form-data">
             <select name="select">
                 <optgroup label="Scenario">
                     <option value="circle">Circle</option>
@@ -225,29 +220,6 @@ html6="""
 </html>
 """
 
-def ab():
-    if form.getvalue("select") == None :
-        P = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\static_ublox.txt')
-        Q = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\static_spectracom.txt')
-    else :
-        P = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database'+str(form.getvalue("select"))+'_ublox.txt')
-        Q = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database'+str(form.getvalue("select"))+'_spectracom.txt')
-
-    a = []
-    b = []
-    for i in range(len(P)):
-        a.append([P[i][1],P[i][2]])
-
-    for i in range(len(Q)):
-        b.append([Q[i][1],Q[i][2]])
-
-    create_map.create_map(P,Q)
-    return [a,b]
-
-
-x = ab()
-print(html+str(form.getvalue("select"))+html2)
-print(html4+str(x[0])+html5+str(x[1])+html6)
 
 
 
