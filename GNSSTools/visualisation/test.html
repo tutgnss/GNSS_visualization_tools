@@ -1,69 +1,219 @@
 Content-type: text/html; charset=utf-8
 
-
 <!DOCTYPE html>
-<html>
+<nav></nav>
 <head>
-  <title>Leaflet debug page</title>
+	<meta charset="UTF-8">
 
-  <link rel="stylesheet" href="../../dist/leaflet.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+<style>
+header
+{
+text-align: center;
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+}
 
-  <link rel="stylesheet" href="../css/screen.css" />
+img
+{
 
-  <script type="text/javascript" src="../../build/deps.js"></script>
-  <script src="../leaflet-include.js"></script>
+}
+
+body
+{
+background-color: #BDBDBD;
+line-height: 1.65em;
+font-size: 16px;
+text-align: center;
+margin: 0 auto;
+margin-bottom: 100px;
+height:100%
+}
+
+
+a:link
+{
+color: #696;
+text-decoration: none;
+background-color: transparent
+}
+
+a:visited
+{
+color: #699;
+text-decoration: none;
+background-color: transparent
+}
+
+a:hover
+{
+color: #c93;
+text-decoration: underline;
+background-color: transparent
+}
+
+a:active
+{
+color: #900;
+text-decoration: underline;
+background-color: transparent
+}
+
+fieldset
+{
+min-height: 20em;
+border-radius: 12px;
+margin-top: 50px;
+margin-right: 200px;
+margin-left: 200px;
+
+}
+
+#mapid
+{
+height: 400px;
+}
+
+
+#choices
+{
+width:100%;
+height:150px;
+border-top: 2px solid;
+border-bottom: 2px solid;
+}
+
+
+#choices #run
+{
+float: left;
+width:471px;
+
+
+}
+
+
+#choices #create
+{
+float: left;
+width:978px;
+
+
+}
+
+
+#choices #change
+{
+float: left;
+
+}
+
+#myLines
+{
+color: red;
+}
+</style>
 </head>
+
 <body>
+<header>
+    <img src="http://www.tibco.com/blog/wp-content/uploads/2014/10/TIBCO-Spotfire-4-Ways-Data-Visualization-Will-Help-Your-Organization1.jpg" />
+    <h1>Visualization Tool</h1>
+</header>
 
-  <div id="map"></div>
+<section id="choices">
+    <article id="run">
+        <h2>Run current scenario</h2>
+        <p>Visualize the chosen scenario</p>
+    </article>
+    <article id="create">
+        <h2>Create scenario</h2>
+        <p>Select the parameters to create your own route</p>
+    </article>
+    <article id="change">
+        <h2>Change scenario</h2>
+        <p>Select the scenario you want to play</p>
+        <form method="post" action="/main_vis.py" enctype=multipqrt/form-data">
+            <select name="select">
+                <optgroup label="Scenario">
+                    <option value="circle">Circle</option>
+                    <option value="square">Square</option>
+                    <option value="acceleration">Acceleration</option>
+                    <option value="static">Static</option>
+                    <option value="cno">CN0</option>
+                    <option value="freetourban">Free to Urban</option>
+                </optgroup>
+            </select>
+            <input type="submit" name="change" value="Change scenario">
+        </form>
+    </article>
+</section>
 
-  <script type="text/javascript">
-    var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib});
-    var map = L.map('map')
-        .setView([50.5, 30.51], 15)
-        .addLayer(osm);
-    var features = new L.FeatureGroup([
-      L.marker(getRandomLatLng(map)),
-      L.polyline([
-        getRandomLatLng(map),
-        getRandomLatLng(map),
-        getRandomLatLng(map)
-      ]),
-      L.polygon([
-        getRandomLatLng(map),
-        getRandomLatLng(map),
-        getRandomLatLng(map),
-        getRandomLatLng(map)
-      ])
-    ]);
-    features.bindPopup(function(layer){
-      return 'Leaflet ID is ' + layer._leaflet_id;
-    }).addTo(map);
-    var content = L.DomUtil.create('p', 'custom-popup');
-    content.innerText = 'I\'m a red polygon';
-    var polygon = L.polygon([
-      getRandomLatLng(map),
-      getRandomLatLng(map),
-      getRandomLatLng(map),
-      getRandomLatLng(map)
-    ], {
-      color: 'red'
-    }).bindPopup(content).addTo(map);
-    var polyline = L.polyline([
-      getRandomLatLng(map),
-      getRandomLatLng(map),
-      getRandomLatLng(map)
-    ], {
-      color: 'red'
-    }).bindPopup('I\'m a red polyline').addTo(map);
-    var marker = L.circleMarker(getRandomLatLng(map), {
-      color: 'red',
-      radius: 25
-    }).bindPopup('I\'m a red circle').addTo(map);
-  </script>
+<fieldset>
+    <legend>Visualisation of the
+None
+    scenario</legend>
+    <div id="mapid">
+    <script src="sample-geojson.js" type="text/javascript"></script>
+	<script src="https://npmcdn.com/leaflet@1.0.0-rc.2/dist/leaflet.js"></script>
+	<script>
+
+		var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery <a href="http://mapbox.com">Mapbox</a>',
+			id: 'mapbox.streets'
+		}).addTo(mymap);
+
+
+		function onEachFeature(feature, layer) {
+			var popupContent = "<p>I started out as a GeoJSON " +
+					feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
+
+			if (feature.properties && feature.properties.popupContent) {
+				popupContent += feature.properties.popupContent;
+			}
+
+			layer.bindPopup(popupContent);
+		}
+
+
+        var geojsonFeature = {
+            "type": "Feature",
+            "properties": {
+                "name": "Coors Field",
+                "amenity": "Baseball Stadium",
+                "popupContent": "This is where the Rockies play!"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                [-104.99404, 39.75621],
+                [-104.99, 39.75621],
+                [-104.99, 39.75],
+                [-104.99404, 39.75]
+                ]]
+            }
+        };
+
+        L.geoJson(geojsonFeature,{
+			onEachFeature: onEachFeature
+		}).addTo(mymap);
+
+
+    </script>
+	</div>
+</fieldset>
+
+
+<fieldset>
+<legend>Test</legend>
+    <p>test</p>
+</fieldset>
+
+
+
 </body>
 </html>

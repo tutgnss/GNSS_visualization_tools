@@ -10,10 +10,6 @@
 # -*- coding: utf-8 -*
 
 
-
-
-
-
 init = """<!DOCTYPE html>
 <nav></nav>
 <head>
@@ -198,11 +194,29 @@ varSpectracom = """
 popup = """
         , {color: 'blue'}).addTo(mymap);
 
-        var road = L.geoJson(ublox).addTo(mymap);
+        function onEachFeature(feature, layer) {
+		        	var popupContent = "<p>I started out as a GeoJSON " +
+				        	feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
 
-                road.addEventListener('click dblclick', function(e) {
-                    alert("hello");
-                });
+        			if (feature.properties && feature.properties.popupContent) {
+		        		popupContent += feature.properties.popupContent;
+			        }
+
+			        layer.bindPopup(popupContent);
+                }
+
+        L.geoJson(ublox, {
+
+			filter: function (feature, layer) {
+				if (feature.properties) {
+					// If the property "underConstruction" exists and is true, return false (don't render features under construction)
+					return feature.properties.underConstruction !== undefined ? !feature.properties.underConstruction : true;
+				}
+				return false;
+			},
+
+			onEachFeature: onEachFeature
+		}).addTo(mymap);
 
     </script>
 	</div>
