@@ -364,7 +364,7 @@ class Ublox(Device):
         second = first.replace('2447', '\n2447')
         third = second.replace('0d0a$G', '\n$G')
 
-        data = self.fileopen()
+        data = open(self.procdatafile, 'w')
         data.write(third)
         data.close()
 
@@ -377,7 +377,8 @@ class Ublox(Device):
         #        kloa2 and klob2 in second/radian^2
         #        kloa3 and klob3 in second/radian^3
         file = self.fileopen()
-        klobuchar = []
+        klobuchar = {}
+        i = 0
         for line in file:
             if line[0:12] == 'b5620b024800':
                 # hui message
@@ -389,20 +390,66 @@ class Ublox(Device):
                 klob1 = int(line[124:132], 16)*pow(2, 14)/math.pi
                 klob2 = int(line[132:140], 16)*pow(2, 16)/pow(2, math.pi)
                 klob3 = int(line[140:148], 16)*pow(2, 16)/pow(3, math.pi)
-                klobuchar.append([kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3])
+                klobuchar[i] = {'kloa0': kloa0, 'kloa1': kloa1, 'kloa2': kloa2, 'kloa3': kloa3,
+                                'klob0': klob0, 'klob1': klob1, 'klob2': klob2, 'klob3': klob3}
+                i += 1
         file.close()
-        return klobuchar
+        return json.dumps(klobuchar, indent=4)
+
+    @staticmethod
+    def uratometer(uraindex):
+        if uraindex <= 6:
+            if uraindex == 1:
+                ura = 2.8
+            elif uraindex == 3:
+                ura = 5.7
+            elif uraindex == 5:
+                ura = 11.3
+            else:
+                ura = pow(2, (1 + uraindex/2))
+        elif 6 < uraindex < 15:
+            ura = pow(2, (uraindex - 2))
+        else:
+            ura = 'no accuracy'
+        return ura
+
+    @staticmethod
+    def healthmean(healthvalue):
+        if healthvalue[0] == 0:
+            health = 'Data ok'
+        else:
+            health = 'Some bad data', healthvalue
+        return health
+
+    @staticmethod
+    def l2mean(l2):
+        if l2 == '00':
+            l2say = 'Reserved'
+        elif l2 == '01':
+            l2say = 'P code ON'
+        elif l2 == '10':
+            l2say = 'C/A code ON'
+        else:
+            l2say = 'No idea find yourself!'
+        return l2say
+
+    @staticmethod
+    def fitintervalmean(flag):
+        if flag == 0:
+            flagsay = 'Curvefit interval of 4 hours'
+        else:
+            flagsay = 'Curvefit interval greater than 4 hours'
+        return flagsay
+
+    @staticmethod
+    def getSignedNumber(number, bitLength):
+        mask = (2 ** bitLength) - 1
+        if number & (1 << (bitLength - 1)):
+            return number | ~mask
+        else:
+            return number & mask
 
     def ephemeris_data(self):
-        # creates the matrix of ephemeris data with application of the scale factor decimal values
-        # Return:
-        # ephemeris: [[svid, wn, cap, ura, health, iodc, tgd, toc, af2, af1, af0, iodesf2,
-        #              crs, deltan, m0, cuc, e, cus, sqrta, toe, flag, aodo, cic, omega0,
-        #              cis, i0, crc, omega, omegadot, iodesf3, idot]
-        # where: toc and toe in seconds, af2 in sec/sec^2, af1 in sec/sec, af0 in sec,
-        #        cuc cus cic and cis in radians, sqrta in meter^0,5
-        #        omega0 omega m0 and i0 in radians (semi circles * pi),
-        #        crc and crs in meters, deltan omegadot and idot in rad/sec (semicircles*pi/sec)
         file = self.fileopen()
         ephemeris = {}
         i = 0
@@ -410,52 +457,87 @@ class Ublox(Device):
             if line[0:12] == 'b5620b316800':
                 join = ''
                 svid = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
-                wn = int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16)
-
-                sf1d0 = format(int(join.join((line[32:34], line[30:32], line[28:30])), 16), 'b')
+                # SF1D0
+                sf1d0 = '{0:024b}'.format(int(join.join((line[32:34], line[30:32], line[28:30])), 16), 2)
+                health = self.healthmean(sf1d0[0:6])
+                iodcmsb = sf1d0[6:8]
                 wn = int(join.join((sf1d0[8:10], sf1d0[16:24])), 2)
-                cap = int(sf1d0[10:12], 2)
-                ura = int(sf1d0[12:16], 2)
-                health = int(sf1d0[0:6], 2)
-                tgd = int(line[64:66], 16)
-
-                sf1d5 = format(int(line[68:70], 16), 'b')
-                iodc = int(join.join((sf1d0[6:8], sf1d5)), 2)
-                toc = int(join.join((line[72:74], line[70:72])), 16)*pow(2, 4)
-
-                af2 = int(line[76:78], 16)*pow(2, -55)
-                af1 = int(join.join((line[80:82], line[78:80])), 16)*pow(2, -43)
-
-                sf1d7 = format(int(join.join((line[88:90], line[86:88], line[84:86])), 16), 'b')
-                af0 = int(join.join((sf1d7[0:6], sf1d7[8:24])), 2)*pow(2, -31)
-
-                iodesf2 = int(line[92:94], 16)
-                crs = int(join.join((line[96:98], line[94:96])), 16)*pow(2, -5)
-                deltan = int(join.join((line[102:104], line[100:102])), 16)*pow(2, -43)
-                m0 = int(join.join((line[112:114], line[110:112], line[108:110], line[104:106])), 16)*pow(2, -31)*math.pi
-                cuc = int(join.join((line[118:120], line[116:118])), 16)*pow(2, -29)
-                e = int(join.join((line[128:130], line[126:128], line[124:126], line[120:122])), 16)*pow(2, -33)
-                cus = int(join.join((line[134:136], line[132:134])), 16)*pow(2, -29)
-                sqrta = int(join.join((line[144:146], line[142:144], line[140:142], line[136:138])), 16)*pow(2, -19)
-                toe = int(join.join((line[150:152], line[148:150])), 16)*pow(2, 4)
-
-                sf2d7 = format(int(line[152:154], 16), 'b')
-                flag = int(sf2d7[0], 2)
+                l2 = self.l2mean(sf1d0[10:12])
+                ura = self.uratometer(int(sf1d0[12:16], 2))
+                # SF1D4
+                sf1d4 = '{0:024b}'.format(int(join.join((line[64:66], line[62:64], line[60:62])), 16), 2)
+                tgd = (self.getSignedNumber(int(sf1d4[0:8], 2), 8))*pow(2, -31)
+                # SF1D5
+                sf1d5 = '{0:024b}'.format(int(join.join((line[72:74], line[70:72], line[68:70])), 16), 2)
+                iodc = int(join.join((sf1d5[16:24], iodcmsb)), 2)
+                toc = int(sf1d5[0:16], 2)*pow(2, 4)
+                # SF1D6
+                sf1d6 = '{0:024b}'.format(int(join.join((line[80:82], line[78:80], line[76:78])), 16), 2)
+                af2 = (self.getSignedNumber(int(sf1d6[16:24], 2), 8))*pow(2, -55)
+                af1 = (self.getSignedNumber(int(sf1d6[0:16], 2), 16))*pow(2, -43)
+                # SF1D7
+                sf1d7 = '{0:024b}'.format(int(join.join((line[88:90], line[86:88], line[84:86])), 16), 2)
+                af0 = (self.getSignedNumber(int(join.join((sf1d7[0:6], sf1d7[8:24])), 2), 22))*pow(2, -31)
+                # SF2D0
+                sf2d0 = '{0:024b}'.format(int(join.join((line[96:98], line[94:96], line[92:94])), 16), 2)
+                iodesf2 = int(sf2d0[16:24], 2)
+                crs = (self.getSignedNumber(int(sf2d0[0:16], 2), 16))*pow(2, -5)
+                # SF2D1
+                sf2d1 = '{0:024b}'.format(int(join.join((line[104:106], line[102:104], line[100:102])), 16), 2)
+                deltan = (self.getSignedNumber(int(sf2d1[8:24], 2), 16))*pow(2, -43)*math.pi
+                m0msb = sf2d1[0:8]
+                # SF2D2
+                sf2d2 = '{0:024b}'.format(int(join.join((line[112:114], line[110:112], line[108:110])), 16), 2)
+                m0 = (self.getSignedNumber(int(join.join((sf2d2, m0msb)), 2), 32))*pow(2, -31)*math.pi
+                # SF2D3
+                sf2d3 = '{0:024b}'.format(int(join.join((line[120:122], line[118:120], line[116:118])), 16), 2)
+                emsb = sf2d3[0:8]
+                cuc = (self.getSignedNumber(int(sf2d3[8:24], 2), 16))*pow(2, -29)
+                # SF2D4
+                sf2d4 = '{0:024b}'.format(int(join.join((line[128:130], line[126:128], line[124:126])), 16), 2)
+                e = (int(join.join((sf2d4, emsb)), 2))*pow(2, -33)
+                # SF2D5
+                sf2d5 = '{0:024b}'.format(int(join.join((line[136:138], line[134:136], line[132:134])), 16), 2)
+                sqrtamsb = sf2d5[0:8]
+                cus = (self.getSignedNumber(int(sf2d5[8:24], 2), 16))*pow(2, -29)
+                # SF2D6
+                sf2d6 = '{0:024b}'.format(int(join.join((line[144:146], line[142:144], line[140:142])), 16), 2)
+                sqrta = (int(join.join((sf2d6, sqrtamsb)), 2))*pow(2, -19)
+                # SF2D7
+                sf2d7 = '{0:024b}'.format(int(join.join((line[152:154], line[150:152], line[148:150])), 16), 2)
+                flag = self.fitintervalmean(sf2d7[0])
                 aodo = int(sf2d7[1:6], 2)
+                toe = int(sf2d7[8:24], 2)*pow(2, 4)
+                # SF3D0
+                sf3d0 = '{0:024b}'.format(int(join.join((line[160:162], line[158:160], line[156:158])), 16), 2)
+                omega0msb = sf3d0[0:8]
+                cic = (self.getSignedNumber(int(sf3d0[8:24], 2), 16))*pow(2, -29)
+                # SF3D1
+                sf3d1 = '{0:024b}'.format(int(join.join((line[168:170], line[166:168], line[164:166])), 16), 2)
+                omega0 = (self.getSignedNumber(int(join.join((sf3d1, omega0msb)), 2), 32))*pow(2, -31)*math.pi
+                # SF3D2
+                sf3d2 = '{0:024b}'.format(int(join.join((line[174:178], line[174:176], line[172:174])), 16), 2)
+                i0msb = sf3d2[0:8]
+                cis = (self.getSignedNumber(int(sf3d2[8:24], 2), 16))*pow(2, -29)
+                # SF3D3
+                sf3d3 = '{0:024b}'.format(int(join.join((line[184:186], line[182:184], line[180:182])), 16), 2)
+                i0 = (self.getSignedNumber(int(join.join((sf3d3, i0msb)), 2), 32))*pow(2, -31)*math.pi
+                # SF3D4
+                sf3d4 = '{0:024b}'.format(int(join.join((line[192:194], line[190:192], line[188:190])), 16), 2)
+                omegamsb = sf3d4[0:8]
+                crc = (self.getSignedNumber(int(sf3d4[8:24], 2), 16))*pow(2, -5)
+                # SF3D5
+                sf3d5 = '{0:024b}'.format(int(join.join((line[200:202], line[198:200], line[196:198])), 16), 2)
+                omega = (self.getSignedNumber(int(join.join((sf3d5, omegamsb)), 2), 32))*pow(2, -31)*math.pi
+                # SF3D6
+                sf3d6 = '{0:024b}'.format(int(join.join((line[208:210], line[206:208], line[204:206])), 16), 2)
+                omegadot = (self.getSignedNumber(int(sf3d6, 2), 24))*pow(2, -43)*math.pi
+                # SF3D7
+                sf3d7 = '{0:024b}'.format(int(join.join((line[216:218], line[214:216], line[212:214])), 16), 2)
+                idot = int(join.join((sf3d7[0:6], sf3d7[8:16])), 2)*pow(2, -43)*math.pi
+                iodesf3 = int(sf3d7[16:24], 2)
 
-                cic = int(join.join((line[158:160], line[156:158])), 16)*pow(2, -29)
-                omega0 = int(join.join((line[168:170], line[166:168], line[164:166], line[160:162])), 16)*pow(2, -31)*math.pi
-                cis = int(join.join((line[174:176], line[172:174])), 16)*pow(2, -29)
-                i0 = int(join.join((line[184:186], line[182:184], line[180:182], line[176:178])), 16)*pow(2, -31)*math.pi
-                crc = int(join.join((line[190:192], line[188:190])), 16)*pow(2, -5)
-                omega = int(join.join((line[200:202], line[198:200], line[196:198], line[192:194])), 16)*pow(2, -31)*math.pi
-                omegadot = int(join.join((line[208:210], line[206:208], line[204:206])), 16)*pow(2, -43)*math.pi
-                iodesf3 = int(line[212:214], 16)
-
-                sf3d7 = format(int(join.join((line[216:218], line[214:216])), 16), 'b')
-                idot = int(join.join((sf3d7[0:2], sf3d7[4:16])), 2)*pow(2, -43)*math.pi
-
-                ephemeris[i] = {'svid': svid, 'wn': wn, 'cap': cap, 'ura': ura, 'health': health,
+                ephemeris[i] = {'svid': svid, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
                                 'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
                                 'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
                                 'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,

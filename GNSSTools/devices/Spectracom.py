@@ -16,12 +16,14 @@ from GNSSTools.devices.device import Device
 
 class Spectracom(Device):
 
-    def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='current_pos.txt', almanach='almanach.txt'):
+    def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='datatxt/current_pos.txt',
+                 almanach='datatxt/almanach.txt', latest='datatxt/latest.txt'):
         super(Spectracom, self).__init__(datafile)
         self.com = com
         self.datafile = datafile
         self.currentposfile = currentposfile
         self.almanach = almanach
+        self.latest = latest
         try:
             self.spectracom = pyvisa.ResourceManager().open_resource(self.com)
         except:
@@ -513,3 +515,9 @@ class Spectracom(Device):
         almanach.append(inter)
         file.close()
         return almanach
+
+    def get_latest(self):
+        file = open(self.latest, 'w')
+        self.spectracom.write('MMEMory:CDIRectory observations')
+        file.write(self.spectracom.query('MMEMory:DATA? latest.obs'))
+        file.close()

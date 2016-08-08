@@ -87,17 +87,18 @@ class Device:
         for line in file:
             if line[3:6] == 'RMC':
                 data = line.split(',')
-                time = data[1]
-                lat = tools.dm_to_dd(float(data[3])/100)
-                ns = data[4]
-                long = tools.dm_to_dd(float(data[5])/100)
-                ew = data[6]
-                speed_over_ground = data[7]
-                course_over_ground = data[8]
-                rmc[i] = {'time': time, 'lat': lat, 'N/S': ns, 'long': long, 'E/W': ew,
-                          'Speed Over Ground': speed_over_ground,
-                          'Course Over Ground': course_over_ground}
-                i += 1
+                if (data[3] and data[5]) != '':
+                    time = data[1]
+                    lat = tools.dm_to_dd(float(data[3])/100)
+                    ns = data[4]
+                    long = tools.dm_to_dd(float(data[5])/100)
+                    ew = data[6]
+                    speed_over_ground = data[7]
+                    course_over_ground = data[8]
+                    rmc[i] = {'time': time, 'lat': lat, 'N/S': ns, 'long': long, 'E/W': ew,
+                              'Speed Over Ground': speed_over_ground,
+                              'Course Over Ground': course_over_ground}
+                    i += 1
         file.close()
         return json.dumps(rmc, indent=4)
 
@@ -115,7 +116,7 @@ class Device:
         #        "1": {...
         #        }
         #   }
-        #}
+        # }
         file = self.fileopen()
         gsv = {}
         k = 0
