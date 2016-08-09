@@ -1,3 +1,12 @@
+# Tampere University of Technology
+#
+# DESCRIPTION
+# Calls the html script. Processing functions are added.
+# This file is launched on the browser
+#
+# AUTHOR
+# Yannick DEFRANCE
+
 drop table if exists entries;
 create table entries (
   id integer primary key autoincrement,

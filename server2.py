@@ -1,4 +1,14 @@
-__author__ = 'defrance'
+# Tampere University of Technology
+#
+# DESCRIPTION
+# Launches the localhost server
+#
+# AUTHOR
+# Yannick DEFRANCE
+
+
+#!/usr/bin/python3
+
 import http.server
 
 if __name__ == '__main__' :
