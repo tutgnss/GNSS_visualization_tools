@@ -160,7 +160,7 @@ color: red;
 </section>
 
 <fieldset>
-    <legend>Visualisation of the
+    <legend>Visualization of the
 """
 
 tileLayer = """
