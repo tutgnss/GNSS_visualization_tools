@@ -369,32 +369,39 @@ class Ublox(Device):
         data.close()
 
     def klobuchar_data(self):
-        # creates the matrix of ionospheric data decimal values
+        # creates the dictionnary of ionospheric data decimal values
         # Return:
-        # klobuchar: [[kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3]][...]]
+        # klobuchar: [[utctow, kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3]][...]]
         # where: kloa0 and klob0 in second
         #        kloa1 and klob1 in second/radian (semi circle*pi)
         #        kloa2 and klob2 in second/radian^2
         #        kloa3 and klob3 in second/radian^3
         file = self.fileopen()
+        join = ''
         klobuchar = {}
         i = 0
         for line in file:
             if line[0:12] == 'b5620b024800':
                 # hui message
-                kloa0 = int(line[84:92], 16)*pow(2, -30)
-                kloa1 = int(line[92:100], 16)*pow(2, -27)/math.pi
-                kloa2 = int(line[100:108], 16)*pow(2, -24)/pow(2, math.pi)
-                kloa3 = int(line[108:116], 16)*pow(2, -24)/pow(3, math.pi)
-                klob0 = int(line[116:124], 16)*pow(2, 11)
-                klob1 = int(line[124:132], 16)*pow(2, 14)/math.pi
-                klob2 = int(line[132:140], 16)*pow(2, 16)/pow(2, math.pi)
-                klob3 = int(line[140:148], 16)*pow(2, 16)/pow(3, math.pi)
-                klobuchar[i] = {'kloa0': kloa0, 'kloa1': kloa1, 'kloa2': kloa2, 'kloa3': kloa3,
+                utctow = int(join.join((line[58:60], line[56:58], line[54:56], line[52:54])), 16)
+                kloa0 = int(join.join((line[90:92], line[88:90], line[86:88], line[84:86])), 16)*pow(2, -30)
+                kloa1 = int(join.join((line[98:100], line[96:98], line[94:96], line[92:94])), 16)*pow(2, -27)/math.pi
+                kloa2 = int(join.join((line[106:108], line[104:106], line[102:104], line[100:102])), 16)\
+                        * pow(2, -24)/pow(2, math.pi)
+                kloa3 = int(join.join((line[114:116], line[112:114], line[110:112], line[108:110])), 16)\
+                        * pow(2, -24)/pow(3, math.pi)
+                klob0 = int(join.join((line[122:124], line[120:122], line[118:120], line[116:118])), 16)*pow(2, 11)
+                klob1 = int(join.join((line[130:132], line[128:130], line[126:128], line[124:126])), 16)\
+                        * pow(2, 14)/math.pi
+                klob2 = int(join.join((line[138:140], line[136:138], line[134:136], line[132:134])), 16)\
+                        * pow(2, 16)/pow(2, math.pi)
+                klob3 = int(join.join((line[146:148], line[144:146], line[142:144], line[140:142])), 16)\
+                        * pow(2, 16)/pow(3, math.pi)
+                klobuchar[i] = {'utctow': utctow, 'kloa0': kloa0, 'kloa1': kloa1, 'kloa2': kloa2, 'kloa3': kloa3,
                                 'klob0': klob0, 'klob1': klob1, 'klob2': klob2, 'klob3': klob3}
                 i += 1
         file.close()
-        return json.dumps(klobuchar, indent=4)
+        return klobuchar
 
     @staticmethod
     def uratometer(uraindex):
@@ -450,6 +457,48 @@ class Ublox(Device):
             return number & mask
 
     def ephemeris_data(self):
+        # Stores the EPH data under this way :
+        # Return:
+        # ephemeris: {'svid': svid, 'tow': tow, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
+        #             'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
+        #             'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
+        #             'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,
+        #             'toe': toe, 'flag': flag, 'aodo': aodo, 'cic': cic, 'omega0': omega0,
+        #             'cis': cis, 'i0': i0, 'crc': crc, 'omega': omega, 'omegadot': omegadot,
+        #             'iodesf3': iodesf3, 'idot': idot}
+        # where:
+        #       svid - satellite ID for which this ephemeris data is valid
+        #       tow - Time of week - seconds
+        #       wn - Week number
+        #       l2 -
+        #       ura - User Range Accuracy
+        #       health
+        #       iodc - Issue Of Data Clock
+        #       tgd - Estimated group delay differential - seconds
+        #       toc - Clock data reference time - seconds
+        #       af2 - polynomial coefficient - second/second^2
+        #       af1 - polynomial coefficient - second/second
+        #       af0 - polynomial coefficient - second
+        #       iodesf2 - issue of data ephemeris - subframe 2
+        #       crs - amplitude of the sine harmonic correction term to the orbit radius - meters
+        #       deltan - mean motion difference from computed value - radians/sec
+        #       m0 - mean anomay at reference time - radians
+        #       cuc - amplitude of the cosine harmonic correction term to the argument of latitude - radians
+        #       e - eccentricity
+        #       cus - amplitude of the sine harmonic correction term to the argument of latitude - radians
+        #       sqrta - square root of semi major axis - meters^(1/2)
+        #       toe - reference time ephemeris - seconds
+        #       flag - fit interval flag
+        #       aodo - Age Of Data Offset
+        #       cic - amplitude of the cosine harmonic correction term to the angle of inclination - radians
+        #       omega0 - longitude of ascending node of orbit plane at weekly epoch - radians
+        #       cis - amplitude of the sine harmonic correction term to the angle of inclination - radians
+        #       i0 - inclinaison angle at reference time - radians
+        #       crc - amplitude of the cosine harmonic correction term to the orbit radius - meters
+        #       omega - argument of perigee - radians
+        #       omegadot - rate of right ascension - radians/second
+        #       iodesf3 - issue of data ephemeris subframe 3
+        #       idot - rate of inclination angle - radians/second
         file = self.fileopen()
         ephemeris = {}
         i = 0
@@ -457,87 +506,89 @@ class Ublox(Device):
             if line[0:12] == 'b5620b316800':
                 join = ''
                 svid = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
+                how = '{0:032b}'.format(int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16), 2)
+                tow = int(how[0:17], 2)
                 # SF1D0
                 sf1d0 = '{0:024b}'.format(int(join.join((line[32:34], line[30:32], line[28:30])), 16), 2)
-                health = self.healthmean(sf1d0[0:6])
-                iodcmsb = sf1d0[6:8]
-                wn = int(join.join((sf1d0[8:10], sf1d0[16:24])), 2)
+                health = self.healthmean(sf1d0[16:22])
+                iodcmsb = sf1d0[22:24]
+                wn = int(sf1d0[0:10], 2)
                 l2 = self.l2mean(sf1d0[10:12])
                 ura = self.uratometer(int(sf1d0[12:16], 2))
                 # SF1D4
                 sf1d4 = '{0:024b}'.format(int(join.join((line[64:66], line[62:64], line[60:62])), 16), 2)
-                tgd = (self.getSignedNumber(int(sf1d4[0:8], 2), 8))*pow(2, -31)
+                tgd = (self.getSignedNumber(int(sf1d4[16:24], 2), 8))*pow(2, -31)
                 # SF1D5
                 sf1d5 = '{0:024b}'.format(int(join.join((line[72:74], line[70:72], line[68:70])), 16), 2)
-                iodc = int(join.join((sf1d5[16:24], iodcmsb)), 2)
-                toc = int(sf1d5[0:16], 2)*pow(2, 4)
+                iodc = int(join.join((iodcmsb, sf1d5[0:8])), 2)
+                toc = int(sf1d5[8:24], 2)*pow(2, 4)
                 # SF1D6
                 sf1d6 = '{0:024b}'.format(int(join.join((line[80:82], line[78:80], line[76:78])), 16), 2)
-                af2 = (self.getSignedNumber(int(sf1d6[16:24], 2), 8))*pow(2, -55)
-                af1 = (self.getSignedNumber(int(sf1d6[0:16], 2), 16))*pow(2, -43)
+                af2 = (self.getSignedNumber(int(sf1d6[0:8], 2), 8))*pow(2, -55)
+                af1 = (self.getSignedNumber(int(sf1d6[8:24], 2), 16))*pow(2, -43)
                 # SF1D7
                 sf1d7 = '{0:024b}'.format(int(join.join((line[88:90], line[86:88], line[84:86])), 16), 2)
-                af0 = (self.getSignedNumber(int(join.join((sf1d7[0:6], sf1d7[8:24])), 2), 22))*pow(2, -31)
+                af0 = (self.getSignedNumber(int(sf1d7[0:22], 2), 22))*pow(2, -31)
                 # SF2D0
                 sf2d0 = '{0:024b}'.format(int(join.join((line[96:98], line[94:96], line[92:94])), 16), 2)
-                iodesf2 = int(sf2d0[16:24], 2)
-                crs = (self.getSignedNumber(int(sf2d0[0:16], 2), 16))*pow(2, -5)
+                iodesf2 = int(sf2d0[0:8], 2)
+                crs = (self.getSignedNumber(int(sf2d0[8:24], 2), 16))*pow(2, -5)
                 # SF2D1
                 sf2d1 = '{0:024b}'.format(int(join.join((line[104:106], line[102:104], line[100:102])), 16), 2)
-                deltan = (self.getSignedNumber(int(sf2d1[8:24], 2), 16))*pow(2, -43)*math.pi
-                m0msb = sf2d1[0:8]
+                deltan = (self.getSignedNumber(int(sf2d1[0:16], 2), 16))*pow(2, -43)*math.pi
+                m0msb = sf2d1[16:24]
                 # SF2D2
                 sf2d2 = '{0:024b}'.format(int(join.join((line[112:114], line[110:112], line[108:110])), 16), 2)
-                m0 = (self.getSignedNumber(int(join.join((sf2d2, m0msb)), 2), 32))*pow(2, -31)*math.pi
+                m0 = (self.getSignedNumber(int(join.join((m0msb, sf2d2)), 2), 32))*pow(2, -31)*math.pi
                 # SF2D3
                 sf2d3 = '{0:024b}'.format(int(join.join((line[120:122], line[118:120], line[116:118])), 16), 2)
-                emsb = sf2d3[0:8]
-                cuc = (self.getSignedNumber(int(sf2d3[8:24], 2), 16))*pow(2, -29)
+                emsb = sf2d3[16:24]
+                cuc = (self.getSignedNumber(int(sf2d3[0:16], 2), 16))*pow(2, -29)
                 # SF2D4
                 sf2d4 = '{0:024b}'.format(int(join.join((line[128:130], line[126:128], line[124:126])), 16), 2)
-                e = (int(join.join((sf2d4, emsb)), 2))*pow(2, -33)
+                e = (int(join.join((emsb, sf2d4)), 2))*pow(2, -33)
                 # SF2D5
                 sf2d5 = '{0:024b}'.format(int(join.join((line[136:138], line[134:136], line[132:134])), 16), 2)
-                sqrtamsb = sf2d5[0:8]
-                cus = (self.getSignedNumber(int(sf2d5[8:24], 2), 16))*pow(2, -29)
+                sqrtamsb = sf2d5[16:24]
+                cus = (self.getSignedNumber(int(sf2d5[0:16], 2), 16))*pow(2, -29)
                 # SF2D6
                 sf2d6 = '{0:024b}'.format(int(join.join((line[144:146], line[142:144], line[140:142])), 16), 2)
-                sqrta = (int(join.join((sf2d6, sqrtamsb)), 2))*pow(2, -19)
+                sqrta = (int(join.join((sqrtamsb, sf2d6)), 2))*pow(2, -19)
                 # SF2D7
                 sf2d7 = '{0:024b}'.format(int(join.join((line[152:154], line[150:152], line[148:150])), 16), 2)
-                flag = self.fitintervalmean(sf2d7[0])
-                aodo = int(sf2d7[1:6], 2)
-                toe = int(sf2d7[8:24], 2)*pow(2, 4)
+                flag = self.fitintervalmean(sf2d7[17])
+                aodo = int(sf2d7[18:23], 2)
+                toe = int(sf2d7[0:16], 2)*pow(2, 4)
                 # SF3D0
                 sf3d0 = '{0:024b}'.format(int(join.join((line[160:162], line[158:160], line[156:158])), 16), 2)
-                omega0msb = sf3d0[0:8]
-                cic = (self.getSignedNumber(int(sf3d0[8:24], 2), 16))*pow(2, -29)
+                omega0msb = sf3d0[16:24]
+                cic = (self.getSignedNumber(int(sf3d0[0:16], 2), 16))*pow(2, -29)
                 # SF3D1
                 sf3d1 = '{0:024b}'.format(int(join.join((line[168:170], line[166:168], line[164:166])), 16), 2)
-                omega0 = (self.getSignedNumber(int(join.join((sf3d1, omega0msb)), 2), 32))*pow(2, -31)*math.pi
+                omega0 = (self.getSignedNumber(int(join.join((omega0msb, sf3d1)), 2), 32))*pow(2, -31)*math.pi
                 # SF3D2
-                sf3d2 = '{0:024b}'.format(int(join.join((line[174:178], line[174:176], line[172:174])), 16), 2)
-                i0msb = sf3d2[0:8]
-                cis = (self.getSignedNumber(int(sf3d2[8:24], 2), 16))*pow(2, -29)
+                sf3d2 = '{0:024b}'.format(int(join.join((line[176:178], line[174:176], line[172:174])), 16), 2)
+                i0msb = sf3d2[16:24]
+                cis = (self.getSignedNumber(int(sf3d2[0:16], 2), 16))*pow(2, -29)
                 # SF3D3
                 sf3d3 = '{0:024b}'.format(int(join.join((line[184:186], line[182:184], line[180:182])), 16), 2)
-                i0 = (self.getSignedNumber(int(join.join((sf3d3, i0msb)), 2), 32))*pow(2, -31)*math.pi
+                i0 = (self.getSignedNumber(int(join.join((i0msb, sf3d3)), 2), 32))*pow(2, -31)*math.pi
                 # SF3D4
                 sf3d4 = '{0:024b}'.format(int(join.join((line[192:194], line[190:192], line[188:190])), 16), 2)
-                omegamsb = sf3d4[0:8]
-                crc = (self.getSignedNumber(int(sf3d4[8:24], 2), 16))*pow(2, -5)
+                omegamsb = sf3d4[16:24]
+                crc = (self.getSignedNumber(int(sf3d4[0:16], 2), 16))*pow(2, -5)
                 # SF3D5
                 sf3d5 = '{0:024b}'.format(int(join.join((line[200:202], line[198:200], line[196:198])), 16), 2)
-                omega = (self.getSignedNumber(int(join.join((sf3d5, omegamsb)), 2), 32))*pow(2, -31)*math.pi
+                omega = (self.getSignedNumber(int(join.join((omegamsb, sf3d5)), 2), 32))*pow(2, -31)*math.pi
                 # SF3D6
                 sf3d6 = '{0:024b}'.format(int(join.join((line[208:210], line[206:208], line[204:206])), 16), 2)
                 omegadot = (self.getSignedNumber(int(sf3d6, 2), 24))*pow(2, -43)*math.pi
                 # SF3D7
                 sf3d7 = '{0:024b}'.format(int(join.join((line[216:218], line[214:216], line[212:214])), 16), 2)
-                idot = int(join.join((sf3d7[0:6], sf3d7[8:16])), 2)*pow(2, -43)*math.pi
-                iodesf3 = int(sf3d7[16:24], 2)
+                idot = int(sf3d7[8:22], 2)*pow(2, -43)*math.pi
+                iodesf3 = int(sf3d7[0:8], 2)
 
-                ephemeris[i] = {'svid': svid, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
+                ephemeris[i] = {'svid': svid, 'tow': tow, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
                                 'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
                                 'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
                                 'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,
@@ -546,7 +597,66 @@ class Ublox(Device):
                                 'iodesf3': iodesf3, 'idot': idot}
                 i += 1
         file.close()
-        return json.dumps(ephemeris, indent=4)
+        return ephemeris
+
+    def pos_with_eph(self):
+        # Compute the ECEF position from ephemeris :
+        # Return:
+        # pos: {
+        #    "0": {
+        #        "y": ECEF y ,
+        #        "z": ECEF z,
+        #        "x": ECEF x,
+        #        "svid":
+        #    },
+        pos = {}
+        p = 0
+
+        dic = self.ephemeris_data()
+
+        for eph in range(len(dic)):
+            if dic[eph]['tow'] != 0:
+                    mu = 3.986005*(10**14)  # WGS84 value for the earth's universal gravitational parameter for GPS user in meters^3/sec^2
+                    omegaedot = 7.2921151467*(10**-5)  # WGS84 value of the earth's rotation rate in rad/sec
+                    A = (dic[eph]['sqrta'])**2  # Semi-major axis
+                    n0 = math.sqrt(mu/(A**3))  # Computed mean motion in rad/sec
+
+                    if ((dic[eph]['tow'])*(10**(-3)) - dic[eph]['toe']) > 302400:
+                        tk = (dic[eph]['tow']*(10**(-3))) - dic[eph]['toe'] - 604800  # Time from ephemeris reference epoch in sec
+                    elif ((dic[eph]['tow']*(10**(-3))) - dic[eph]['toe']) < - 302400:
+                        tk = (dic[eph]['tow']*(10**(-3))) - dic[eph]['toe'] + 604800
+                    else:
+                        tk = (dic[eph]['tow']*(10**(-3))) - dic[eph]['toe']
+
+                    n = n0 + (dic[eph]['deltan'])  # Corrected mean motion in rad/sec
+                    Mk0 = dic[eph]['m0'] + n * tk  # Mean anomaly
+
+                    # solve equation Mk by iteration
+                    e = dic[eph]['e']
+                    Ek = 0.1
+
+                    for j in range(1000):
+                        vk = math.atan((math.sqrt(1 - e**2) * math.sin(Ek))/((math.cos(Ek) - e)))  # true anomaly
+                        Ek = math.acos((e + math.cos(vk))/(1 + e * math.cos(Ek)))  # eccentric anomaly
+                        j +=1
+
+                    Mk = Ek - e * Ek  # Kepler's Equation for Eccentric Anomaly in radians
+                    phik = vk + dic[eph]['omega']  # argument of latitude
+                    deltauk = dic[eph]['cus']*math.sin(2*phik) + dic[eph]['cuc']*math.cos(2*phik)  # argument of latitude correction
+                    deltark = dic[eph]['crs']*math.sin(2*phik) + dic[eph]['crc']*math.cos(2*phik)  # radius correction
+                    deltaik = dic[eph]['cis']*math.sin(2*phik) + dic[eph]['cic']*math.cos(2*phik)  # inclination correction
+                    uk = deltauk + phik  # corrected argument of latitude
+                    rk = A * (1 - e * math.cos(Ek)) + deltark  # corrected radius
+                    ik = dic[eph]['i0'] + deltaik + dic[eph]['idot'] * tk  # corrected inclination
+                    xkp = rk * math.cos(uk)  # Positions in orbital plane
+                    ykp = rk * math.sin(uk)
+                    omegak = dic[eph]['omega0'] + (dic[eph]['omegadot'] - omegaedot) * tk - omegaedot * dic[eph]['toe']  # corrected longitude of ascending node
+                    xk = xkp * math.cos(omegak) - ykp * math.cos(ik) * math.sin(omegak)
+                    yk = xkp * math.sin(omegak) - ykp * math.cos(ik) * math.cos(omegak)
+                    zk = ykp * math.sin(ik)
+                    pos[p] = {'svid': dic[eph]['svid'] ,'x': xk, 'y': yk, 'z': zk}
+                    p += 1
+        return json.dumps(pos, indent=4)
 
     def raw_data(self):
         # Stores the PRN data under this way :
