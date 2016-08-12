@@ -17,7 +17,7 @@ def get_sec(date):
     # Input:
     # date: date in this format DD:HH:MM:SS
     # Return:
-    # the value of the date in secondes
+    # the value of the date in seconds
     d, h, m, s = [int(i) for i in date.split(':')]
     return d*3600*24 + h*3600 + m*60 + s
 
@@ -181,11 +181,11 @@ def rms_2d(lat_error, long_error):
 def rms_3d(lat_error, long_error, alt_error):
     # Compute the root mean square 3D error (in latitude, longitude and altitude)
     # Input:
-    # alt_error: list of difference of altitude between lists at each time
-    # lat_error: list of difference of latitude between lists at each time
-    # long_error: list of difference of longitude between lists at each time
+    #       alt_error: list of difference of altitude between lists at each time
+    #       lat_error: list of difference of latitude between lists at each time
+    #       long_error: list of difference of longitude between lists at each time
     # Return:
-    # rms3d: RMS 3D error
+    #       rms3d: RMS 3D error
     alt = [nb * nb for nb in alt_error]
     lat = [nb * nb for nb in lat_error]
     long = [nb * nb for nb in long_error]
@@ -201,6 +201,9 @@ def rms_3d(lat_error, long_error, alt_error):
 
 def data(filename):
     # take only the information GPGGA (global positionning system fix data)
+    # Input:
+    # file with nmea gga data
+    # Return:
     # gpgga = [time in HHMMSS.DD, LAT in DMS, LONG in DMS, ALT in m, N/S, E/W]
     read = open(filename, 'r')
     gpgga = []
@@ -261,3 +264,33 @@ def computation(file1='datatxt/spectracom_data.nmea', file2='datatxt/ublox_proce
     else:
         raise ValueError('Not enough data available')
     return rms1dalt, rms1dlat, rms1dlong, rms2d, rms3d
+
+
+def r4(message):
+    # Decode IEEE 754 Single Precision message
+    # Input: message to decode
+    # Return: message decoded
+    binary = '{0:032b}'.format(int(message, 16), 2)
+    sign = int(binary[0], 2)
+    exponent = int(binary[1:9], 2) - 127
+    rawmantisse = binary[9:32]
+    mantisse = 1
+    for i in range(23):
+        mantisse += int(rawmantisse[i], 2) * (2**-(i+1))
+    value = pow(-1, sign) * mantisse * pow(2, exponent)
+    return value
+
+
+def r8(message):
+    # Decode IEEE 754 Double Precision message
+    # Input: message to decode
+    # Return: message decoded
+    binary = '{0:064b}'.format(int(message, 16), 2)
+    sign = int(binary[0], 2)
+    exponent = int(binary[1:12], 2) - 1023
+    rawmantisse = binary[12:64]
+    mantisse = 1
+    for i in range(52):
+        mantisse += int(rawmantisse[i], 2) * (2**-(i+1))
+    value = pow(-1, sign) * mantisse * pow(2, exponent)
+    return value

@@ -18,7 +18,7 @@ class Spectracom(Device):
 
     def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='datatxt/current_pos.txt',
                  almanach='datatxt/almanach.txt', latest='datatxt/latest.txt'):
-        super(Spectracom, self).__init__(datafile)
+        super(Spectracom, self).__init__()
         self.com = com
         self.datafile = datafile
         self.currentposfile = currentposfile

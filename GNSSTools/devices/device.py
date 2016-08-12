@@ -13,26 +13,23 @@ import json
 
 class Device:
 
-    def __init__(self, datafile):
-        self.datafile = datafile
-
     def open(self):
         pass
 
     def close(self):
         pass
 
-    def fileopen(self):
+    def fileopen(self, datafile):
         try:
-            f = urllib.request.urlopen(self.datafile)
+            f = urllib.request.urlopen(datafile)
         except:
             try:
-                f = open(self.datafile, 'r')
+                f = open(datafile, 'r')
             except ValueError:
                 print("Can't open this")
         return f
 
-    def nmea_gga_store(self):
+    def nmea_gga_store(self, datafile):
         # Read file and take only the information GGA (global positioning system fix data) data
         # Return:
         # gga: dictionnary of GGA data parsing this way:
@@ -46,7 +43,8 @@ class Device:
         #        "1": {...
         #       }
         #   }
-        read = self.fileopen()
+        #read = self.fileopen(datafile)
+        read = open(datafile, 'r')
         gga = {}
         a = 1
         b = 1
@@ -65,7 +63,7 @@ class Device:
         read.close()
         return json.dumps(gga, indent=4)
 
-    def nmea_rmc_store(self):
+    def nmea_rmc_store(self, datafile):
         # Read data collected and store into matrix RMC data
         # Return:
         # rmc: {
@@ -81,7 +79,7 @@ class Device:
         #    "1": {...
         #    }
         #}
-        file = self.fileopen()
+        file = self.fileopen(de)
         rmc = {}
         i = 0
         for line in file:

@@ -13,13 +13,14 @@ import binascii
 import math
 import json
 from GNSSTools.devices.device import Device
+import GNSSTools.tools as tools
 
 
 class Ublox(Device):
 
     def __init__(self, com, baud_rate=4800, data_bits=8, parity='N', stop_bit=1, timeout=1,
                  rawdatafile='datatxt/ublox_raw_data.txt', procdatafile='datatxt/ublox_processed_data.txt'):
-        super(Ublox, self).__init__(procdatafile)
+        super(Ublox, self).__init__()
         self.com = com
         self.baud_rate = baud_rate
         self.data_bits = data_bits
@@ -356,7 +357,7 @@ class Ublox(Device):
 
     def miseenforme(self):
         # UBX messages doesn't include \n at the end of each messages, this function explicitly put them
-        data = open(self.rawdatafile, 'r')
+        data = self.fileopen(self.rawdatafile)
         thing = data.read()
         data.close()
 
@@ -371,33 +372,57 @@ class Ublox(Device):
     def klobuchar_data(self):
         # creates the dictionnary of ionospheric data decimal values
         # Return:
-        # klobuchar: [[utctow, kloa0, kloa1, kloa2, kloa3, klob0, klob1, klob2, klob3]][...]]
-        # where: kloa0 and klob0 in second
-        #        kloa1 and klob1 in second/radian (semi circle*pi)
-        #        kloa2 and klob2 in second/radian^2
-        #        kloa3 and klob3 in second/radian^3
-        file = self.fileopen()
+        # klobuchar: {
+        #    "0": {
+        #        "utcls":  UTC - time difference due to leap seconds before event,
+        #        "kloa1": Klobuchar - alpha 1 - second/semicircle,
+        #        "kloa0": Klobuchar - alpha 0 - second,
+        #        "utcwnf": UTC - week number when next leap second event occurs,
+        #        "health": Bitmask, every bit represents a GPS SV (1-32). If the bit is set the SV is healthy.,
+        #        "kloa3": Klobuchar - alpha 3 - second/semicircle^3,
+        #        "klob1": Klobuchar - beta 1 - second/semicircle,
+        #        "klob3": Klobuchar - beta 3 - second/semicircle^3,
+        #        "utclsf": UTC - time difference due to leap seconds after event,
+        #        "kloa2": Klobuchar - alpha 2 - second/semicircle^2,
+        #        "klob2": Klobuchar - beta 2 - second/semicircle^2,
+        #        "klob0": Klobuchar - beta 0 - second,
+        #        "utcwn": UTC - reference week number,
+        #        "utca0": UTC - parameter A0,
+        #        "utcdn": UTC - day of week when next leap second event occurs,
+        #        "utca1": UTC - parameter A1,
+        #        "utctow": reference time of week
+        #    }
+        # }
+        #file = self.fileopen(self.procdatafile)
+        file = open(self.procdatafile, 'r')
         join = ''
         klobuchar = {}
         i = 0
         for line in file:
             if line[0:12] == 'b5620b024800':
-                # hui message
+                health = (join.join((line[18:20], line[16:18], line[14:16], line[12:14])))
                 utctow = int(join.join((line[58:60], line[56:58], line[54:56], line[52:54])), 16)
-                kloa0 = int(join.join((line[90:92], line[88:90], line[86:88], line[84:86])), 16)*pow(2, -30)
-                kloa1 = int(join.join((line[98:100], line[96:98], line[94:96], line[92:94])), 16)*pow(2, -27)/math.pi
-                kloa2 = int(join.join((line[106:108], line[104:106], line[102:104], line[100:102])), 16)\
-                        * pow(2, -24)/pow(2, math.pi)
-                kloa3 = int(join.join((line[114:116], line[112:114], line[110:112], line[108:110])), 16)\
-                        * pow(2, -24)/pow(3, math.pi)
-                klob0 = int(join.join((line[122:124], line[120:122], line[118:120], line[116:118])), 16)*pow(2, 11)
-                klob1 = int(join.join((line[130:132], line[128:130], line[126:128], line[124:126])), 16)\
-                        * pow(2, 14)/math.pi
-                klob2 = int(join.join((line[138:140], line[136:138], line[134:136], line[132:134])), 16)\
-                        * pow(2, 16)/pow(2, math.pi)
-                klob3 = int(join.join((line[146:148], line[144:146], line[142:144], line[140:142])), 16)\
-                        * pow(2, 16)/pow(3, math.pi)
-                klobuchar[i] = {'utctow': utctow, 'kloa0': kloa0, 'kloa1': kloa1, 'kloa2': kloa2, 'kloa3': kloa3,
+                utcwn = int(join.join((line[62:64], line[60:62])), 16)
+                utcls = int(join.join((line[66:68], line[64:66])), 16)
+                utcwnf = int(join.join((line[70:72], line[68:70])), 16)
+                utcdn = int(join.join((line[74:76], line[72:74])), 16)
+                utclsf = int(join.join((line[78:80], line[76:78])), 16)
+                utca0 = tools.r8(join.join((line[34:36], line[32:34], line[30:32], line[28:30],
+                                            line[26:28], line[24:26], line[22:24], line[20:22])))
+                utca1 = tools.r8(join.join((line[50:52], line[48:50], line[46:48], line[44:46],
+                                            line[42:44], line[40:42], line[38:40], line[36:38])))
+                kloa0 = tools.r4(join.join((line[90:92], line[88:90], line[86:88], line[84:86])))
+                kloa1 = tools.r4(join.join((line[98:100], line[96:98], line[94:96], line[92:94])))
+                kloa2 = tools.r4(join.join((line[106:108], line[104:106], line[102:104], line[100:102])))
+                kloa3 = tools.r4(join.join((line[114:116], line[112:114], line[110:112], line[108:110])))
+                klob0 = tools.r4(join.join((line[122:124], line[120:122], line[118:120], line[116:118])))
+                klob1 = tools.r4(join.join((line[130:132], line[128:130], line[126:128], line[124:126])))
+                klob2 = tools.r4(join.join((line[138:140], line[136:138], line[134:136], line[132:134])))
+                klob3 = tools.r4(join.join((line[146:148], line[144:146], line[142:144], line[140:142])))
+
+                klobuchar[i] = {'health': health, 'utcwn': utcwn, 'utcls': utcls, 'utcwnf': utcwnf, 'utcdn': utcdn,
+                                'utclsf': utclsf, 'utctow': utctow, 'utca0': utca0, 'utca1': utca1, 'kloa0': kloa0,
+                                'kloa1': kloa1, 'kloa2': kloa2, 'kloa3': kloa3,
                                 'klob0': klob0, 'klob1': klob1, 'klob2': klob2, 'klob3': klob3}
                 i += 1
         file.close()
@@ -499,7 +524,7 @@ class Ublox(Device):
         #       omegadot - rate of right ascension - radians/second
         #       iodesf3 - issue of data ephemeris subframe 3
         #       idot - rate of inclination angle - radians/second
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         ephemeris = {}
         i = 0
         for line in file:
@@ -673,7 +698,7 @@ class Ublox(Device):
         #       mesqi,  Nav Measurements Quality Indicator: >=4 : PR+DO OK   >=5 : PR+DO+CP OK
         #                                   <6 : likely loss of carrier lock in previous interval
         #       cno in dBHz,  Signal strength C/No
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         raw = {}
         r = 0
         join = ''
@@ -715,7 +740,7 @@ class Ublox(Device):
         #           pacc, tacc, staticholdthresh, dgpstimeout, cnothreshnumsv, cnothresh}{...}}
         # dop: {{itow, gdop, pdop, tdop, vdop, hdop, ndop, edop}{...}}
         # svsi: {{itow, week, numvis, numsv, {{svid, elev, az, age}{...}}}{...}}
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         nav = {}
         n = 0
         dop = {}
@@ -800,7 +825,7 @@ class Ublox(Device):
         #     }
         #     {...}
         # }
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         satfaultdetection = {}
         i = 0
         for line in file:
@@ -833,7 +858,7 @@ class Ublox(Device):
         #    }
         #    "1": {...}
         # }
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         dopandactivesat = {}
         i = 0
         for line in file:
@@ -867,7 +892,7 @@ class Ublox(Device):
         #    "1":{...
         #    }
         # }
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         courseandspeed = {}
         i = 0
         for line in file:
@@ -904,7 +929,7 @@ class Ublox(Device):
         # where: az =
         #        elev =
         #
-        file = self.fileopen()
+        file = self.fileopen(self.procdatafile)
         satinview = {}
         k = 0
         for line in file:
