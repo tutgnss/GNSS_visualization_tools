@@ -2,13 +2,41 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <link href="{{ url_for('static', filename='style1.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
+         <link rel="stylesheet" href="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
         <title>GNSS Visualization Tool</title>
     </head>
 
     <body>
         <h1>GNSS Visualization Tool</h1>
-        <h1>{% set menu = ['accueil', 'news', 'contact'] %}</h1>
-
+        </br></br></br>
+        <section id="choices">
+            <article id="home">
+                <a href="/main"><h3>Home</h3></a>
+            </article>
+            <article id="add">
+                <a href=""><h3>Add scenario</h3></a>
+                <p>Add a NMEA file</p>
+            </article>
+            <article id="run">
+                <a href=""><h3>Run a scenario</h3></a>
+                <p>Select the scenario you want to play</p>
+                <form method="post" action="/scenario" enctype=multipqrt/form-data">
+                    <select name="select">
+                        <optgroup label="Scenario">
+                            <option value="circle">Circle</option>
+                            <option value="square">Square</option>
+                            <option value="acceleration">Acceleration</option>
+                            <option value="static">Static</option>
+                            <option value="cno">CN0</option>
+                            <option value="freetourban">Free to Urban</option>
+                        </optgroup>
+                    </select>
+                    <input type="submit" name="change" value="Run">
+                </form>
+            </article>
+        </section>
+        {% block body %}{% endblock %}
+        {% block fieldset %}{% endblock %}
     </body>
 </html>

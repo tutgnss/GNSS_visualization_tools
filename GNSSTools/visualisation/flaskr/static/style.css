@@ -1,0 +1,79 @@
+body            { font-family: sans-serif;
+                  background: #eee;
+                  text-align: center; }
+
+a               { color: #377ba8;
+                text-align:center;
+                text-decoration: none;
+                }
+
+h1              { color: #377ba8;
+                text-align:center;
+                font-family: 'Georgia', serif; margin: 0;
+                border-bottom: 2px solid #eee;
+                font-size: 2.5em;
+                margin-top: 1em;
+                }
+
+h2              { color: #377ba8;
+                text-align:center;
+                font-family: 'Georgia', serif; margin: 0;
+                font-size: 2em;
+                }
+
+legend          { color: black;
+                  font-weight: bold;
+                  font-size: 23px;
+                  }
+
+
+.page           { margin: 2em auto; width: 35em; border: 5px solid #ccc;
+                  padding: 0.8em; background: white; }
+
+.entries        { list-style: none; margin: 0; padding: 0; }
+
+.entries li     { margin: 0.8em 1.2em; }
+
+.entries li h2  { margin-left: -1em; }
+
+.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
+
+.add-entry dl   { font-weight: bold; }
+
+.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
+                  margin-bottom: 1em; background: #fafafa; }
+
+.flash          { background: #cee5F5; padding: 0.5em;
+                  border: 1px solid #aacbe2; }
+
+.error          { background: #f0d6d6; padding: 0.5em; }
+
+fieldset        { min-height: 20em;
+                  border-radius: 12px;
+                  margin-top: 50px;
+                  margin-right: 200px;
+                  margin-left: 200px;
+                  }
+
+#mapid          { height: 400px; }
+
+#choices        { width:100%;
+                  height:150px;
+                  border-top: 2px solid;
+                  border-bottom: 2px solid; }
+
+
+#choices #home  { float: left;
+                  width:471px;
+                  margin-top: 40px;}
+
+#choices #add   { float: left;
+                  width:978px;
+                  margin-top: 20px;}
+
+
+#choices #run   { float: left; }
+
+
+
+
