@@ -13,5 +13,3 @@ create table entries (
   title text not null,
   'text' text not null
 );
-
-sqlite3 /tmp/flaskr.db < schema.sql
