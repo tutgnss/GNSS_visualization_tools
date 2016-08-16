@@ -61,7 +61,7 @@ class Device:
                               'long': b*tools.dm_to_dd(float(split[4])/100), 'alt': split[9]}
                 i += 1
         read.close()
-        return json.dumps(gga, indent=4)
+        return gga
 
     def nmea_rmc_store(self, datafile):
         # Read data collected and store into matrix RMC data
@@ -79,7 +79,7 @@ class Device:
         #    "1": {...
         #    }
         #}
-        file = self.fileopen(de)
+        file = self.fileopen(datafile)
         rmc = {}
         i = 0
         for line in file:
@@ -98,9 +98,9 @@ class Device:
                               'Course Over Ground': course_over_ground}
                     i += 1
         file.close()
-        return json.dumps(rmc, indent=4)
+        return rmc
 
-    def nmea_gsv_store(self):
+    def nmea_gsv_store(self, datafile):
         # Read data collected and store into matrix GSV data
         # Return:
         # gsv: {
@@ -115,7 +115,7 @@ class Device:
         #        }
         #   }
         # }
-        file = self.fileopen()
+        file = self.fileopen(datafile)
         gsv = {}
         k = 0
 
@@ -157,4 +157,4 @@ class Device:
                     gsv[k] = first
                     k += 1
         file.close()
-        return json.dumps(gsv, indent=4)
+        return gsv

@@ -484,7 +484,7 @@ class Ublox(Device):
     def ephemeris_data(self):
         # Stores the EPH data under this way :
         # Return:
-        # ephemeris: {'svid': svid, 'tow': tow, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
+        # ephemeris: {'svid': svid, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
         #             'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
         #             'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
         #             'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,
@@ -493,7 +493,6 @@ class Ublox(Device):
         #             'iodesf3': iodesf3, 'idot': idot}
         # where:
         #       svid - satellite ID for which this ephemeris data is valid
-        #       tow - Time of week - seconds
         #       wn - Week number
         #       l2 -
         #       ura - User Range Accuracy
@@ -531,8 +530,6 @@ class Ublox(Device):
             if line[0:12] == 'b5620b316800':
                 join = ''
                 svid = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
-                how = '{0:032b}'.format(int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16), 2)
-                tow = int(how[0:17], 2)
                 # SF1D0
                 sf1d0 = '{0:024b}'.format(int(join.join((line[32:34], line[30:32], line[28:30])), 16), 2)
                 health = self.healthmean(sf1d0[16:22])
@@ -613,7 +610,7 @@ class Ublox(Device):
                 idot = int(sf3d7[8:22], 2)*pow(2, -43)*math.pi
                 iodesf3 = int(sf3d7[0:8], 2)
 
-                ephemeris[i] = {'svid': svid, 'tow': tow, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
+                ephemeris[i] = {'svid': svid, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
                                 'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
                                 'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
                                 'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,
@@ -640,18 +637,18 @@ class Ublox(Device):
         dic = self.ephemeris_data()
 
         for eph in range(len(dic)):
-            if dic[eph]['tow'] != 0:
+            if dic[eph]['toc'] != 0:
                     mu = 3.986005*(10**14)  # WGS84 value for the earth's universal gravitational parameter for GPS user in meters^3/sec^2
                     omegaedot = 7.2921151467*(10**-5)  # WGS84 value of the earth's rotation rate in rad/sec
                     A = (dic[eph]['sqrta'])**2  # Semi-major axis
                     n0 = math.sqrt(mu/(A**3))  # Computed mean motion in rad/sec
 
-                    if ((dic[eph]['tow'])*(10**(-3)) - dic[eph]['toe']) > 302400:
-                        tk = (dic[eph]['tow']*(10**(-3))) - dic[eph]['toe'] - 604800  # Time from ephemeris reference epoch in sec
-                    elif ((dic[eph]['tow']*(10**(-3))) - dic[eph]['toe']) < - 302400:
-                        tk = (dic[eph]['tow']*(10**(-3))) - dic[eph]['toe'] + 604800
+                    if ((dic[eph]['toc'])*(10**(-3)) - dic[eph]['toe']) > 302400:
+                        tk = (dic[eph]['toc']*(10**(-3))) - dic[eph]['toe'] - 604800  # Time from ephemeris reference epoch in sec
+                    elif ((dic[eph]['toc']*(10**(-3))) - dic[eph]['toe']) < - 302400:
+                        tk = (dic[eph]['toc']*(10**(-3))) - dic[eph]['toe'] + 604800
                     else:
-                        tk = (dic[eph]['tow']*(10**(-3))) - dic[eph]['toe']
+                        tk = (dic[eph]['toc']*(10**(-3))) - dic[eph]['toe']
 
                     n = n0 + (dic[eph]['deltan'])  # Corrected mean motion in rad/sec
                     Mk0 = dic[eph]['m0'] + n * tk  # Mean anomaly
@@ -755,12 +752,12 @@ class Ublox(Device):
                 # staticholdthresh in cm/s, dgpstimeout in s, cnothresh in dBHz
                 dynmodel = int(line[16:18], 16)
                 fixmode = int(line[18:20], 16)
-                fixedalt = int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16)
-                fixedaltvar = int(join.join((line[34:36], line[32:34], line[30:32], line[28:30])), 16)
+                fixedalt = int(join.join((line[26:28], line[24:26], line[22:24], line[20:22])), 16) * 0.01
+                fixedaltvar = int(join.join((line[34:36], line[32:34], line[30:32], line[28:30])), 16) * 0.0001
                 minelev = int(line[36:38], 16)
-                pdop = int(join.join((line[42:44], line[40:42])), 16)
-                tdop = int(join.join((line[46:48], line[44:46])), 16)
-                pacc = int(join.join((line[50:52], line[50:52])), 16)
+                pdop = int(join.join((line[42:44], line[40:42])), 16) * 0.1
+                tdop = int(join.join((line[46:48], line[44:46])), 16) * 0.1
+                pacc = int(join.join((line[50:52], line[48:50])), 16)
                 tacc = int(join.join((line[54:56], line[52:54])), 16)
                 staticholdthresh = int(line[56:58], 16)
                 dgpstimeout = int(line[58:60], 16)
@@ -775,7 +772,7 @@ class Ublox(Device):
 
             if line[0:12] == 'b56201041200':
                 # NAV-DOP
-                itow = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
+                itow = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)  # in ms
                 gdop = int(join.join((line[22:24], line[20:22])), 16)/100
                 pdop = int(join.join((line[26:28], line[24:26])), 16)/100
                 tdop = int(join.join((line[30:32], line[28:30])), 16)/100
@@ -798,19 +795,16 @@ class Ublox(Device):
                 i = 0
                 for sat in range(numsv):
                     svid = int(line[(28+12*sat):(30+12*sat)], 16)
-                    azim = int(join.join((line[(34+12*sat):(36+12*sat)], line[(32+12*sat):(34+12*sat)])), 16)
-                    elev = int(line[(36+12*sat):(38+12*sat)], 16)
+                    azim = self.getSignedNumber(int(join.join((line[(34+12*sat):(36+12*sat)], line[(32+12*sat):(34+12*sat)])), 16), 16)
+                    elev = self.getSignedNumber(int(line[(36+12*sat):(38+12*sat)], 16), 8)
                     age = int(line[(38+12*sat):(40+12*sat)], 16)
                     inter[i] = {'svid': svid, 'azim': azim, 'elev': elev, 'age': age}
                     i += 1
                 svsi[s] = {'itow': itow, 'week': week, 'numvis': numvis, 'numsv': numsv,
                            'info': inter}
                 s += 1
-        navdumps = json.dumps(nav, indent=4)
-        dopdumps = json.dumps(dop, indent=4)
-        svsidumps = json.dumps(svsi, indent=4)
         file.close()
-        return navdumps, dopdumps, svsidumps
+        return nav, dop, svsi
 
     def nmea_data_gbs(self):
         # Stores NMEA GBS data into a dictionary
@@ -840,7 +834,7 @@ class Ublox(Device):
                                         'Erralt': erralt, 'SatIDfailed': svid}
                 i += 1
         file.close()
-        return json.dumps(satfaultdetection, indent=4)
+        return satfaultdetection
 
     def nmea_data_gsa(self):
         # Stores NMEA GSA data into a dictionary
@@ -878,7 +872,7 @@ class Ublox(Device):
                                       'VDOP': vdop}
                 i += 1
         file.close()
-        return json.dumps(dopandactivesat, indent=4)
+        return dopandactivesat
 
     def nmea_data_vtg(self):
         # Stores NMEA VTG data into a dictionary
@@ -905,7 +899,7 @@ class Ublox(Device):
                                      'speed in km per hour': kph}
                 i += 1
         file.close()
-        return json.dumps(courseandspeed, indent=4)
+        return courseandspeed
 
     def nmea_data_pubx3(self):
         # Stores NMEA PUBX 03 data into a dictionary
@@ -950,7 +944,7 @@ class Ublox(Device):
                 satinview[k] = {'nb of sat': nbsat, 'info': inter}
                 k += 1
         file.close()
-        return json.dumps(satinview, indent=4)
+        return satinview
 
     def store_data(self, file):
         # Store into a file data comming from the receiver and make data processing if data are UBX message
