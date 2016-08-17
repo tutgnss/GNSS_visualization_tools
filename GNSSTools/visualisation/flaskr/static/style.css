@@ -74,6 +74,17 @@ fieldset        { min-height: 20em;
 
 #choices #run   { float: left; }
 
+.button         { background-color: #e7e7e7;
+                  border: none;
+                  color: #377ba8;
+                  padding: 12px 20px;
+                  border-radius: 12px;
+                  border: 1px solid black;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  font-size: 16px;}
+
 
 
 

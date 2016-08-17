@@ -18,14 +18,42 @@
 			id: 'mapbox.streets'
 		}).addTo(mymap);
 
-		var ublox = L.polyline({{ ubl }}, {color: 'red'}).addTo(mymap);
-		var spectracom = L.polyline({{ spec }}, {color: 'blue'}).addTo(mymap);
-		mymap.fitBounds(ublox.getBounds());
+        function onEachFeatureUbl(feature, layer) {
+			var popupContent = "hello"
+			layer.bindPopup(popupContent);
+		};
+
+		function onEachFeatureSpec(feature, layer) {
+			var popupContent = "hey"
+			layer.bindPopup(popupContent);
+		};
+
+		var ublox = {
+		    "type": "Feature",
+		    "geometry": {
+		        "type": "LineString",
+		        "coordinates": {{ ubl }}
+            }
+        };
+
+		var spectracom = {
+		    "type": "Feature",
+		    "geometry": {
+		        "type": "LineString",
+		        "coordinates": {{ spec }}
+            }
+        };
+
+		L.geoJson(ublox, {style: {"color": "red"}, onEachFeature: onEachFeatureUbl}).addTo(mymap);
+        L.geoJson(spectracom, {onEachFeature: onEachFeatureSpec}).addTo(mymap);
+
+		mymap.fitBounds(L.geoJson(ublox).getBounds());
 
 
 	</script>
     </div>
 </fieldset>
+
 
 
 

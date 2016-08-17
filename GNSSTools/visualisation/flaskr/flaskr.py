@@ -36,9 +36,10 @@ def scenario():
     P = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_ublox.txt')
     Q = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_spectracom.txt')
     for i in range(len(P)):
-        ubl.append([P[i][1],P[i][2]])
+        ubl.append([P[i][2],P[i][1]])
     for i in range(len(Q)):
-        spec.append([Q[i][1],Q[i][2]])
+        spec.append([Q[i][2],Q[i][1]])
+
     return render_template('scenario.html', ubl=ubl, spec=spec, scenario=scenario)
 
 if __name__ == '__main__':
