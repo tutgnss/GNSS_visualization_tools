@@ -19,16 +19,10 @@ from data import database
 
 app = Flask(__name__)
 
-@app.route('/main', methods=['GET','POST'])
-def main():
-    scenario = request.form.get("select")
-    a = scenario
-    return render_template('main.html', scenario=a)
-
-@app.route('/scenario', methods=['GET','POST'])
-def scenario():
+def matrix():
     ubl = []
-    spec=[]
+    spec= []
+    time= []
     if request.form.get("select") == None:
         scenario = 'static'
     else:
@@ -39,8 +33,21 @@ def scenario():
         ubl.append([P[i][2],P[i][1]])
     for i in range(len(Q)):
         spec.append([Q[i][2],Q[i][1]])
+    return [ubl,spec]
 
-    return render_template('scenario.html', ubl=ubl, spec=spec, scenario=scenario)
+
+
+
+@app.route('/main', methods=['GET','POST'])
+def main():
+    scenario = request.form.get("select")
+    a = scenario
+    return render_template('main.html', scenario=a)
+
+@app.route('/scenario', methods=['GET','POST'])
+def scenario():
+    matrix()
+    return render_template('scenario.html', ubl=matrix()[0], spec=matrix()[1], scenario=scenario)
 
 if __name__ == '__main__':
     app.run(debug=True)

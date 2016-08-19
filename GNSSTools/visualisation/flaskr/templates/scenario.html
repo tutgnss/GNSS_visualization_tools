@@ -28,11 +28,23 @@
 			layer.bindPopup(popupContent);
 		};
 
+        var popup = L.popup();
+
+        function onMapclick(e) {
+            popup
+                .setLatLng(e.latlng)
+                .setContent(e.latlng.toString() + '<br />Longitude : ' + {{ ubl[0][0] }} +
+                 '<br />Latitude : ' + {{ ubl[0][1] }} + '<a href="/main"><h3>Home</h3></a>')
+                .openOn(mymap)
+        };
+
+        mymap.on('click', onMapclick);
+
 		var ublox = {
 		    "type": "Feature",
 		    "geometry": {
-		        "type": "LineString",
-		        "coordinates": {{ ubl }}
+		        "type": "Point",
+		        "coordinates": {{ ubl[0] }}
             }
         };
 
@@ -44,7 +56,9 @@
             }
         };
 
-		L.geoJson(ublox, {style: {"color": "red"}, onEachFeature: onEachFeatureUbl}).addTo(mymap);
+		L.geoJson(ublox, {style: {"color": "red"}, onMapclick}).addTo(mymap);
+
+
         L.geoJson(spectracom, {onEachFeature: onEachFeatureSpec}).addTo(mymap);
 
 		mymap.fitBounds(L.geoJson(ublox).getBounds());
