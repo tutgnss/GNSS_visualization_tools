@@ -16,27 +16,18 @@ from GNSSTools.visualisation import create_map
 from GNSSTools.visualisation import position
 from GNSSTools.visualisation import index
 from data import database
+from GNSSTools.tools import data
 
 app = Flask(__name__)
 
-def matrix():
+def matrix(P,Q):
     ubl = []
     spec= []
-    time= []
-    if request.form.get("select") == None:
-        scenario = 'static'
-    else:
-        scenario = request.form.get("select")
-    P = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_ublox.txt')
-    Q = position.position('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_spectracom.txt')
     for i in range(len(P)):
-        ubl.append([P[i][2],P[i][1]])
+        ubl.append([P[i][2],P[i][1],P[i][0]])
     for i in range(len(Q)):
         spec.append([Q[i][2],Q[i][1]])
     return [ubl,spec]
-
-
-
 
 @app.route('/main', methods=['GET','POST'])
 def main():
@@ -46,8 +37,14 @@ def main():
 
 @app.route('/scenario', methods=['GET','POST'])
 def scenario():
-    matrix()
-    return render_template('scenario.html', ubl=matrix()[0], spec=matrix()[1], scenario=scenario)
+    if request.form.get("select") == None:
+        scenario = 'static'
+    else:
+        scenario = request.form.get("select")
+    P = data('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_ublox.txt')
+    Q = data('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_spectracom.txt')
+    matrix(P,Q)
+    return render_template('scenario.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario)
 
 if __name__ == '__main__':
     app.run(debug=True)

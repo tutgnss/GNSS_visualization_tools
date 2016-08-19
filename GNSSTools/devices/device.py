@@ -31,15 +31,26 @@ class Device:
                 print("Can't open this")
         return f
 
-    def nmea_gga_store(self):
+    def nmea_gga_store(self, datafile):
         # Read file and take only the information GGA (global positioning system fix data) data
         # Return:
-        # gga: list of GGA data parsing this way:
-        #      gga = [[time in HHMMSS.DD, LAT in DD, LONG in DD, ALT in m][...]]
-        read = self.fileopen()
-        gga = []
+        # gga: dictionnary of GGA data parsing this way:
+        #   {
+        #        "0": {
+        #           "lat": LAT in DD,
+        #           "long": LONG in DD,
+        #           "alt": ALT in m,
+        #           "time": time in HHMMSS.DD
+        #       },
+        #        "1": {...
+        #       }
+        #   }
+        #read = self.fileopen(datafile)
+        read = open(datafile, 'r')
+        gga = {}
         a = 1
         b = 1
+        i = 0
         for line in read.readlines():
             if line[3:6] == 'GGA':
                 split = line.split(',')
@@ -48,8 +59,9 @@ class Device:
                         a = -1
                     if split[5] == 'W':
                         b = -1
-                    gga.append([split[1], a*tools.dm_to_dd(float(split[2])/100),
-                                b*tools.dm_to_dd(float(split[4])/100), split[9]])
+                    gga[i] = {'time': split[1], 'lat': a*tools.dm_to_dd(float(split[2])/100),
+                              'long': b*tools.dm_to_dd(float(split[4])/100), 'alt': split[9]}
+                i += 1
         read.close()
         return gga
 

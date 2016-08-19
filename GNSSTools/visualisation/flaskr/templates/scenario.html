@@ -18,35 +18,30 @@
 			id: 'mapbox.streets'
 		}).addTo(mymap);
 
-        function onEachFeatureUbl(feature, layer) {
-			var popupContent = "hello"
-			layer.bindPopup(popupContent);
-		};
+
 
 		function onEachFeatureSpec(feature, layer) {
 			var popupContent = "hey"
 			layer.bindPopup(popupContent);
 		};
 
-        var popup = L.popup();
 
-        function onMapclick(e) {
-            popup
-                .setLatLng(e.latlng)
-                .setContent(e.latlng.toString() + '<br />Longitude : ' + {{ ubl[0][0] }} +
-                 '<br />Latitude : ' + {{ ubl[0][1] }} + '<a href="/main"><h3>Home</h3></a>')
-                .openOn(mymap)
-        };
-
-        mymap.on('click', onMapclick);
+        {% for i in ubl %}
 
 		var ublox = {
 		    "type": "Feature",
 		    "geometry": {
 		        "type": "Point",
-		        "coordinates": {{ ubl[0] }}
+		        "coordinates": [{{ i[0] }},{{ i[1] }}]
             }
         };
+
+        L.geoJson(ublox, {style: {"color": "red"}, onEachFeature: function onEachFeatureUbl(feature, layer) {
+			layer.bindPopup('Longitude : ' + {{ i[0] }} + '<br />Latitude : ' + {{ i[1] }} + '<br />Time (hhmmss.dd) : ' + '{{ i[2] }}' + '<a href="/main"><h3>More</h3></a>');
+		}}).addTo(mymap);
+        {% endfor %}
+
+
 
 		var spectracom = {
 		    "type": "Feature",
@@ -56,9 +51,6 @@
             }
         };
 
-		L.geoJson(ublox, {style: {"color": "red"}, onMapclick}).addTo(mymap);
-
-
         L.geoJson(spectracom, {onEachFeature: onEachFeatureSpec}).addTo(mymap);
 
 		mymap.fitBounds(L.geoJson(ublox).getBounds());
@@ -67,8 +59,6 @@
 	</script>
     </div>
 </fieldset>
-
-
 
 
 

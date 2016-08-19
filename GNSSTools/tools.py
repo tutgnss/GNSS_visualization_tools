@@ -11,6 +11,28 @@
 import math
 import configparser
 
+def data(filename):
+    # take only the information GPGGA (global positionning system fix data)
+    # Input:
+    # file with nmea gga data
+    # Return:
+    # gpgga = [time in HHMMSS.DD, LAT in DMS, LONG in DMS, ALT in m, N/S, E/W]
+    read = open(filename, 'r')
+    gpgga = []
+    a = 1
+    b = 1
+    for line in read.readlines():
+        if line[3:6] == 'GGA':
+            split = line.split(',')
+            if split[2] != '' or split[4] != '':
+                if split[3] == 'S':
+                    a = -1
+                if split[5] == 'W':
+                    b = -1
+                gpgga.append([split[1], a*dm_to_dd(float(split[2])/100),
+                              b*dm_to_dd(float(split[4])/100), split[9]])
+    read.close()
+    return gpgga
 
 def get_sec(date):
     # Converts a date into sec
