@@ -175,16 +175,11 @@ color: red;
 		                "type": "Point",
 		                "coordinates": [{{ i[0] }},{{ i[1] }}]
                     }
-                }, {style:
-                        {"color": "red"},
-                        onEachFeature: function onEachFeatureUbl(feature, layer) {
-			                layer.bindPopup('Longitude : {{ i[0] }}<br />Latitude : {{ i[1] }}<br />Time (hhmmss.dd) : ' +
-			 '{{ i[2] }}<br />Number : {{ a }}');
-		                }
-		            }
+                }
 		    );
         {% endfor %}
 
+        myLayer.
 
 	</script>
     </div>

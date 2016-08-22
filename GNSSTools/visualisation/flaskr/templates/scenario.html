@@ -25,7 +25,7 @@
 			layer.bindPopup(popupContent);
 		};
 
-
+        {% set a=1 %}
         {% for i in ubl %}
 
 		var ublox = {
@@ -36,9 +36,17 @@
             }
         };
 
+        function more() {
+
+            alert("{{ a }}" + "  {{ i }}");
+
+            };
+
         L.geoJson(ublox, {style: {"color": "red"}, onEachFeature: function onEachFeatureUbl(feature, layer) {
-			layer.bindPopup('Longitude : ' + {{ i[0] }} + '<br />Latitude : ' + {{ i[1] }} + '<br />Time (hhmmss.dd) : ' + '{{ i[2] }}' + '<a href="/main"><h3>More</h3></a>');
+			layer.bindPopup('Longitude : {{ i[0] }}<br />Latitude : {{ i[1] }}<br />Time (hhmmss.dd) : ' +
+			 '{{ i[2] }}<br />Number : {{ a }}' + '<br /><br /><button onclick="more()">More</button>');
 		}}).addTo(mymap);
+        {% set a = a+1 %}
         {% endfor %}
 
 
@@ -59,6 +67,7 @@
 	</script>
     </div>
 </fieldset>
+
 
 
 

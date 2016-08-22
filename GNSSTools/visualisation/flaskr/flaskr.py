@@ -46,5 +46,12 @@ def scenario():
     matrix(P,Q)
     return render_template('scenario.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario)
 
+@app.route('/test', methods=['GET','POST'])
+def test():
+    P = data('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_ublox.txt')
+    Q = data('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_spectracom.txt')
+    matrix(P,Q)
+    return render_template('test.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario)
+
 if __name__ == '__main__':
     app.run(debug=True)
