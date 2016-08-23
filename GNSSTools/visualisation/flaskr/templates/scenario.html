@@ -19,11 +19,11 @@
 		}).addTo(mymap);
 
 
+		function more(i) {
 
-		function onEachFeatureSpec(feature, layer) {
-			var popupContent = "hey"
-			layer.bindPopup(popupContent);
-		};
+            alert('time : '+i[2]);
+
+            };
 
         {% set a=1 %}
         {% for i in ubl %}
@@ -36,20 +36,20 @@
             }
         };
 
-        function more() {
 
-            alert("{{ a }}" + "  {{ i }}");
-
-            };
 
         L.geoJson(ublox, {style: {"color": "red"}, onEachFeature: function onEachFeatureUbl(feature, layer) {
 			layer.bindPopup('Longitude : {{ i[0] }}<br />Latitude : {{ i[1] }}<br />Time (hhmmss.dd) : ' +
-			 '{{ i[2] }}<br />Number : {{ a }}' + '<br /><br /><button onclick="more()">More</button>');
+			 '{{ i[2] }}<br />Number : {{ a }}' + '<br /><br /><button onclick="more({{ ubl[a] }})">More</button>');
 		}}).addTo(mymap);
         {% set a = a+1 %}
         {% endfor %}
 
 
+        function onEachFeatureSpec(feature, layer) {
+			var popupContent = "hey"
+			layer.bindPopup(popupContent);
+		};
 
 		var spectracom = {
 		    "type": "Feature",
@@ -61,13 +61,41 @@
 
         L.geoJson(spectracom, {onEachFeature: onEachFeatureSpec}).addTo(mymap);
 
-		mymap.fitBounds(L.geoJson(ublox).getBounds());
+		mymap.fitBounds(L.geoJson(spectracom).getBounds());
 
 
 	</script>
     </div>
 </fieldset>
 
+<br /><br />
+<fieldset>
+	<legend id="legend">Details about trajctory</legend>
+
+	<input type="button" class="button" onclick="rms1d()"  value="RMS1D">
+    <input type="button" class="button" onclick="rms2d()"  value="RMS2D">
+    <input type="button" class="button" onclick="rms3d()"  value="RMS3D">
+	<br />
+	<p id="detail"></p>
+
+	<script>
+		function rms1d() {
+			var x = 'Root Mean Square error 1D in<br />Altitude : {{ computation[0] }}<br />Latitude : {{ computation[1] }}<br />Longitude :{{ computation[2] }}'
+			document.getElementById("detail").innerHTML = x;
+		}
+
+		function rms2d() {
+			var x = 'Root Mean Square error 2D : {{ computation[2] }}'
+			document.getElementById("detail").innerHTML = x;
+		}
+
+		function rms3d() {
+			var x = 'Root Mean Square error 3D : {{ computation[3] }}'
+			document.getElementById("detail").innerHTML = x;
+		}
+	</script>
+
+</fieldset>
 
 
 

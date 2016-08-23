@@ -167,7 +167,7 @@ color: red;
 
 
 
-		var myLayer = L.geoJson().addTo(mymap);
+		var myLayer = L.geoJson();
         {% for i in ubl %}
         myLayer.addData({
 		            "type": "Feature",
@@ -179,7 +179,15 @@ color: red;
 		    );
         {% endfor %}
 
-        myLayer.
+        function onEachFeatureSpec(feature, layer) {
+			var popupContent = "hey"
+			layer.bindPopup(popupContent);
+		};
+
+        myLayer.addTo(mymap);
+
+
+        mymap.fitBounds(myLayer.getBounds());
 
 	</script>
     </div>
