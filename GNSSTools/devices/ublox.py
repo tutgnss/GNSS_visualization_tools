@@ -526,8 +526,10 @@ class Ublox(Device):
         file = self.fileopen(self.procdatafile)
         ephemeris = {}
         i = 0
-        for line in file:
-            if line[0:12] == 'b5620b316800':
+        inter = {}
+        j = 0
+
+        def collect(line):
                 join = ''
                 svid = int(join.join((line[18:20], line[16:18], line[14:16], line[12:14])), 16)
                 # SF1D0
@@ -611,14 +613,29 @@ class Ublox(Device):
                     idot = int(sf3d7[8:22], 2)*pow(2, -43)*math.pi
                     iodesf3 = int(sf3d7[0:8], 2)
 
-                    ephemeris[i] = {'svid': svid, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
+                    inter[j] = {'svid': svid, 'wn': wn, 'l2': l2, 'ura': ura, 'health': health,
                                     'iodc': iodc, 'tgd': tgd, 'toc': toc, 'af2': af2, 'af1': af1,
                                     'af0': af0, 'iodesf2': iodesf2, 'crs': crs, 'deltan': deltan,
                                     'm0': m0, 'cuc': cuc, 'e': e, 'cus': cus, 'sqrta': sqrta,
                                     'toe': toe, 'flag': flag, 'aodo': aodo, 'cic': cic, 'omega0': omega0,
                                     'cis': cis, 'i0': i0, 'crc': crc, 'omega': omega, 'omegadot': omegadot,
                                     'iodesf3': iodesf3, 'idot': idot}
+        for line in file:
+            if line[0:12] == 'b5620b316800':
+                if line[0:14] == 'b5620b31680001':
+                        inter = {}
+                        j = 0
+                        collect(line)
+                        j += 1
+                elif line[0:14] != 'b5620b31680020':
+                    collect(line)
+                    j += 1
+                else:
+                    collect(line)
+                    ephemeris[i] = inter
                     i += 1
+
+
         file.close()
         return ephemeris
 
@@ -914,6 +931,70 @@ class Ublox(Device):
                 k += 1
         file.close()
         return satinview
+
+    def pos_with_eph(self):
+        # Compute the ECEF position from ephemeris :
+        # Return:
+        # pos: {
+        #    "0": {
+        #        "y": ECEF y ,
+        #        "z": ECEF z,
+        #        "x": ECEF x,
+        #        "svid":
+        #    },
+        pos = {}
+        p = 0
+
+        dic = self.ephemeris_data()
+
+        for eph in range(len(dic)):
+            tow = self.klobuchar_data()[eph]['utctow']
+            keys = []
+            for key in self.ephemeris_data()[0]:
+                keys.append(key)
+            for seq in range(len(keys)):
+                sequence = keys[seq]
+                mu = 3.986005*(10**14)  # WGS84 value for the earth's universal gravitational parameter for GPS user in meters^3/sec^2
+                omegaedot = 7.2921151467*(10**-5)  # WGS84 value of the earth's rotation rate in rad/sec
+                A = (dic[eph][sequence]['sqrta'])**2  # Semi-major axis in meters
+                n0 = math.sqrt(mu/(A**3))  # Computed mean motion in rad/sec
+                if (tow - dic[eph][sequence]['toe']) > 302400:
+                    tk = tow - dic[eph][sequence]['toe'] - 604800  # Time from ephemeris reference epoch in sec
+                elif (tow - dic[eph][sequence]['toe']) < - 302400:
+                    tk = tow - dic[eph][sequence]['toe'] + 604800
+                else:
+                    tk = tow - dic[eph][sequence]['toe']
+
+                n = n0 + (dic[eph][sequence]['deltan'])  # Corrected mean motion in rad/sec
+                Mk = dic[eph][sequence]['m0'] + n * tk  # Mean anomaly
+                Ek = 0 # eccentric anomaly
+                # solve equation Mk by iteration
+                e = dic[eph][sequence]['e']
+
+                while Ek != Mk:
+                    Ek = Mk
+                    Mk = Ek + e * math.sin(Ek)  # Kepler's Equation for Eccentric Anomaly in radians
+                vk = math.atan((math.sqrt(1 - e**2) * math.sin(Ek))/((math.cos(Ek) - e)))  # true anomaly
+                Ek = math.acos((e + math.cos(vk))/(1 + e * math.cos(vk)))
+                phik = vk + dic[eph][sequence]['omega']  # argument of latitude
+                deltauk = dic[eph][sequence]['cus']*math.sin(2*phik) + dic[eph][sequence]['cuc']*math.cos(2*phik)  # argument of latitude correction
+                deltark = dic[eph][sequence]['crs']*math.sin(2*phik) + dic[eph][sequence]['crc']*math.cos(2*phik)  # radius correction
+                deltaik = dic[eph][sequence]['cis']*math.sin(2*phik) + dic[eph][sequence]['cic']*math.cos(2*phik)  # inclination correction
+                uk = deltauk + phik  # corrected argument of latitude
+                rk = A * (1 - e * math.cos(Ek)) + deltark  # corrected radius
+                ik = dic[eph][sequence]['i0'] + deltaik + dic[eph][sequence]['idot'] * tk  # corrected inclination
+                xkp = rk * math.cos(uk)  # Positions in orbital plane
+                ykp = rk * math.sin(uk)
+                omegak = dic[eph][sequence]['omega0'] + (dic[eph][sequence]['omegadot'] - omegaedot) * tk - omegaedot * dic[eph][sequence]['toe']  # corrected longitude of ascending node
+                xk = xkp * math.cos(omegak) - ykp * math.cos(ik) * math.sin(omegak)
+                yk = xkp * math.sin(omegak) - ykp * math.cos(ik) * math.cos(omegak)
+                zk = ykp * math.sin(ik)
+                #print(math.sqrt(xk**2+yk**2+zk**2))
+                #print(math.sqrt(xkp**2+ykp**2))
+                #print(rk)
+                pos[p] = {'svid': dic[eph][sequence]['svid'], 'Ek': Ek, 'x': xk, 'y': yk, 'z': zk}
+                p += 1
+        return pos
 
     def store_data(self, file):
         # Store into a file data comming from the receiver and make data processing if data are UBX message

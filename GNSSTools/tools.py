@@ -102,6 +102,12 @@ def synchronisation(list1, list2):
 
 # RMS 1D error
 
+def haversine(lat1, long1, lat2, long2):
+    a = (math.sin(((lat2-lat1)*(math.pi/180))/2))**2 + math.cos(lat1) * math.cos(lat2) *\
+                                                       (math.sin(((long2-long1)*(math.pi/180))/2))**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = 6378137 * c
+    return d
 
 def rms_1d_alt(new_list1, new_list2):
     # Compute the root mean square error in altitude
@@ -132,7 +138,8 @@ def rms_1d_lat(new_list1, new_list2):
     for i in range(len(new_list1)):
         latv = new_list1[i][1]
         latm = new_list2[i][1]
-        lat_error.append(float(latm) - float(latv))
+        #lat_error.append(float(latm) - float(latv))
+        lat_error.append(haversine(float(latm), 0, float(latv), 0))
     rms1dlat = math.sqrt(sum([nb * nb for nb in lat_error])/len(new_list1))
     return rms1dlat, lat_error
 
@@ -149,7 +156,8 @@ def rms_1d_long(new_list1, new_list2):
     for i in range(len(new_list1)):
         longv = new_list1[i][2]
         longm = new_list2[i][2]
-        long_error.append(float(longm) - float(longv))
+        #long_error.append(float(longm) - float(longv))  # for DD computation
+        long_error.append(haversine(0, float(longm), 0,float(longv)))  # for
     rms1dlong = math.sqrt(sum([nb * nb for nb in long_error])/len(new_list1))
     return rms1dlong, long_error
 
@@ -157,21 +165,34 @@ def rms_1d_long(new_list1, new_list2):
 # RMS 2D error
 
 
-def rms_2d(lat_error, long_error):
+def rms_2d(new_list1, new_list2):
+    # argument for DD computation lat_error, long_error
     # Compute the root mean square 2D error (in latitude and longitude)
     # Input:
     # lat_error: list of difference of latitude between lists at each time
     # long_error: list of difference of longitude between lists at each time
     # Return:
     # rms2d: RMS 2D error
-    lat = [nb * nb for nb in lat_error]
-    long = [nb * nb for nb in long_error]
+
+    # result in DD
+    #lat = [nb * nb for nb in lat_error]
+    #long = [nb * nb for nb in long_error]
+    #latlong = []
+    #for i in range(len(long)):
+    #    latitude = lat[i]
+    #    longitude = long[i]
+    #    latlong.append(latitude+longitude)
+    #rms2d = math.sqrt(sum(latlong)/len(lat_error))
+
+    # result in meters
     latlong = []
-    for i in range(len(long)):
-        latitude = lat[i]
-        longitude = long[i]
-        latlong.append(latitude+longitude)
-    rms2d = math.sqrt(sum(latlong)/len(lat_error))
+    for i in range(len(new_list1)):
+        latv = new_list1[i][1]
+        latm = new_list2[i][1]
+        longv = new_list1[i][2]
+        longm = new_list2[i][2]
+        latlong.append(haversine(float(latm), float(longm), float(latv), float(longv)))
+    rms2d = math.sqrt(sum([nb * nb for nb in latlong])/len(new_list1))
     return rms2d
 
 
@@ -255,7 +276,8 @@ def computation(file1='datatxt/spectracom_data.nmea', file2='datatxt/ublox_proce
         lat_error = rms_1d_lat(new_list1, new_list2)[1]
         long_error = rms_1d_long(new_list1, new_list2)[1]
         # RMS 2D
-        rms2d = rms_2d(lat_error, long_error)
+        rms2d = rms_2d(new_list1, new_list2)  # result in meters
+        # rms2d = rms_2d(lat_error, long_error)  # result in DD
         # RMS 3D
         rms3d = rms_3d(lat_error, long_error, alt_error)
         # close files
