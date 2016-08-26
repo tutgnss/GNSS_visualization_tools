@@ -75,7 +75,7 @@ def point():
     Q = data(S)
     matrix(P,Q)
     computation(file1=U, file2=S)
-    
+
     return render_template('point.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario, computation=computation(file1=U, file2=S))
 
 
