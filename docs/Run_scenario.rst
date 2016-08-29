@@ -54,3 +54,11 @@ To make the connexion with the Spectracom, you need to fill the argument of ``Sp
 
         spectracomcnx = Spectracom('USB0::0x14EB::0x0060::200448::INSTR')
 
+You can if you want get the almanach data and/or the latest observation file by uncomment line 84 and/or 87 in the main file::
+
+        # Get almanach of Spectracom
+        spectracomcnx.get_almanach()
+
+        # Get latest observation file
+        spectracomcnx.get_latest()
+

@@ -79,3 +79,9 @@ if __name__ == "__main__":
 
     # computation of the root mean square error
     tools.computation()
+
+    # Get almanach of Spectracom
+    #spectracomcnx.get_almanach()
+
+    # Get latest observation file
+    #spectracomcnx.get_latest()
