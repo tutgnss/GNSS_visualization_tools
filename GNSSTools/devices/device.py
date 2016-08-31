@@ -21,12 +21,12 @@ class Device:
     def close(self):
         pass
 
-    def fileopen(self):
+    def fileopen(self, datafile):
         try:
-            f = urllib.request.urlopen(self.datafile)
+            f = urllib.request.urlopen(datafile)
         except:
             try:
-                f = open(self.datafile, 'r')
+                f = open(datafile, 'r')
             except ValueError:
                 print("Can't open this")
         return f
@@ -65,45 +65,64 @@ class Device:
         read.close()
         return gga
 
-    def nmea_rmc_store(self):
+    def nmea_rmc_store(self, datafile):
         # Read data collected and store into matrix RMC data
         # Return:
-        # rmc: [[time, lat, NS, long, EW, speed_over_ground, course_over_ground][...]]
-        # where: time - hhmmss.ss - UTC time
-        #        lat - ddmm.mmmmm - Latitude (degrees & minutes)
-        #        NS - character - North/South indicator
-        #        long - dddmm.mmmmm - Longitude (degrees & minutes)
-        #        EW - character - East/West indicator
-        #        speed_ovr_ground - knots - numeric - Speed over ground
-        #        course_over_ground - degrees - numeric - Course over ground
-        file = self.fileopen()
-        rmc = []
+        # rmc: {
+        #    "0": {
+        #        "E/W": EW - character - East/West indicator,
+        #        "Course Over Ground": course_over_ground - degrees - numeric - Course over ground,
+        #        "time": time - hhmmss.ss - UTC time,
+        #        "N/S": NS - character - North/South indicator,
+        #        "long":  long - dddmm.mmmmm - Longitude (degrees & minutes),
+        #        "lat": lat - ddmm.mmmmm - Latitude (degrees & minutes),
+        #        "Speed Over Ground": speed_ovr_ground - knots - numeric - Speed over ground
+        #    },
+        #    "1": {...
+        #    }
+        #}
+        file = self.fileopen(datafile)
+        rmc = {}
+        i = 0
         for line in file:
-            if line[3:6] == 'GBS':
+            if line[3:6] == 'RMC':
                 data = line.split(',')
-                time = data[1]
-                lat = data[2]
-                ns = data[3]
-                long = data[4]
-                ew = data[5]
-                speed_over_ground = data[6]
-                course_over_ground = data[7]
-                rmc.append([time, lat, ns, long, ew, speed_over_ground, course_over_ground])
+                if (data[3] and data[5]) != '':
+                    time = data[1]
+                    lat = tools.dm_to_dd(float(data[3])/100)
+                    ns = data[4]
+                    long = tools.dm_to_dd(float(data[5])/100)
+                    ew = data[6]
+                    speed_over_ground = data[7]
+                    course_over_ground = data[8]
+                    rmc[i] = {'time': time, 'lat': lat, 'N/S': ns, 'long': long, 'E/W': ew,
+                              'Speed Over Ground': speed_over_ground,
+                              'Course Over Ground': course_over_ground}
+                    i += 1
         file.close()
         return rmc
 
-    def nmea_gsv_store(self):
+    def nmea_gsv_store(self, datafile):
         # Read data collected and store into matrix GSV data
         # Return:
-        # rmc: [[[sv, elev, az, cno][sv, elev, az, cno][sv, elev, az, cno](...][...]]
-        # where: sv - numeric - Satellite ID
-        #        elv - deg - numeric - Elevation (range 0-90)
-        #        az - deg - numeric - Azimuth, (range 0-359)
-        #        cno - dBHz - numeric - Signal strength (C/N0, range 0-99), blank when not tracking
-        file = self.fileopen()
-        gsv = []
+        # gsv: {
+        # "0": {
+        #        "0": {
+        #            "Sat ID": numeric - Satellite ID,
+        #            "azimuth": deg - numeric - Azimuth, (range 0-359),
+        #            "C/N0":  cno - dBHz - numeric - Signal strength (C/N0, range 0-99), blank when not tracking,
+        #            "elevation": deg - numeric - Elevation (range 0-90)
+        #        },
+        #        "1": {...
+        #        }
+        #   }
+        # }
+        file = self.fileopen(datafile)
+        gsv = {}
+        k = 0
 
         def collect(nsat):
+            j = 0
             for i in range(nsat):
                 sv = data[4 + 4*i]
                 elev = data[5 + 4*i]
@@ -112,26 +131,32 @@ class Device:
                     cno = data[7 + 4*i][0:2]
                 else:
                     cno = ''
-                satif = [sv, elev, az, cno]
-                first.append(satif)
+                satif = {'Sat ID': sv, 'elevation': elev, 'azimuth': az, 'C/N0': cno}
+                first[j + a] = satif
+                j += 1
             return first
 
         for line in file:
-            if line[3:6] == 'GSV' and len(line)>17:
+            if line[3:6] == 'GSV' and len(line) > 17:
                 data = line.split(',')
-                if (int(data[1]) > 1) and (data[1] != data[2]):
+                if ((int(data[1]) > 1) and (data[1] != data[2])) or int(data[3]) % 4 == 0:
                     nsat = 4
                 else:
-                    nsat = int(data[3])%4
+                    nsat = int(data[3]) % 4
                 if data[2] == '1':
-                    first = []
+                    a = 0
+                    first = {}
                     collect(nsat)
                     if data[2] == data[1]:
-                        gsv.append(first)
+                        gsv[k] = first
+                        k += 1
+                    a += 4
                 elif data[2] != data[1]:
                     collect(nsat)
+                    a += 4
                 else:
                     collect(nsat)
-                    gsv.append(first)
+                    gsv[k] = first
+                    k += 1
         file.close()
         return gsv

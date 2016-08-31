@@ -19,10 +19,10 @@ setup(
     description='An automatic testing toolchain for GNSS receivers',
     long_description=read('README'),
     url='https://github.com/tutgnss/GNSS_visualization_tools',
-    author='A-Mari',
+    authors='A-Mari','Yanickdefrance'
     license='MIT',
     keywords='GNSS simulators receivers ',
-    packages=find_packages(exclude=('docs', 'tests', 'env', 'index.py')),
+    packages=find_packages(exclude=('docs', 'tests', 'env')),
     include_package_data=True,
     install_requires=[
     ],

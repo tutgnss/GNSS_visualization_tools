@@ -19,13 +19,31 @@
 		}).addTo(mymap);
 
 
-		function more(i) {
-
-            alert('time : '+i[2]);
+		function moreUbl(ubl,sat) {
+            Vg = ubl[3]
+            text = '\n\nSatellites involved in the tracking :\n';
+            for (i = 0; i < sat.length; i++) {
+                j = i+1
+                text += 'Sat ' + j + ' :\nID : ' + sat[i][3] + '\nC/N0 : ' + sat[i][1] +
+                    '\nAzimuth : ' + sat[i][2] + '\nElevation : ' + sat[i][0] +'\n\n';
+            }
+            alert('Speed over ground : ' + Vg + ' kt' + text);
 
             };
 
-        {% set a=1 %}
+		function moreSpec(spec,sat) {
+            Vg = spec[3]
+            text = '\n\nSatellites involved in the tracking :\n';
+            for (i = 0; i < sat.length; i++) {
+                j = i+1
+                text += 'Sat ' + j + ' :\nID : ' + sat[i][3] + '\nC/N0 : ' + sat[i][1] +
+                    '\nAzimuth : ' + sat[i][2] + '\nElevation : ' + sat[i][0] +'\n\n';
+            }
+            alert('Speed over ground : ' + Vg + ' kt' + text);
+
+            };
+
+        {% set a=0 %}
         {% for i in ubl %}
 
 		var ublox = {
@@ -38,28 +56,67 @@
 
 
 
-        L.geoJson(ublox, {style: {"color": "red"}, onEachFeature: function onEachFeatureUbl(feature, layer) {
+        L.geoJson(ublox, {
+
+        	onEachFeature: function onEachFeatureUbl(feature, layer) {
 			layer.bindPopup('Longitude : {{ i[0] }}<br />Latitude : {{ i[1] }}<br />Time (hhmmss.dd) : ' +
-			 '{{ i[2] }}<br />Number : {{ a }}' + '<br /><br /><button onclick="more({{ ubl[a] }})">More</button>');
-		}}).addTo(mymap);
+			 '{{ i[2] }}<br /><br /><button onclick="moreUbl({{ ubl[a] }}, {{ gsvUbl[a] }})">More</button>');
+			},
+
+			pointToLayer: function (feature, latlng) {
+				return L.circleMarker(latlng, {
+					radius: 4,
+					fillColor: "#FF0000",
+					color: "#000",
+					weight: 1,
+					opacity: 1,
+					fillOpacity: 0.8
+				});
+			}
+
+		}).addTo(mymap);
         {% set a = a+1 %}
         {% endfor %}
 
 
-        function onEachFeatureSpec(feature, layer) {
-			var popupContent = "hey"
-			layer.bindPopup(popupContent);
-		};
+
+		{% set b=0 %}
+        {% for i in spec %}
 
 		var spectracom = {
 		    "type": "Feature",
 		    "geometry": {
-		        "type": "LineString",
-		        "coordinates": {{ spec }}
+		        "type": "Point",
+		        "coordinates": [{{ i[0] }},{{ i[1] }}]
             }
         };
 
-        L.geoJson(spectracom, {onEachFeature: onEachFeatureSpec}).addTo(mymap);
+
+
+        L.geoJson(spectracom, {
+
+        	onEachFeature: function onEachFeatureSpec(feature, layer) {
+			layer.bindPopup('Longitude : {{ i[0] }}<br />Latitude : {{ i[1] }}<br />Time (hhmmss.dd) : ' +
+			 '{{ i[2] }}<br /><br /><button onclick="moreSpec({{ spec[b] }}, {{ gsvSpec[b] }})">More</button>');
+			},
+
+			pointToLayer: function (feature, latlng) {
+				return L.circleMarker(latlng, {
+					radius: 4,
+					fillColor: "#2E64FE",
+					color: "#000",
+					weight: 1,
+					opacity: 1,
+					fillOpacity: 0.8
+				});
+			}
+
+		}).addTo(mymap);
+        {% set b = b+1 %}
+        {% endfor %}
+
+
+
 
 		mymap.fitBounds(L.geoJson(spectracom).getBounds());
 
