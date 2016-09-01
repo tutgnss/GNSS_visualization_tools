@@ -5,7 +5,7 @@ GNSS Visualisation Tools
 Play a scenario
 --------------------
 
-    Six scenarios are already stored in the database : Circle, Square, Static, Acceleration, Sensivity and
+Six scenarios are already stored in the database : Circle, Square, Static, Acceleration, Sensivity and
 Free to urban tests. You can choose to run any one these in order to visualize the trajectory. You just
 have to select it in the list, then click on the "Run" button.
 
@@ -15,9 +15,9 @@ have to select it in the list, then click on the "Run" button.
    :width: 600 px
 
 
-    A map appears on the screen, centered on the coordinates where the scenario is played.
+A map appears on the screen, centered on the coordinates where the scenario is played.
 
-    There are two differents trajectories for each scenario :
+There are two differents trajectories for each scenario :
 
 - The blue one represents the estimated position calculated by the receiver
 
