@@ -75,17 +75,6 @@ def scenario():
                            gsvUbl=a[0], gsvSpec=a[1], scenario=scenario, computation=computation(file1=U, file2=S))
 
 
-U = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_ublox.txt'
-S = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_spectracom.txt'
-DU = device.Device(U)
-DS = device.Device(S)
-
-V = DU.nmea_gsv_store(U)
-W = DS.nmea_gsv_store(S)
-a = gsv_data(V,W)
-P = DU.nmea_gga_store(U)
-print(a[1])
-
 
 if __name__ == '__main__':
     app.run(debug=True)
