@@ -6,7 +6,7 @@ Play a scenario
 --------------------
 
 Six scenarios are already stored in the database : Circle, Square, Static, Acceleration, Sensivity and
-Free to urban tests. You can choose to run any one these in order to visualize the trajectory. You just
+Free to urban tests. You can choose to run any of these in order to visualize the trajectory. You just
 have to select it in the list, then click on the "Run" button.
 
 
@@ -33,17 +33,49 @@ There are two differents trajectories for each scenario :
 Avalaible data of the trajectory
 --------------------
 
+You can have a sight of the Root Mean Square Error of the estimated trajectory. This information is
+avalaible :
 
-frfrf
+- in 1D : RMS errors in altitude, longitude and altitude
+- in 2D : RMS error in the plan latitude-longitude
+- in 3D : RMS error in the space latitude-longitude-altitude
 
+You just have to click on the corresponding button, below the map.
+
+
+.. image:: images/informationTrajectory.png
+   :height: 500px
+   :width: 600 px
 
 
 
 Avalaible data for each point
 --------------------
 
+You can have a sight of several data of any point of the trajectory. You just have to click on the point
+you want. Then a first popup appears, giving two pieces of information :
 
-frfrfr
+- The coordinates of the point
+- The time when the receiver was at that point
+
+
+
+.. image:: images/popup.png
+   :height: 500px
+   :width: 600 px
+
+
+If you want to learn more, you need to click on th "More" button at the bottom of the popup. A alert window
+will appear and you will be given many data :
+
+- The velocity of the receiver at that point
+- The ID, elevation, azimuth and C/N0 of any satelite involved in the positionning at that point
+
+
+.. image:: images/more.png
+   :height: 500px
+   :width: 600 px
+
 
 
 
