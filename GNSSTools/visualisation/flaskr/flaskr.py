@@ -1,8 +1,8 @@
 # Tampere University of Technology
 #
 # DESCRIPTION
-# Calls the html script. Processing functions are added.
-# This file is launched on the browser
+# Defines the Flask application. Launches the server where the application is hosted.
+# All the pages paths are defined here.
 #
 # AUTHOR
 # Yannick DEFRANCE
@@ -12,7 +12,6 @@
 
 # Imports
 from flask import Flask, render_template, request
-from GNSSTools.visualisation import index
 from data import database
 from GNSSTools.tools import data
 from GNSSTools.tools import computation
@@ -20,21 +19,36 @@ from GNSSTools.devices import device
 
 app = Flask(__name__)
 
-def matrix(P,Q):
+def matrix(P,Q,R,T):
     ubl = []
     spec= []
     for i in range(len(P)):
-        ubl.append([P[i][2],P[i][1],P[i][0]])
+        ubl.append([P[i+250]['long'],P[i+250]['lat'],P[i+250]['time'],R[i]['Speed Over Ground']])
     for i in range(len(Q)):
-        spec.append([Q[i][2],Q[i][1]])
+        spec.append([Q[i]['long'],Q[i]['lat'],Q[i]['time'],T[i]['Speed Over Ground']])
+    return [ubl,spec]
+
+def gsv_data(P,Q):
+    ubl = []
+    spec = []
+    for i in range(len(P)):
+        a = []
+        b = []
+        for j in range(len(P[i])):
+            a.append([P[i][j]['elevation'],P[i][j]['C/N0'],P[i][j]['azimuth'],P[i][j]['Sat ID']])
+        ubl.append(a)
+        for k in range(len(Q[i])):
+            b.append([Q[i][j]['elevation'],Q[i][j]['C/N0'],Q[i][j]['azimuth'],Q[i][j]['Sat ID']])
+        spec.append(b)
     return [ubl,spec]
 
 
-@app.route('/main', methods=['GET','POST'])
+
+@app.route('/home', methods=['GET','POST'])
 def main():
     scenario = request.form.get("select")
     a = scenario
-    return render_template('main.html', scenario=a)
+    return render_template('home.html', scenario=a)
 
 
 
@@ -46,38 +60,31 @@ def scenario():
         scenario = request.form.get("select")
     U = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_ublox.txt'
     S = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_spectracom.txt'
-    P = data(U)
-    Q = data(S)
-    matrix(P,Q)
+    DU = device.Device(U)
+    DS = device.Device(S)
+    P = DU.nmea_gga_store(U)
+    Q = DS.nmea_gga_store(S)
+    R = DU.nmea_rmc_store(U)
+    T = DS.nmea_rmc_store(S)
+    V = DU.nmea_gsv_store(U)
+    W = DS.nmea_gsv_store(S)
+    a = gsv_data(V,W)
+    b = matrix(P,Q,R,T)
     computation(file1=U, file2=S)
-    return render_template('scenario.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario, computation=computation(file1=U, file2=S))
+    return render_template('scenario.html', ubl=b[0], spec=b[1],
+                           gsvUbl=a[0], gsvSpec=a[1], scenario=scenario, computation=computation(file1=U, file2=S))
 
 
+U = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_ublox.txt'
+S = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_spectracom.txt'
+DU = device.Device(U)
+DS = device.Device(S)
 
-@app.route('/test', methods=['GET','POST'])
-def test():
-    P = data('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_ublox.txt')
-    Q = data('P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_spectracom.txt')
-    matrix(P,Q)
-    return render_template('test.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario)
-
-
-
-@app.route('/point', methods=['GET','POST'])
-def point():
-    if request.form.get("select") == None:
-        scenario = 'static'
-    else:
-        scenario = request.form.get("select")
-    U = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_ublox.txt'
-    S = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\s'+str(scenario)+'_spectracom.txt'
-    P = data(U)
-    Q = data(S)
-    matrix(P,Q)
-    computation(file1=U, file2=S)
-
-    return render_template('point.html', ubl=matrix(P,Q)[0], spec=matrix(P,Q)[1], scenario=scenario, computation=computation(file1=U, file2=S))
-
+V = DU.nmea_gsv_store(U)
+W = DS.nmea_gsv_store(S)
+a = gsv_data(V,W)
+P = DU.nmea_gga_store(U)
+print(a[1])
 
 
 if __name__ == '__main__':
