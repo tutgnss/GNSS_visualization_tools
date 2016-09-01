@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="db54d5e1-e403-4cdc-b867-36b73ce6ba0c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/visualization.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GNSSTools/visualisation/flaskr/flaskr.py" afterPath="$PROJECT_DIR$/GNSSTools/visualisation/flaskr/flaskr.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/visualization.rst" afterPath="$PROJECT_DIR$/docs/visualization.rst" />
     </list>
     <ignored path="GNSS_visualization_tools.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,10 +22,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="flaskr.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="flaskr.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GNSSTools/visualisation/flaskr/flaskr.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="354">
+            <state relative-caret-position="456">
               <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
               <folding>
                 <element signature="e#261#310#0" expanded="true" />
@@ -36,11 +34,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="visualization.rst" pinned="false" current-in-tab="false">
+      <file leaf-file-name="visualization.rst" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/docs/visualization.rst">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+            <state relative-caret-position="357">
+              <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -49,7 +47,7 @@
       <file leaf-file-name="Run_scenario.rst" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/docs/Run_scenario.rst">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
+            <state relative-caret-position="187">
               <caret line="11" column="37" selection-start-line="11" selection-start-column="37" selection-end-line="11" selection-end-column="37" />
               <folding />
             </state>
@@ -59,8 +57,8 @@
       <file leaf-file-name="define_the_scenario.rst" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/docs/define_the_scenario.rst">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="43" column="0" selection-start-line="43" selection-start-column="0" selection-end-line="45" selection-end-column="17" />
+            <state relative-caret-position="289">
+              <caret line="41" column="48" selection-start-line="41" selection-start-column="48" selection-end-line="41" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -114,8 +112,8 @@
         <option value="$PROJECT_DIR$/GNSSTools/visualisation/flaskr/templates/home.html" />
         <option value="$PROJECT_DIR$/GNSSTools/devices/device.py" />
         <option value="$PROJECT_DIR$/GNSSTools/visualisation/flaskr/templates/scenario.html" />
-        <option value="$PROJECT_DIR$/docs/visualization.rst" />
         <option value="$PROJECT_DIR$/GNSSTools/visualisation/flaskr/flaskr.py" />
+        <option value="$PROJECT_DIR$/docs/visualization.rst" />
       </list>
     </option>
   </component>
@@ -862,9 +860,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/GNSSTools/visualisation/flaskr/flaskr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
+          <folding>
+            <element signature="e#261#310#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/docs/Run_scenario.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
+        <state relative-caret-position="187">
           <caret line="11" column="37" selection-start-line="11" selection-start-column="37" selection-end-line="11" selection-end-column="37" />
           <folding />
         </state>
@@ -872,27 +880,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/docs/define_the_scenario.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="43" column="0" selection-start-line="43" selection-start-column="0" selection-end-line="45" selection-end-column="17" />
+        <state relative-caret-position="289">
+          <caret line="41" column="48" selection-start-line="41" selection-start-column="48" selection-end-line="41" selection-end-column="48" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/docs/visualization.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+        <state relative-caret-position="357">
+          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GNSSTools/visualisation/flaskr/flaskr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="354">
-          <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
-          <folding>
-            <element signature="e#261#310#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
