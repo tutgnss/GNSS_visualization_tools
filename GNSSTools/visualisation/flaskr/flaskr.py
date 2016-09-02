@@ -23,7 +23,7 @@ def matrix(P,Q,R,T):
     ubl = []
     spec= []
     for i in range(len(P)):
-        ubl.append([P[i+250]['long'],P[i+250]['lat'],P[i+250]['time'],R[i]['Speed Over Ground']])
+        ubl.append([P[i]['long'],P[i]['lat'],P[i]['time'],R[i]['Speed Over Ground']])
     for i in range(len(Q)):
         spec.append([Q[i]['long'],Q[i]['lat'],Q[i]['time'],T[i]['Speed Over Ground']])
     return [ubl,spec]
@@ -38,7 +38,7 @@ def gsv_data(P,Q):
             a.append([P[i][j]['elevation'],P[i][j]['C/N0'],P[i][j]['azimuth'],P[i][j]['Sat ID']])
         ubl.append(a)
         for k in range(len(Q[i])):
-            b.append([Q[i][j]['elevation'],Q[i][j]['C/N0'],Q[i][j]['azimuth'],Q[i][j]['Sat ID']])
+            b.append([Q[i][k]['elevation'],Q[i][k]['C/N0'],Q[i][k]['azimuth'],Q[i][k]['Sat ID']])
         spec.append(b)
     return [ubl,spec]
 
@@ -73,6 +73,20 @@ def scenario():
     computation(file1=U, file2=S)
     return render_template('scenario.html', ubl=b[0], spec=b[1],
                            gsvUbl=a[0], gsvSpec=a[1], scenario=scenario, computation=computation(file1=U, file2=S))
+
+
+U = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_ublox.txt'
+S = 'P:\My Documents\Desktop\GitHub\GNSS_visualization_tools\data\database\scircle_spectracom.txt'
+DU = device.Device(U)
+DS = device.Device(S)
+P = DU.nmea_gga_store(U)
+Q = DS.nmea_gga_store(S)
+R = DU.nmea_rmc_store(U)
+T = DS.nmea_rmc_store(S)
+V = DU.nmea_gsv_store(U)
+W = DS.nmea_gsv_store(S)
+a = gsv_data(V,W)
+print(a[1][7])
 
 
 

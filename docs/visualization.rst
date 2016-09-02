@@ -63,6 +63,7 @@ you want. Then a first popup appears, giving two pieces of information :
 .. image:: images/popup.png
    :height: 500px
    :width: 600 px
+   :align: center
 
 
 If you want to learn more, you need to click on th "More" button at the bottom of the popup. A alert window
@@ -75,6 +76,7 @@ will appear and you will be given many data :
 .. image:: images/more.png
    :height: 500px
    :width: 600 px
+   :align: center
 
 
 

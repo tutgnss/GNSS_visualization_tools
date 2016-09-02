@@ -61,7 +61,7 @@ class Device:
                         b = -1
                     gga[i] = {'time': split[1], 'lat': a*tools.dm_to_dd(float(split[2])/100),
                               'long': b*tools.dm_to_dd(float(split[4])/100), 'alt': split[9]}
-                i += 1
+                    i += 1
         read.close()
         return gga
 
