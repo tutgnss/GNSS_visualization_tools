@@ -1,9 +1,9 @@
-================
+========================
 GNSS Visualisation Tools
-================
+========================
 
 Play a scenario
---------------------
+---------------
 
 Six scenarios are already stored in the database : Circle, Square, Static, Acceleration, Sensivity and
 Free to urban tests. You can choose to run any of these in order to visualize the trajectory. You just
@@ -31,7 +31,7 @@ There are two differents trajectories for each scenario :
 
 
 Avalaible data of the trajectory
---------------------
+--------------------------------
 
 You can have a sight of the Root Mean Square Error of the estimated trajectory. This information is
 avalaible :
@@ -50,7 +50,7 @@ You just have to click on the corresponding button, below the map.
 
 
 Avalaible data for each point
---------------------
+-----------------------------
 
 You can have a sight of several data of any point of the trajectory. You just have to click on the point
 you want. Then a first popup appears, giving two pieces of information :
