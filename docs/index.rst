@@ -35,6 +35,8 @@ The main documentation for the site is organized into a couple sections:
    :glob:
    :caption: Visualisation Web Page
 
+   visualization
+
 Features
 --------
 
