@@ -1,8 +1,17 @@
-GNSS_visualization_tools
+GNSS visualization tools
 ========================
 
 GNSS Visualisation Tools is an automatic testing toolchain for GNSS receivers.
-This toolchain is able to test a receiver in various test scenarios.
-You can create your own scenario,according to the template, run them into GNSS generator and
-then visualise a range of data coming from the GNSS generator and from one or several GNSS receiver.
 
+This toolchain is able to test a receiver in various test scenarios.
+
+You can create your own scenario, according to the specified template, configure a compatible GNSS generator and
+visualise relevant data and metrics related to the output from the GNSS signal generator and  GNSS receiver.
+
+*DOCUMENTATION:* http://gnss-visualisation.readthedocs.io/en/latest/
+
+*LICENSE:* MIT
+
+Developed by,
+Anne-Marie Tobie
+Yannick Defrance
