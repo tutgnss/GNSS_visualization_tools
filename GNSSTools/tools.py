@@ -285,7 +285,7 @@ def computation(file1='datatxt/spectracom_data.nmea', file2='datatxt/ublox_proce
         filename2.close()
     else:
         raise ValueError('Not enough data available')
-    return rms1dalt, rms1dlat, rms1dlong, rms2d, rms3d
+    return rms1dalt, rms1dlat, rms1dlong, rms2d, rms3d, lat_error, long_error
 
 
 def r4(message):

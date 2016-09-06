@@ -14,7 +14,7 @@
 from flask import Flask, render_template, request
 from data import database
 from GNSSTools.tools import data
-from GNSSTools.tools import computation
+from GNSSTools.tools import computation, rms_1d_lat, rms_1d_long, synchronisation
 from GNSSTools.devices import device
 
 app = Flask(__name__)
@@ -68,7 +68,6 @@ def scenario():
     W = device.Device().nmea_gsv_store(S)
     a = gsv_data(V,W)
     b = matrix(P,Q,R,T)
-    computation(file1=U, file2=S)
     return render_template('scenario.html', ubl=b[0], spec=b[1],
                            gsvUbl=a[0], gsvSpec=a[1], scenario=scenario, computation=computation(file1=U, file2=S))
 
