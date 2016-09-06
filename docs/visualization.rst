@@ -2,6 +2,14 @@
 GNSS Visualisation Tools
 ========================
 
+Launch the application
+----------------------
+
+First of all, you have to run the flask.py file. You can find it in GNSS_visualization_tools > GNSSTools >
+visualisation > flaskr. This will launch the server on http://127.0.0.1:5000. Then, if you want to get the
+home page, just go to http://127.0.0.1:5000/home.
+
+
 Play a scenario
 ---------------
 
@@ -57,6 +65,7 @@ you want. Then a first popup appears, giving two pieces of information :
 
 - The coordinates of the point
 - The time when the receiver was at that point
+- The latitude and longitude errors of positionning
 
 
 
@@ -77,5 +86,24 @@ will appear and you will be given many data :
    :height: 500px
    :width: 600 px
    :align: center
+
+
+How to run your own files
+-------------------------
+
+.. note:: The "Add a nmea file" page hasn't been written yet. The associated button isn't linked to any page.
+For the moment, there is a esay way to avoid this issue.
+
+You may have remarked there is a "Test" choice in the list of the scenarios. There are likewise two files in the
+database : stest_ublox.txt and stest_spectracom.txt. These two files are empty, and dedicated to your own files.
+Let's remind that all the stored files have the .txt format and their names begin with a "s".
+
+Thus you have two solutions :
+
+- You can copy/paste the content of your nmea files in these two ones
+- You can save your files with the same name "stest_ublox(spectracom).txt" in data > database and erase the empty ones
+
+Don't forget to refresh the web application. Now you can select the "Test" scenario and visualize it on the map.
+
 
 

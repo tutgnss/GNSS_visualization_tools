@@ -16,7 +16,7 @@ from GNSSTools.devices.device import Device
 
 class Spectracom(Device):
 
-    def __init__(self, com, datafile='datatxt/spectracom_data.nmea', currentposfile='datatxt/current_pos.txt',
+    def __init__(self, com, datafile='datatxt/spectracom_data.txt', currentposfile='datatxt/current_pos.txt',
                  almanach='datatxt/almanach.txt', latest='datatxt/latest.txt'):
         super(Spectracom, self).__init__()
         self.com = com
@@ -82,14 +82,14 @@ class Spectracom(Device):
         # or the current position if the scenario is Running.
         # Inputs:
         # x: Decimal X Position [-26 500 000.00, +26 500 000.00] meters
-        # y: Decimal Y Position [-26 500 000.00, +26 500 000.00] meters
-        # z: Decimal Z Position [-26 500 000.00, +26 500 000.00] meters
+        # y: Decimal Y Position [-26 500 000.00, +26ï¿½500 000.00] meters
+        # z: Decimal Z Position [-26ï¿½500 000.00, +26ï¿½500 000.00] meters
         return self.spectracom.write('SOURce:SCENario:ECEFPOSition IMM, %f, %f, %f' % x, y, z)
 
     def set_duration(self, start, duration, inter):
         # Turn on scenario observations.
         # Inputs:
-        # start: Decimal start [-1,nnn] seconds. If ‘-1’ is used the logging will start immediately when a command is
+        # start: Decimal start [-1,nnn] seconds. If ï¿½-1ï¿½ is used the logging will start immediately when a command is
         #        received number of seconds from scenario start.
         # duration: length of observations from start.
         # interval: the interval between the individual observations in the resulting Rinex OBS file
@@ -118,21 +118,21 @@ class Spectracom(Device):
         # Set the heading change rate.
         # Input:
         # rateheading: Decimal RateHeading [-180.000, 180.000] true heading change in decimal degrees per second
-        #              Positive value correspond to right turn, negative – left turn.
+        #              Positive value correspond to right turn, negative ï¿½ left turn.
         return self.spectracom.write('SOURce:SCENario:RATEHEading IMM, %f' % rateheading)
 
     def set_turnrate(self, turnrate):
         # Set the rate of turning.
         # Input:
         # turnrate: Decimal TurnRate [- 180.000, 180.000] desired average heading rate (over single full closed circle)
-        #           in decimal degrees per second. Positive value correspond to right turn, negative – left turn.
+        #           in decimal degrees per second. Positive value correspond to right turn, negative ï¿½ left turn.
         return self.spectracom.write('SOURce:SCENario:TURNRATE IMM, %f' % turnrate)
 
     def set_turnradius(self, turnradius):
         # Sets the radius of turning. Radius is expressed in meters
         # Input:
-        # turnradius: Decimal TurnRadius [-5 000 000.000, 5 000 000.000] radius of turning in meters. Positive value
-        #             correspond to right turn, negative – left turn.
+        # turnradius: Decimal TurnRadius [-5 000 000.000, 5ï¿½000 000.000] radius of turning in meters. Positive value
+        #             correspond to right turn, negative ï¿½ left turn.
         return self.spectracom.write('SOURce:SCENario:TURNRADIUS IMM %f' % turnradius)
 
     def set_noise(self, noise):
