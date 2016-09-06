@@ -34,8 +34,7 @@ which C/N0 it is still possible to receive something
 This is the `Free to Urban space test`. The goal is to test if the receiver can keep its
 reliability when passing from a free space to a urban space.
 
-.. note:: You can remark that all the files stored in the database are saved with an "s" as the first letter
-of their name. If you want to add your own files, make sure to keep the same notation, and to save it in .txt format.
+.. note:: You can remark that all the files stored in the database are saved with an "s" as the first letter of their name. If you want to add your own files, make sure to keep the same notation, and to save it in .txt format.
 
 
 Create your scenario
