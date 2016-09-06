@@ -19,7 +19,7 @@
 		}).addTo(mymap);
 
 
-		function moreUbl(ubl,sat) {
+		function moreUbl(ubl,spec,sat) {
             Vg = ubl[3]
             text = '\n\nSatellites involved in the tracking :\n';
             for (i = 0; i < sat.length; i++) {
@@ -59,8 +59,9 @@
         L.geoJson(ublox, {
 
         	onEachFeature: function onEachFeatureUbl(feature, layer) {
-			layer.bindPopup('Longitude : {{ i[0] }}<br />Latitude : {{ i[1] }}<br />Time (hhmmss.dd) : ' +
-			 '{{ i[2] }}<br /><br /><button onclick="moreUbl({{ ubl[a] }}, {{ gsvUbl[a] }})">More</button>');
+			layer.bindPopup('Longitude : {{ i[0] }}°<br />Latitude : {{ i[1] }}°<br />Time (hhmmss.dd) : ' +
+			 '{{ i[2] }}<br /><br />Latitude error : {{ computation[5][a] }}m<br />Longitude error : {{ computation[6][a] }}m'
+			 + '<br /><br /><button onclick="moreUbl({{ ubl[a] }}, {{ gsvUbl[a] }})">More</button>');
 			},
 
 			pointToLayer: function (feature, latlng) {
@@ -137,17 +138,17 @@
 
 	<script>
 		function rms1d() {
-			var x = 'Root Mean Square error 1D in<br />Altitude : {{ computation[0] }}<br />Latitude : {{ computation[1] }}<br />Longitude :{{ computation[2] }}'
+			var x = 'Root Mean Square error 1D in<br />Altitude : {{ computation[0] }}m<br />Latitude : {{ computation[1] }}m<br />Longitude :{{ computation[2] }}m'
 			document.getElementById("detail").innerHTML = x;
 		}
 
 		function rms2d() {
-			var x = 'Root Mean Square error 2D : {{ computation[2] }}'
+			var x = 'Root Mean Square error 2D : {{ computation[2] }}m'
 			document.getElementById("detail").innerHTML = x;
 		}
 
 		function rms3d() {
-			var x = 'Root Mean Square error 3D : {{ computation[3] }}'
+			var x = 'Root Mean Square error 3D : {{ computation[3] }}m'
 			document.getElementById("detail").innerHTML = x;
 		}
 	</script>
